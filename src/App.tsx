@@ -355,8 +355,15 @@ export default function App() {
         return next;
       });
     } catch {
-      // No backend — if some items were left unpurchased, generate a follow-up pending request
+      // No backend — split purchased/unpurchased items locally
+      const purchased = shoppingModalRequest.items.filter((item) => item.purchased);
       const unpurchased = shoppingModalRequest.items.filter((item) => !item.purchased);
+      // Trim original request to only the items that were actually purchased
+      setSupplyRequests((prev) =>
+        prev.map((r) =>
+          r.id === optimistic.id ? { ...optimistic, items: purchased } : r
+        )
+      );
       if (unpurchased.length > 0) {
         const followUp: SupplyRequest = {
           id: `local-req-${Date.now()}`,
