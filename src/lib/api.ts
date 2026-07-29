@@ -1,4 +1,5 @@
 import { Restaurant, Product, SupplyRequest, UserProfile, RequestStatus } from '../types';
+import { INITIAL_USERS, INITIAL_RESTAURANTS } from '../data/caddyShackData';
 
 const API_BASE = '/api';
 
@@ -8,8 +9,7 @@ export async function fetchRestaurants(): Promise<Restaurant[]> {
     if (!res.ok) throw new Error('Error al cargar restaurantes');
     return await res.json();
   } catch (err) {
-    console.error('API Error, falling back:', err);
-    return [];
+    return INITIAL_RESTAURANTS;
   }
 }
 
@@ -19,7 +19,7 @@ export async function fetchUsers(): Promise<UserProfile[]> {
     if (!res.ok) throw new Error('Error al cargar usuarios');
     return await res.json();
   } catch (err) {
-    return [];
+    return INITIAL_USERS;
   }
 }
 
