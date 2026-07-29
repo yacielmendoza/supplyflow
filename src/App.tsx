@@ -150,8 +150,18 @@ export default function App() {
       setDeferredPrompt(e);
     });
 
+    // iOS PWA: reconnect Realtime when app returns from background
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        supabase.realtime.connect();
+        loadInitialData();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       supabase.removeChannel(channel);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [loadInitialData]);
 
