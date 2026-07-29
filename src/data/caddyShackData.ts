@@ -47,7 +47,7 @@ export const INITIAL_USERS: UserProfile[] = [
     phone: '+1 (432) 888-1020',
     assignedLocations: ['rest-1', 'rest-2', 'rest-3', 'rest-4'],
     avatarUrl: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150',
-    language: 'es',
+    language: 'en',
   },
   {
     id: 'user-2',
@@ -66,8 +66,8 @@ export const INITIAL_USERS: UserProfile[] = [
     phone: '+1 (432) 888-3050',
     assignedLocations: ['rest-1', 'rest-2', 'rest-3', 'rest-4'],
     assignedCategories: ['CHEMICALS', 'PAPER / DISPOSABLES', 'SUPPLIES'],
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    language: 'es',
+    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+    language: 'en',
   },
   {
     id: 'user-4',
@@ -75,7 +75,7 @@ export const INITIAL_USERS: UserProfile[] = [
     role: 'admin',
     phone: '+1 (432) 888-4090',
     assignedLocations: ['rest-1', 'rest-2', 'rest-3', 'rest-4'],
-    avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+    avatarUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150',
     language: 'en',
   },
 ];

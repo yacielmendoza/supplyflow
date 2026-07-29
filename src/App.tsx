@@ -251,33 +251,52 @@ export default function App() {
 
   const handleToggleItem = async (itemId: string, purchased: boolean, note?: string) => {
     if (!shoppingModalRequest || !currentUser) return;
-    const res = await toggleItemPurchased(
-      shoppingModalRequest.id,
-      itemId,
-      purchased,
-      note
-    );
-    setShoppingModalRequest(res.request);
-    setSupplyRequests((prev) =>
-      prev.map((r) => (r.id === res.request.id ? res.request : r))
-    );
+    // Optimistic update — reflect change immediately so UI works without backend
+    const optimistic = {
+      ...shoppingModalRequest,
+      items: shoppingModalRequest.items.map((item) =>
+        item.id === itemId
+          ? { ...item, purchased, purchasedAt: purchased ? new Date().toISOString() : undefined, itemNote: note ?? item.itemNote }
+          : item
+      ),
+    };
+    setShoppingModalRequest(optimistic);
+    setSupplyRequests((prev) => prev.map((r) => (r.id === optimistic.id ? optimistic : r)));
+    // Sync with backend in background (may fail on static hosting, that's OK)
+    try {
+      const res = await toggleItemPurchased(shoppingModalRequest.id, itemId, purchased, note);
+      if (res?.request) {
+        setShoppingModalRequest(res.request);
+        setSupplyRequests((prev) => prev.map((r) => (r.id === res.request.id ? res.request : r)));
+      }
+    } catch {
+      // no backend available, optimistic update already applied
+    }
   };
 
   const handleFinishShopping = async () => {
     if (!shoppingModalRequest || !currentUser) return;
-    const { request: updated, newPendingRequest } = await updateRequestStatus(
-      shoppingModalRequest.id,
-      'Comprada',
-      currentUser.id
-    );
-
-    setSupplyRequests((prev) => {
-      let next = prev.map((r) => (r.id === updated.id ? updated : r));
-      if (newPendingRequest && !next.some((r) => r.id === newPendingRequest.id)) {
-        next = [newPendingRequest, ...next];
-      }
-      return next;
-    });
+    // Optimistic update — mark as Comprada locally
+    const optimistic = { ...shoppingModalRequest, status: 'Comprada' as const };
+    setSupplyRequests((prev) => prev.map((r) => (r.id === optimistic.id ? optimistic : r)));
+    let newPendingRequest: SupplyRequest | null | undefined;
+    try {
+      const { request: updated, newPendingRequest: pending } = await updateRequestStatus(
+        shoppingModalRequest.id,
+        'Comprada',
+        currentUser.id
+      );
+      newPendingRequest = pending;
+      setSupplyRequests((prev) => {
+        let next = prev.map((r) => (r.id === updated.id ? updated : r));
+        if (pending && !next.some((r) => r.id === pending.id)) {
+          next = [pending, ...next];
+        }
+        return next;
+      });
+    } catch {
+      // no backend available, optimistic update already applied
+    }
 
     triggerNotification(
       `✅ COMPRA COMPLETADA - SOLICITUD #${shoppingModalRequest.requestNumber}`,

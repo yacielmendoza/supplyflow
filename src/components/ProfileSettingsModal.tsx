@@ -26,18 +26,18 @@ interface ProfileSettingsModalProps {
 const AVATAR_PRESETS = [
   {
     id: 'chef',
-    label: 'Cocinero / Chef',
+    label: 'Cook / Chef',
     url: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150&auto=format&fit=crop&q=80',
   },
   {
     id: 'runner',
-    label: 'Runner / Comprador',
-    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    label: 'Runner / Buyer',
+    url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
   },
   {
     id: 'admin',
-    label: 'Admin / Gerente',
-    url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
+    label: 'Admin / Manager',
+    url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80',
   },
 ];
 
