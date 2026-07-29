@@ -355,7 +355,31 @@ export default function App() {
         return next;
       });
     } catch {
-      // no backend available, optimistic update already applied
+      // No backend — if some items were left unpurchased, generate a follow-up pending request
+      const unpurchased = shoppingModalRequest.items.filter((item) => !item.purchased);
+      if (unpurchased.length > 0) {
+        const followUp: SupplyRequest = {
+          id: `local-req-${Date.now()}`,
+          requestNumber: 200 + Math.floor(Math.random() * 99),
+          restaurantId: shoppingModalRequest.restaurantId,
+          restaurantName: shoppingModalRequest.restaurantName,
+          createdByUserId: shoppingModalRequest.createdByUserId,
+          createdByUserName: shoppingModalRequest.createdByUserName,
+          status: 'Pendiente',
+          items: unpurchased.map((item) => ({
+            ...item,
+            id: `${item.id}-follow`,
+            purchased: false,
+            purchasedAt: undefined,
+            purchasedBy: undefined,
+          })),
+          urgent: shoppingModalRequest.urgent,
+          notes: `Follow-up on #${shoppingModalRequest.requestNumber} — items not purchased`,
+          createdAt: new Date().toISOString(),
+        };
+        newPendingRequest = followUp;
+        setSupplyRequests((prev) => [followUp, ...prev]);
+      }
     }
 
     triggerNotification(
