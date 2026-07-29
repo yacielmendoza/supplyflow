@@ -1,0 +1,6 @@
+{
+  "name": "RestoSupply - Coordinación de Abastecimiento",
+  "description": "Plataforma mobile-first de coordinación de abastecimiento y gestión de compras por mínimos operativos para grupos de restaurantes.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

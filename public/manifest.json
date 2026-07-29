@@ -1,0 +1,17 @@
+{
+  "short_name": "RestoSupply",
+  "name": "RestoSupply - Coordinación de Abastecimiento",
+  "description": "Plataforma mobile-first para gestión de abastecimiento de restaurantes por mínimos operativos.",
+  "start_url": "/",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "display": "standalone",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/pwa-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
