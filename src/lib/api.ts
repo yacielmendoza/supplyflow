@@ -1,5 +1,5 @@
 import { Restaurant, Product, SupplyRequest, UserProfile, RequestStatus } from '../types';
-import { INITIAL_USERS, INITIAL_RESTAURANTS } from '../data/caddyShackData';
+import { INITIAL_USERS, INITIAL_RESTAURANTS, INITIAL_PRODUCTS_WITH_IDS, INITIAL_SUPPLY_REQUESTS } from '../data/caddyShackData';
 
 const API_BASE = '/api';
 
@@ -32,7 +32,9 @@ export async function fetchProducts(restaurantId?: string): Promise<Product[]> {
     if (!res.ok) throw new Error('Error al cargar productos');
     return await res.json();
   } catch (err) {
-    return [];
+    return restaurantId
+      ? INITIAL_PRODUCTS_WITH_IDS.filter((p) => p.restaurantId === restaurantId)
+      : INITIAL_PRODUCTS_WITH_IDS;
   }
 }
 
@@ -69,7 +71,10 @@ export async function fetchSupplyRequests(restaurantId?: string, status?: string
     if (!res.ok) throw new Error('Error al cargar solicitudes');
     return await res.json();
   } catch (err) {
-    return [];
+    let fallback = INITIAL_SUPPLY_REQUESTS;
+    if (restaurantId) fallback = fallback.filter((r) => r.restaurantId === restaurantId);
+    if (status) fallback = fallback.filter((r) => r.status === status);
+    return fallback;
   }
 }
 

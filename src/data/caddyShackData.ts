@@ -1,4 +1,4 @@
-import { Restaurant, UserProfile, Product, Supplier } from '../types';
+import { Restaurant, UserProfile, Product, Supplier, SupplyRequest } from '../types';
 
 export const INITIAL_RESTAURANTS: Restaurant[] = [
   {
@@ -434,3 +434,73 @@ export const INITIAL_PRODUCTS: Omit<Product, 'id' | 'updatedAt'>[] = [
 
 // Keep old export name as alias for backward compatibility with any imports
 export const INITIAL_PRODUCTS_CADDY_SHACK = INITIAL_PRODUCTS;
+
+export const INITIAL_PRODUCTS_WITH_IDS: Product[] = INITIAL_PRODUCTS.map((p, i) => ({
+  ...p,
+  id: `prod-${i + 1}`,
+  updatedAt: new Date().toISOString(),
+}));
+
+export const INITIAL_SUPPLY_REQUESTS: SupplyRequest[] = [
+  {
+    id: 'req-101',
+    requestNumber: 124,
+    restaurantId: 'rest-1',
+    restaurantName: 'Caddy Shack Grill',
+    createdByUserId: 'user-1',
+    createdByUserName: 'Yaciel',
+    assignedBuyerId: 'user-2',
+    assignedBuyerName: 'Pete',
+    status: 'En Compra',
+    urgent: true,
+    notes: 'Requerimos tocino y pan urgente antes de las 11:00 AM para el turno del almuerzo.',
+    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    assignedAt: new Date(Date.now() - 3600000 * 1.5).toISOString(),
+    shoppingStartedAt: new Date(Date.now() - 3600000 * 0.5).toISOString(),
+    items: [
+      { id: 'ri-1', productId: 'prod-2', productName: 'Bacon', category: 'INGREDIENTS', unit: 'Caja', currentStockAtRequest: 0, minThreshold: 2, requestedQty: 4, suggestedSupplier: 'Restaurant Depot', purchased: true, purchasedAt: new Date(Date.now() - 1800000).toISOString() },
+      { id: 'ri-2', productId: 'prod-3', productName: 'Burger Buns', category: 'INGREDIENTS', unit: 'Paquete', currentStockAtRequest: 1, minThreshold: 3, requestedQty: 8, suggestedSupplier: 'Panadería Local El Sol', purchased: true, purchasedAt: new Date(Date.now() - 1200000).toISOString() },
+      { id: 'ri-3', productId: 'prod-1', productName: 'American Cheese (squares)', category: 'INGREDIENTS', unit: 'Paquete', currentStockAtRequest: 1, minThreshold: 2, requestedQty: 5, suggestedSupplier: "Sam's Club", purchased: false },
+      { id: 'ri-4', productId: 'prod-15', productName: 'Fries (Papas Fritas)', category: 'INGREDIENTS', unit: 'Caja', currentStockAtRequest: 1, minThreshold: 3, requestedQty: 6, suggestedSupplier: "Sam's Club", purchased: false },
+    ],
+  },
+  {
+    id: 'req-102',
+    requestNumber: 125,
+    restaurantId: 'rest-2',
+    restaurantName: "Alberto's Crystal Cafe",
+    createdByUserId: 'user-1',
+    createdByUserName: 'Yaciel',
+    status: 'Pendiente',
+    urgent: false,
+    notes: 'Reponer químicos de limpieza y papel para el turno de la tarde.',
+    createdAt: new Date(Date.now() - 3600000 * 0.5).toISOString(),
+    items: [
+      { id: 'ri-5', productId: 'prod-50', productName: 'Dish Soap (Galón)', category: 'CHEMICALS', unit: 'Galón', currentStockAtRequest: 0, minThreshold: 2, requestedQty: 3, suggestedSupplier: "Sam's Club", purchased: false },
+      { id: 'ri-6', productId: 'prod-55', productName: 'Paper Towels', category: 'PAPER / DISPOSABLES', unit: 'Caja', currentStockAtRequest: 1, minThreshold: 2, requestedQty: 4, suggestedSupplier: "Sam's Club", purchased: false },
+    ],
+  },
+  {
+    id: 'req-103',
+    requestNumber: 123,
+    restaurantId: 'rest-1',
+    restaurantName: 'Caddy Shack Grill',
+    createdByUserId: 'user-1',
+    createdByUserName: 'Yaciel',
+    assignedBuyerId: 'user-3',
+    assignedBuyerName: 'Gene',
+    status: 'Completada',
+    urgent: false,
+    notes: 'Reposición semanal de desechables.',
+    createdAt: new Date(Date.now() - 3600000 * 26).toISOString(),
+    assignedAt: new Date(Date.now() - 3600000 * 25).toISOString(),
+    shoppingStartedAt: new Date(Date.now() - 3600000 * 24.5).toISOString(),
+    deliveredAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+    completedAt: new Date(Date.now() - 3600000 * 23.5).toISOString(),
+    items: [
+      { id: 'ri-7', productId: 'prod-60', productName: 'Foam Cups 16oz', category: 'PAPER / DISPOSABLES', unit: 'Caja', currentStockAtRequest: 0, minThreshold: 3, requestedQty: 5, suggestedSupplier: "Sam's Club", purchased: true, purchasedAt: new Date(Date.now() - 3600000 * 24.3).toISOString() },
+      { id: 'ri-8', productId: 'prod-61', productName: 'Clamshell Containers', category: 'PAPER / DISPOSABLES', unit: 'Caja', currentStockAtRequest: 1, minThreshold: 2, requestedQty: 4, suggestedSupplier: "Sam's Club", purchased: true, purchasedAt: new Date(Date.now() - 3600000 * 24.3).toISOString() },
+      { id: 'ri-9', productId: 'prod-62', productName: 'Nitrile Gloves', category: 'PAPER / DISPOSABLES', unit: 'Caja', currentStockAtRequest: 0, minThreshold: 2, requestedQty: 3, suggestedSupplier: "Sam's Club", purchased: true, purchasedAt: new Date(Date.now() - 3600000 * 24.3).toISOString() },
+    ],
+  },
+];
