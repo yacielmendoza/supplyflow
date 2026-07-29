@@ -96,7 +96,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
     }
   };
 
-  const visibleRequests = requests.filter((r) => !dismissedIds.has(r.id));
+  const visibleRequests = requests.filter((r) => !dismissedIds.has(r.id) && r.status !== 'Completada');
 
   const handleEnablePush = async () => {
     const granted = await requestPushPermission();

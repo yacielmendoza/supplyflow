@@ -80,6 +80,10 @@ export default function App() {
   };
 
   const handleSelectRequestFromNotification = (requestId: string) => {
+    const req = supplyRequests.find((r) => r.id === requestId);
+    if (req) {
+      setSelectedRestaurantId(req.restaurantId);
+    }
     setActiveTab('REQUESTS');
     setHighlightedRequestId(requestId);
     setShowNotificationCenter(false);
