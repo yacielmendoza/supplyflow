@@ -21,7 +21,10 @@ import {
   updateProduct,
   deleteProduct,
   triggerNotification,
+  upsertSupplyRequest,
+  getNextRequestNumber,
 } from './lib/api';
+import { supabase, rowToRequest } from './lib/supabase';
 import { INITIAL_SUPPLIERS } from './data/caddyShackData';
 import { Header } from './components/Header';
 import { DailyChecklist } from './components/DailyChecklist';
@@ -107,46 +110,40 @@ export default function App() {
   useEffect(() => {
     loadInitialData();
 
-    const eventSource = new EventSource('/api/stream');
-
-    eventSource.onopen = () => {
-      setSseConnected(true);
-    };
-
-    eventSource.onmessage = (e) => {
-      try {
-        const payload = JSON.parse(e.data);
-        const { type, data } = payload;
-
-        if (type === 'REQUEST_CREATED') {
-          setSupplyRequests((prev) => [data, ...prev.filter((r) => r.id !== data.id)]);
-          playAlertSound('urgent');
-          showLocalNotification(
-            `🚨 NUEVA SOLICITUD DE COMPRA #${data.requestNumber}`,
-            `Restaurante ${data.restaurantName} - ${data.items.length} productos requeridos.`
-          );
-        } else if (type === 'REQUEST_UPDATED') {
-          setSupplyRequests((prev) =>
-            prev.map((r) => (r.id === data.id ? data : r))
-          );
-          // Use ref to avoid stale closure
-          if (shoppingModalRequestRef.current && shoppingModalRequestRef.current.id === data.id) {
-            setShoppingModalRequest(data);
+    // Supabase Realtime — syncs all devices over the internet in real time
+    const channel = supabase
+      .channel('sf_supply_requests_all')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'sf_supply_requests' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newReq = rowToRequest(payload.new as Record<string, unknown>);
+            setSupplyRequests((prev) => {
+              // Skip if already in state (optimistic update on the originating device)
+              if (prev.some((r) => r.id === newReq.id)) return prev;
+              playAlertSound('urgent');
+              showLocalNotification(
+                `🚨 NUEVA SOLICITUD #${newReq.requestNumber}`,
+                `${newReq.restaurantName} — ${newReq.items.length} productos requeridos.`
+              );
+              return [newReq, ...prev];
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = rowToRequest(payload.new as Record<string, unknown>);
+            setSupplyRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+            if (shoppingModalRequestRef.current?.id === updated.id) {
+              setShoppingModalRequest(updated);
+            }
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = (payload.old as Record<string, unknown>).id as string;
+            setSupplyRequests((prev) => prev.filter((r) => r.id !== deletedId));
           }
-        } else if (type === 'PRODUCT_ADDED' || type === 'PRODUCT_UPDATED') {
-          fetchProducts().then((p) => setProducts(p));
-        } else if (type === 'NOTIFICATION_ALERT') {
-          playAlertSound('urgent');
-          showLocalNotification(data.title, data.body);
         }
-      } catch (err) {
-        console.error('SSE Error', err);
-      }
-    };
-
-    eventSource.onerror = () => {
-      setSseConnected(false);
-    };
+      )
+      .subscribe((status) => {
+        setSseConnected(status === 'SUBSCRIBED');
+      });
 
     window.addEventListener('beforeinstallprompt', (e: any) => {
       e.preventDefault();
@@ -154,7 +151,7 @@ export default function App() {
     });
 
     return () => {
-      eventSource.close();
+      supabase.removeChannel(channel);
     };
   }, [loadInitialData]);
 
@@ -240,10 +237,10 @@ export default function App() {
     const optimistic = { ...target, status: 'Asignada' as const, assignedBuyerId: currentUser.id, assignedBuyerName: currentUser.name };
     setSupplyRequests((prev) => prev.map((r) => (r.id === requestId ? optimistic : r)));
     try {
-      const updated = await claimSupplyRequest(requestId, currentUser.id);
+      const updated = await claimSupplyRequest(requestId, currentUser.id, currentUser.name);
       setSupplyRequests((prev) => prev.map((r) => (r.id === requestId ? updated : r)));
     } catch {
-      // no backend, optimistic update stays
+      // Supabase failed, optimistic update stays
     }
   };
 
@@ -267,11 +264,11 @@ export default function App() {
       setSupplyRequests((prev) => prev.map((r) => (r.id === req.id ? optimisticClaimed : r)));
       setShoppingModalRequest(optimisticClaimed);
       try {
-        const claimed = await claimSupplyRequest(req.id, currentUser.id);
+        const claimed = await claimSupplyRequest(req.id, currentUser.id, currentUser.name);
         setSupplyRequests((prev) => prev.map((r) => (r.id === req.id ? claimed : r)));
         setShoppingModalRequest(claimed);
       } catch {
-        // no backend, optimistic update stays
+        // Supabase failed, optimistic update stays
       }
     } else {
       setShoppingModalRequest(req);
@@ -336,71 +333,68 @@ export default function App() {
 
   const handleFinishShopping = async () => {
     if (!shoppingModalRequest || !currentUser) return;
-    // Optimistic update — mark as Comprada locally
-    const optimistic = { ...shoppingModalRequest, status: 'Comprada' as const };
-    setSupplyRequests((prev) => prev.map((r) => (r.id === optimistic.id ? optimistic : r)));
-    let newPendingRequest: SupplyRequest | null | undefined;
-    try {
-      const { request: updated, newPendingRequest: pending } = await updateRequestStatus(
-        shoppingModalRequest.id,
-        'Comprada',
-        currentUser.id
-      );
-      newPendingRequest = pending;
-      setSupplyRequests((prev) => {
-        let next = prev.map((r) => (r.id === updated.id ? updated : r));
-        if (pending && !next.some((r) => r.id === pending.id)) {
-          next = [pending, ...next];
-        }
-        return next;
-      });
-    } catch {
-      // No backend — split purchased/unpurchased items locally
-      const purchased = shoppingModalRequest.items.filter((item) => item.purchased);
-      const unpurchased = shoppingModalRequest.items.filter((item) => !item.purchased);
-      // Trim original request to only the items that were actually purchased
-      setSupplyRequests((prev) =>
-        prev.map((r) =>
-          r.id === optimistic.id ? { ...optimistic, items: purchased } : r
-        )
-      );
-      if (unpurchased.length > 0) {
-        const followUp: SupplyRequest = {
-          id: `local-req-${Date.now()}`,
-          requestNumber: 200 + Math.floor(Math.random() * 99),
-          restaurantId: shoppingModalRequest.restaurantId,
-          restaurantName: shoppingModalRequest.restaurantName,
-          createdByUserId: shoppingModalRequest.createdByUserId,
-          createdByUserName: shoppingModalRequest.createdByUserName,
-          status: 'Pendiente',
-          items: unpurchased.map((item) => ({
-            ...item,
-            id: `${item.id}-follow`,
-            purchased: false,
-            purchasedAt: undefined,
-            purchasedBy: undefined,
-          })),
-          urgent: shoppingModalRequest.urgent,
-          notes: `Follow-up on #${shoppingModalRequest.requestNumber} — items not purchased`,
-          createdAt: new Date().toISOString(),
-        };
-        newPendingRequest = followUp;
-        setSupplyRequests((prev) => [followUp, ...prev]);
-      }
-    }
 
-    triggerNotification(
-      `✅ COMPRA COMPLETADA - SOLICITUD #${shoppingModalRequest.requestNumber}`,
-      `Comprador ${currentUser.name} ha finalizado la compra para ${shoppingModalRequest.restaurantName}. En camino a entregar.`
-    );
+    const purchased = shoppingModalRequest.items.filter((item) => item.purchased);
+    const unpurchased = shoppingModalRequest.items.filter((item) => !item.purchased);
+    const now = new Date().toISOString();
 
-    if (newPendingRequest) {
+    // When some items were not purchased, trim the original to only what was bought
+    const originalItems = unpurchased.length > 0 && purchased.length > 0 ? purchased : shoppingModalRequest.items;
+
+    const updatedOriginal: SupplyRequest = {
+      ...shoppingModalRequest,
+      status: 'Comprada',
+      items: originalItems,
+      purchasedAt: now,
+    };
+
+    // Optimistic update on this device immediately
+    setSupplyRequests((prev) => prev.map((r) => (r.id === updatedOriginal.id ? updatedOriginal : r)));
+
+    let newPendingRequest: SupplyRequest | null = null;
+
+    if (unpurchased.length > 0 && purchased.length > 0) {
+      const nextNumber = await getNextRequestNumber().catch(
+        () => 200 + Math.floor(Math.random() * 99)
+      );
+      newPendingRequest = {
+        id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        requestNumber: nextNumber,
+        restaurantId: shoppingModalRequest.restaurantId,
+        restaurantName: shoppingModalRequest.restaurantName,
+        createdByUserId: shoppingModalRequest.createdByUserId,
+        createdByUserName: shoppingModalRequest.createdByUserName,
+        status: 'Pendiente',
+        items: unpurchased.map((item, idx) => ({
+          ...item,
+          id: `ri-${Date.now()}-${idx}`,
+          purchased: false,
+          purchasedAt: undefined,
+          purchasedBy: undefined,
+        })),
+        urgent: shoppingModalRequest.urgent,
+        notes: `Generada automáticamente — ${unpurchased.length} insumos faltantes de Solicitud #${shoppingModalRequest.requestNumber}.`,
+        createdAt: now,
+      };
+      // Add optimistically so this device sees it immediately
+      setSupplyRequests((prev) => [newPendingRequest!, ...prev.filter((r) => r.id !== newPendingRequest!.id)]);
       playAlertSound('urgent');
       showLocalNotification(
         `📦 NUEVA SOLICITUD #${newPendingRequest.requestNumber} GENERADA`,
         `Se creó con ${newPendingRequest.items.length} productos pendientes de comprar.`
       );
     }
+
+    // Write to Supabase — Realtime broadcasts both changes to all other devices
+    try {
+      await upsertSupplyRequest(updatedOriginal);
+      if (newPendingRequest) {
+        await upsertSupplyRequest(newPendingRequest);
+      }
+    } catch (err) {
+      console.error('Supabase write failed, keeping optimistic state', err);
+    }
+
     setShoppingModalRequest(null);
   };
 
@@ -420,12 +414,7 @@ export default function App() {
   };
 
   const handleAddRestaurant = async (restData: { name: string; type: any; address: string; phone: string }) => {
-    const res = await fetch('/api/restaurants', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(restData),
-    });
-    const newRest = await res.json();
+    const newRest = { ...restData, id: `rest-${Date.now()}`, active: true, colorBadge: 'bg-emerald-600' };
     setRestaurants((prev) => [...prev, newRest]);
     setSelectedRestaurantId(newRest.id);
   };
@@ -522,9 +511,12 @@ export default function App() {
         onLogout={() => setCurrentUser(null)}
       />
 
-      <nav className={`border-b sticky top-[52px] z-30 backdrop-blur-md ${
-        isLight ? 'bg-white/90 border-slate-200' : 'bg-slate-900/90 border-slate-800'
-      }`}>
+      <nav
+        className={`border-b sticky z-30 backdrop-blur-md ${
+          isLight ? 'bg-white/90 border-slate-200' : 'bg-slate-900/90 border-slate-800'
+        }`}
+        style={{ top: 'calc(52px + env(safe-area-inset-top))' }}
+      >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-1 sm:space-x-3 py-1.5 overflow-x-auto no-scrollbar">
             {currentNavTabs.map((tab) => {

@@ -1,81 +1,138 @@
-import { Restaurant, Product, SupplyRequest, UserProfile, RequestStatus } from '../types';
+import { Restaurant, Product, SupplyRequest, UserProfile, RequestStatus, RequestItem } from '../types';
 import { INITIAL_USERS, INITIAL_RESTAURANTS, INITIAL_PRODUCTS_WITH_IDS, INITIAL_SUPPLY_REQUESTS } from '../data/caddyShackData';
+import { supabase, rowToRequest, requestToRow } from './supabase';
 
-const API_BASE = '/api';
+// ── Static data ─────────────────────────────────────────────────────────────
 
 export async function fetchRestaurants(): Promise<Restaurant[]> {
-  try {
-    const res = await fetch(`${API_BASE}/restaurants`);
-    if (!res.ok) throw new Error('Error al cargar restaurantes');
-    return await res.json();
-  } catch (err) {
-    return INITIAL_RESTAURANTS;
-  }
+  return INITIAL_RESTAURANTS;
 }
 
 export async function fetchUsers(): Promise<UserProfile[]> {
-  try {
-    const res = await fetch(`${API_BASE}/users`);
-    if (!res.ok) throw new Error('Error al cargar usuarios');
-    return await res.json();
-  } catch (err) {
-    return INITIAL_USERS;
-  }
+  return INITIAL_USERS;
 }
 
 export async function fetchProducts(restaurantId?: string): Promise<Product[]> {
-  try {
-    const url = restaurantId
-      ? `${API_BASE}/products?restaurantId=${restaurantId}`
-      : `${API_BASE}/products`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Error al cargar productos');
-    return await res.json();
-  } catch (err) {
-    return restaurantId
-      ? INITIAL_PRODUCTS_WITH_IDS.filter((p) => p.restaurantId === restaurantId)
-      : INITIAL_PRODUCTS_WITH_IDS;
-  }
+  if (restaurantId) return INITIAL_PRODUCTS_WITH_IDS.filter((p) => p.restaurantId === restaurantId);
+  return INITIAL_PRODUCTS_WITH_IDS;
 }
 
-export async function createProduct(product: Omit<Product, 'id' | 'updatedAt'>): Promise<Product> {
-  const res = await fetch(`${API_BASE}/products`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(product),
-  });
-  return await res.json();
-}
-
-export async function updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
-  const res = await fetch(`${API_BASE}/products/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updates),
-  });
-  return await res.json();
-}
-
-export async function deleteProduct(id: string): Promise<boolean> {
-  const res = await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
-  return res.ok;
-}
+// ── Supply Requests via Supabase ────────────────────────────────────────────
 
 export async function fetchSupplyRequests(restaurantId?: string, status?: string): Promise<SupplyRequest[]> {
   try {
-    let url = `${API_BASE}/requests?`;
-    if (restaurantId) url += `restaurantId=${restaurantId}&`;
-    if (status) url += `status=${status}`;
-
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Error al cargar solicitudes');
-    return await res.json();
-  } catch (err) {
+    let query = supabase
+      .from('sf_supply_requests')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (restaurantId) query = query.eq('restaurant_id', restaurantId);
+    if (status) query = query.eq('status', status);
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data ?? []).map(rowToRequest);
+  } catch {
     let fallback = INITIAL_SUPPLY_REQUESTS;
     if (restaurantId) fallback = fallback.filter((r) => r.restaurantId === restaurantId);
     if (status) fallback = fallback.filter((r) => r.status === status);
     return fallback;
   }
+}
+
+export async function upsertSupplyRequest(req: SupplyRequest): Promise<SupplyRequest> {
+  const { data, error } = await supabase
+    .from('sf_supply_requests')
+    .upsert(requestToRow(req), { onConflict: 'id' })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToRequest(data);
+}
+
+export async function getNextRequestNumber(): Promise<number> {
+  const { data, error } = await supabase
+    .from('sf_supply_requests')
+    .select('request_number')
+    .order('request_number', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return ((data as { request_number: number } | null)?.request_number ?? 100) + 1;
+}
+
+export async function claimSupplyRequest(requestId: string, buyerId: string, buyerName: string): Promise<SupplyRequest> {
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('sf_supply_requests')
+    .update({
+      status: 'Asignada',
+      assigned_buyer_id: buyerId,
+      assigned_buyer_name: buyerName,
+      assigned_at: now,
+    })
+    .eq('id', requestId)
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToRequest(data);
+}
+
+export async function updateRequestStatus(
+  requestId: string,
+  status: RequestStatus,
+  _buyerId?: string
+): Promise<{ request: SupplyRequest; newPendingRequest?: SupplyRequest | null }> {
+  const now = new Date().toISOString();
+  const updates: Record<string, unknown> = { status };
+  if (status === 'En Compra') updates.shopping_started_at = now;
+  else if (status === 'Comprada') updates.purchased_at = now;
+  else if (status === 'Entregada') updates.delivered_at = now;
+  else if (status === 'Completada') updates.completed_at = now;
+
+  const { data, error } = await supabase
+    .from('sf_supply_requests')
+    .update(updates)
+    .eq('id', requestId)
+    .select()
+    .single();
+  if (error) throw error;
+  return { request: rowToRequest(data) };
+}
+
+export async function toggleItemPurchased(
+  requestId: string,
+  itemId: string,
+  purchased: boolean,
+  itemNote?: string
+): Promise<{ request: SupplyRequest }> {
+  const { data: current, error: fetchErr } = await supabase
+    .from('sf_supply_requests')
+    .select('items, status')
+    .eq('id', requestId)
+    .single();
+  if (fetchErr) throw fetchErr;
+
+  const now = new Date().toISOString();
+  const updatedItems = (current.items as RequestItem[]).map((item) =>
+    item.id === itemId
+      ? { ...item, purchased, purchasedAt: purchased ? now : undefined, itemNote: itemNote ?? item.itemNote }
+      : item
+  );
+
+  const allPurchased = updatedItems.length > 0 && updatedItems.every((i) => i.purchased);
+  const updates: Record<string, unknown> = { items: updatedItems };
+  if (allPurchased) {
+    updates.status = 'Comprada';
+    updates.purchased_at = now;
+  }
+
+  const { data, error } = await supabase
+    .from('sf_supply_requests')
+    .update(updates)
+    .eq('id', requestId)
+    .select()
+    .single();
+  if (error) throw error;
+  return { request: rowToRequest(data) };
 }
 
 export async function submitDailyChecklist(
@@ -85,71 +142,74 @@ export async function submitDailyChecklist(
   notes?: string,
   urgent?: boolean
 ): Promise<{ success: boolean; replenishmentCount: number; request: SupplyRequest | null }> {
-  const res = await fetch(`${API_BASE}/checklist`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ restaurantId, userId, stockReadings, notes, urgent }),
-  });
-  return await res.json();
-}
+  const restaurantProducts = INITIAL_PRODUCTS_WITH_IDS.filter(
+    (p) => p.restaurantId === restaurantId && p.active
+  );
+  const restaurant = INITIAL_RESTAURANTS.find((r) => r.id === restaurantId);
+  const user = INITIAL_USERS.find((u) => u.id === userId);
 
-export async function claimSupplyRequest(requestId: string, buyerId: string): Promise<SupplyRequest> {
-  const res = await fetch(`${API_BASE}/requests/${requestId}/claim`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ buyerId }),
-  });
-  return await res.json();
-}
+  const lowStockItems: RequestItem[] = restaurantProducts
+    .filter((p) => (stockReadings[p.id] ?? p.minThreshold + 1) < p.minThreshold)
+    .map((p, i) => ({
+      id: `item-${Date.now()}-${i}`,
+      productId: p.id,
+      productName: p.name,
+      category: p.category,
+      unit: p.unit,
+      currentStockAtRequest: stockReadings[p.id] ?? 0,
+      minThreshold: p.minThreshold,
+      requestedQty: p.suggestedQuantity,
+      suggestedSupplier: p.suggestedSupplier,
+      purchased: false,
+    }));
 
-export async function updateRequestStatus(
-  requestId: string,
-  status: RequestStatus,
-  buyerId?: string
-): Promise<{ request: SupplyRequest; newPendingRequest?: SupplyRequest | null }> {
-  const res = await fetch(`${API_BASE}/requests/${requestId}/status`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status, buyerId }),
-  });
-  const data = await res.json();
-  if (data.request) {
-    return data;
+  if (lowStockItems.length === 0) {
+    return { success: true, replenishmentCount: 0, request: null };
   }
-  return { request: data };
+
+  const nextNumber = await getNextRequestNumber();
+  const newReq: SupplyRequest = {
+    id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    requestNumber: nextNumber,
+    restaurantId,
+    restaurantName: restaurant?.name ?? restaurantId,
+    createdByUserId: userId,
+    createdByUserName: user?.name ?? userId,
+    status: 'Pendiente',
+    items: lowStockItems,
+    urgent: urgent ?? false,
+    notes: notes ?? '',
+    createdAt: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from('sf_supply_requests')
+    .insert(requestToRow(newReq))
+    .select()
+    .single();
+  if (error) throw error;
+  return { success: true, replenishmentCount: lowStockItems.length, request: rowToRequest(data) };
 }
 
-export async function toggleItemPurchased(
-  requestId: string,
-  itemId: string,
-  purchased: boolean,
-  itemNote?: string
-): Promise<{ request: SupplyRequest }> {
-  const res = await fetch(`${API_BASE}/requests/${requestId}/items/${itemId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ purchased, itemNote }),
-  });
-  return await res.json();
+// ── Products (local only for demo) ─────────────────────────────────────────
+
+export async function createProduct(product: Omit<Product, 'id' | 'updatedAt'>): Promise<Product> {
+  return { ...product, id: `prod-${Date.now()}`, updatedAt: new Date().toISOString() } as Product;
 }
 
-export async function fetchAnalytics(): Promise<any> {
-  try {
-    const res = await fetch(`${API_BASE}/analytics`);
-    return await res.json();
-  } catch (err) {
-    return null;
-  }
+export async function updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
+  const base = INITIAL_PRODUCTS_WITH_IDS.find((p) => p.id === id);
+  return { ...(base ?? ({} as Product)), ...updates, id, updatedAt: new Date().toISOString() };
 }
 
-export async function triggerNotification(title: string, body: string, targetRole?: string): Promise<void> {
-  try {
-    await fetch(`${API_BASE}/notifications/trigger`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, body, targetRole }),
-    });
-  } catch (err) {
-    console.error('Trigger error', err);
-  }
+export async function deleteProduct(_id: string): Promise<boolean> {
+  return true;
+}
+
+export async function fetchAnalytics(): Promise<unknown> {
+  return null;
+}
+
+export async function triggerNotification(_title: string, _body: string, _targetRole?: string): Promise<void> {
+  // Supabase Realtime handles cross-device sync; no push server needed
 }

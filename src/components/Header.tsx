@@ -74,7 +74,10 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white shadow-md">
+    <header
+      className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white shadow-md"
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+    >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5">
         <div className="flex items-center justify-between gap-2">
           {/* Left: Brand Logo & Compact Location Selector */}
