@@ -180,25 +180,37 @@ export default function App() {
   ) => {
     if (!currentUser) return;
     setIsSubmittingChecklist(true);
-    const result = await submitDailyChecklist(
-      selectedRestaurantId,
-      currentUser.id,
-      stockReadings,
-      notes,
-      urgent
-    );
-    setIsSubmittingChecklist(false);
-
-    if (result.request) {
-      setSupplyRequests((prev) => [result.request!, ...prev.filter((r) => r.id !== result.request!.id)]);
+    try {
+      const result = await submitDailyChecklist(
+        selectedRestaurantId,
+        currentUser.id,
+        stockReadings,
+        notes,
+        urgent
+      );
+      setIsSubmittingChecklist(false);
+      if (result.request) {
+        setSupplyRequests((prev) => [result.request!, ...prev.filter((r) => r.id !== result.request!.id)]);
+        setActiveTab('REQUESTS');
+      }
+    } catch {
+      setIsSubmittingChecklist(false);
       setActiveTab('REQUESTS');
     }
   };
 
   const handleClaimRequest = async (requestId: string) => {
     if (!currentUser) return;
-    const updated = await claimSupplyRequest(requestId, currentUser.id);
-    setSupplyRequests((prev) => prev.map((r) => (r.id === requestId ? updated : r)));
+    const target = supplyRequests.find((r) => r.id === requestId);
+    if (!target) return;
+    const optimistic = { ...target, status: 'Asignada' as const, assignedBuyerId: currentUser.id, assignedBuyerName: currentUser.name };
+    setSupplyRequests((prev) => prev.map((r) => (r.id === requestId ? optimistic : r)));
+    try {
+      const updated = await claimSupplyRequest(requestId, currentUser.id);
+      setSupplyRequests((prev) => prev.map((r) => (r.id === requestId ? updated : r)));
+    } catch {
+      // no backend, optimistic update stays
+    }
   };
 
   const handleOpenShoppingMode = async (req: SupplyRequest) => {
@@ -217,9 +229,16 @@ export default function App() {
     }
 
     if (currentUser.role === 'comprador' && !req.assignedBuyerId) {
-      const claimed = await claimSupplyRequest(req.id, currentUser.id);
-      setSupplyRequests((prev) => prev.map((r) => (r.id === req.id ? claimed : r)));
-      setShoppingModalRequest(claimed);
+      const optimisticClaimed = { ...req, status: 'Asignada' as const, assignedBuyerId: currentUser.id, assignedBuyerName: currentUser.name };
+      setSupplyRequests((prev) => prev.map((r) => (r.id === req.id ? optimisticClaimed : r)));
+      setShoppingModalRequest(optimisticClaimed);
+      try {
+        const claimed = await claimSupplyRequest(req.id, currentUser.id);
+        setSupplyRequests((prev) => prev.map((r) => (r.id === req.id ? claimed : r)));
+        setShoppingModalRequest(claimed);
+      } catch {
+        // no backend, optimistic update stays
+      }
     } else {
       setShoppingModalRequest(req);
     }
@@ -227,18 +246,25 @@ export default function App() {
 
   const handleUpdateStatus = async (requestId: string, status: RequestStatus) => {
     if (!currentUser) return;
-    const { request: updated, newPendingRequest } = await updateRequestStatus(
-      requestId,
-      status,
-      currentUser.id
-    );
-    setSupplyRequests((prev) => {
-      let next = prev.map((r) => (r.id === requestId ? updated : r));
-      if (newPendingRequest && !next.some((r) => r.id === newPendingRequest.id)) {
-        next = [newPendingRequest, ...next];
-      }
-      return next;
-    });
+    setSupplyRequests((prev) => prev.map((r) => (r.id === requestId ? { ...r, status } : r)));
+    let newPendingRequest: SupplyRequest | null | undefined;
+    try {
+      const { request: updated, newPendingRequest: pending } = await updateRequestStatus(
+        requestId,
+        status,
+        currentUser.id
+      );
+      newPendingRequest = pending;
+      setSupplyRequests((prev) => {
+        let next = prev.map((r) => (r.id === requestId ? updated : r));
+        if (pending && !next.some((r) => r.id === pending.id)) {
+          next = [pending, ...next];
+        }
+        return next;
+      });
+    } catch {
+      // no backend, optimistic update stays
+    }
 
     if (newPendingRequest) {
       playAlertSound('urgent');
@@ -310,6 +336,7 @@ export default function App() {
         `Se creó con ${newPendingRequest.items.length} productos pendientes de comprar.`
       );
     }
+    setShoppingModalRequest(null);
   };
 
   const handleAddProduct = async (productData: Omit<Product, 'id' | 'updatedAt'>) => {
