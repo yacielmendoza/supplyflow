@@ -4,6 +4,7 @@ import {
   UserProfile,
   Product,
   SupplyRequest,
+  RequestItem,
   RequestStatus,
   Role,
 } from './types';
@@ -195,6 +196,39 @@ export default function App() {
       }
     } catch {
       setIsSubmittingChecklist(false);
+      // No backend — build a local pending request from items below their minimum threshold
+      const restaurant = restaurants.find((r) => r.id === selectedRestaurantId);
+      const restaurantProducts = products.filter((p) => p.restaurantId === selectedRestaurantId && p.active);
+      const lowStockItems: RequestItem[] = restaurantProducts
+        .filter((p) => (stockReadings[p.id] ?? p.minThreshold + 1) < p.minThreshold)
+        .map((p, i) => ({
+          id: `local-item-${i}`,
+          productId: p.id,
+          productName: p.name,
+          category: p.category,
+          unit: p.unit,
+          currentStockAtRequest: stockReadings[p.id] ?? 0,
+          minThreshold: p.minThreshold,
+          requestedQty: p.suggestedQuantity,
+          suggestedSupplier: p.suggestedSupplier,
+          purchased: false,
+        }));
+      if (lowStockItems.length > 0) {
+        const demoReq: SupplyRequest = {
+          id: `local-req-${Date.now()}`,
+          requestNumber: 200 + Math.floor(Math.random() * 50),
+          restaurantId: selectedRestaurantId,
+          restaurantName: restaurant?.name ?? selectedRestaurantId,
+          createdByUserId: currentUser.id,
+          createdByUserName: currentUser.name,
+          status: 'Pendiente',
+          items: lowStockItems,
+          urgent,
+          notes,
+          createdAt: new Date().toISOString(),
+        };
+        setSupplyRequests((prev) => [demoReq, ...prev]);
+      }
       setActiveTab('REQUESTS');
     }
   };
