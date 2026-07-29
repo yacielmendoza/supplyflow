@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Restaurant,
   UserProfile,
@@ -31,6 +31,7 @@ import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { NotificationCenter } from './components/NotificationCenter';
 import { ProfileSettingsModal } from './components/ProfileSettingsModal';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { LoginScreen } from './components/LoginScreen';
 import { showLocalNotification, playAlertSound } from './lib/notifications';
 import { getTranslation } from './lib/translations';
 import {
@@ -38,9 +39,6 @@ import {
   ShoppingBag,
   SlidersHorizontal,
   BarChart3,
-  Flame,
-  CheckCircle2,
-  AlertTriangle,
 } from 'lucide-react';
 
 export default function App() {
@@ -48,23 +46,22 @@ export default function App() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('rest-1');
 
-  const [currentUser, setCurrentUser] = useState<UserProfile>({
-    id: 'user-1',
-    name: 'Mateo (Cocinero Principal)',
-    role: 'cocinero',
-    phone: '+1 (432) 888-1020',
-    assignedLocations: ['rest-1'],
-  });
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [appLanguage, setAppLanguage] = useState<'es' | 'en'>('es');
 
   const [products, setProducts] = useState<Product[]>([]);
   const [supplyRequests, setSupplyRequests] = useState<SupplyRequest[]>([]);
   const [sseConnected, setSseConnected] = useState(false);
 
-  // Active View Tab
   const [activeTab, setActiveTab] = useState<'CHECKLIST' | 'REQUESTS' | 'ADMIN' | 'ANALYTICS'>('REQUESTS');
 
-  // Modals
   const [shoppingModalRequest, setShoppingModalRequest] = useState<SupplyRequest | null>(null);
+  // Ref to avoid stale closure in SSE handler
+  const shoppingModalRequestRef = useRef<SupplyRequest | null>(null);
+  useEffect(() => {
+    shoppingModalRequestRef.current = shoppingModalRequest;
+  }, [shoppingModalRequest]);
+
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
   const [showProfileSettingsModal, setShowProfileSettingsModal] = useState(false);
   const [showPWAInstallModal, setShowPWAInstallModal] = useState(false);
@@ -82,7 +79,6 @@ export default function App() {
     setActiveTab('REQUESTS');
     setHighlightedRequestId(requestId);
     setShowNotificationCenter(false);
-    // Clear highlight after 5 seconds
     setTimeout(() => {
       setHighlightedRequestId(null);
     }, 5000);
@@ -90,7 +86,6 @@ export default function App() {
 
   const [isSubmittingChecklist, setIsSubmittingChecklist] = useState(false);
 
-  // Load Data
   const loadInitialData = useCallback(async () => {
     const [rests, usrs, prods, reqs] = await Promise.all([
       fetchRestaurants(),
@@ -100,10 +95,7 @@ export default function App() {
     ]);
 
     if (rests.length > 0) setRestaurants(rests);
-    if (usrs.length > 0) {
-      setUsers(usrs);
-      if (!currentUser.id) setCurrentUser(usrs[0]);
-    }
+    if (usrs.length > 0) setUsers(usrs);
     if (prods.length > 0) setProducts(prods);
     if (reqs.length > 0) {
       const uniqueReqs = Array.from(new Map(reqs.map((r: SupplyRequest) => [r.id, r])).values());
@@ -114,7 +106,6 @@ export default function App() {
   useEffect(() => {
     loadInitialData();
 
-    // SSE Real-Time Stream Event Listener
     const eventSource = new EventSource('/api/stream');
 
     eventSource.onopen = () => {
@@ -137,7 +128,8 @@ export default function App() {
           setSupplyRequests((prev) =>
             prev.map((r) => (r.id === data.id ? data : r))
           );
-          if (shoppingModalRequest && shoppingModalRequest.id === data.id) {
+          // Use ref to avoid stale closure
+          if (shoppingModalRequestRef.current && shoppingModalRequestRef.current.id === data.id) {
             setShoppingModalRequest(data);
           }
         } else if (type === 'PRODUCT_ADDED' || type === 'PRODUCT_UPDATED') {
@@ -155,7 +147,6 @@ export default function App() {
       setSseConnected(false);
     };
 
-    // PWA Install Prompt Listener
     window.addEventListener('beforeinstallprompt', (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -166,7 +157,6 @@ export default function App() {
     };
   }, [loadInitialData]);
 
-  // Selected Restaurant
   const selectedRestaurant =
     restaurants.find((r) => r.id === selectedRestaurantId) ||
     restaurants[0] || {
@@ -179,17 +169,16 @@ export default function App() {
       colorBadge: 'bg-emerald-600',
     };
 
-  // Filter products by selected restaurant
   const currentRestaurantProducts = products.filter(
     (p) => p.restaurantId === selectedRestaurantId
   );
 
-  // Handle Checklist Submission
   const handleSubmitChecklist = async (
     stockReadings: Record<string, number>,
     notes: string,
     urgent: boolean
   ) => {
+    if (!currentUser) return;
     setIsSubmittingChecklist(true);
     const result = await submitDailyChecklist(
       selectedRestaurantId,
@@ -206,14 +195,14 @@ export default function App() {
     }
   };
 
-  // Claim Request
   const handleClaimRequest = async (requestId: string) => {
+    if (!currentUser) return;
     const updated = await claimSupplyRequest(requestId, currentUser.id);
     setSupplyRequests((prev) => prev.map((r) => (r.id === requestId ? updated : r)));
   };
 
-  // Open Shopping Mode with Access Control & Auto-Claim
   const handleOpenShoppingMode = async (req: SupplyRequest) => {
+    if (!currentUser) return;
     if (
       currentUser.role === 'comprador' &&
       req.assignedBuyerId &&
@@ -227,7 +216,6 @@ export default function App() {
       return;
     }
 
-    // Auto-claim if unassigned buyer opens shopping mode
     if (currentUser.role === 'comprador' && !req.assignedBuyerId) {
       const claimed = await claimSupplyRequest(req.id, currentUser.id);
       setSupplyRequests((prev) => prev.map((r) => (r.id === req.id ? claimed : r)));
@@ -237,8 +225,8 @@ export default function App() {
     }
   };
 
-  // Status Change
   const handleUpdateStatus = async (requestId: string, status: RequestStatus) => {
+    if (!currentUser) return;
     const { request: updated, newPendingRequest } = await updateRequestStatus(
       requestId,
       status,
@@ -261,9 +249,8 @@ export default function App() {
     }
   };
 
-  // Toggle Shopping Mode Item
   const handleToggleItem = async (itemId: string, purchased: boolean, note?: string) => {
-    if (!shoppingModalRequest) return;
+    if (!shoppingModalRequest || !currentUser) return;
     const res = await toggleItemPurchased(
       shoppingModalRequest.id,
       itemId,
@@ -276,9 +263,8 @@ export default function App() {
     );
   };
 
-  // Finish Shopping
   const handleFinishShopping = async () => {
-    if (!shoppingModalRequest) return;
+    if (!shoppingModalRequest || !currentUser) return;
     const { request: updated, newPendingRequest } = await updateRequestStatus(
       shoppingModalRequest.id,
       'Comprada',
@@ -307,7 +293,6 @@ export default function App() {
     }
   };
 
-  // Product CRUD
   const handleAddProduct = async (productData: Omit<Product, 'id' | 'updatedAt'>) => {
     const newProd = await createProduct(productData);
     setProducts((prev) => [...prev, newProd]);
@@ -336,7 +321,6 @@ export default function App() {
 
   const handleSelectUser = (u: UserProfile) => {
     setCurrentUser(u);
-    // Automatically switch active tab to primary tab for the selected role
     if (u.role === 'cocinero') {
       setActiveTab('REQUESTS');
     } else if (u.role === 'comprador') {
@@ -346,6 +330,23 @@ export default function App() {
     }
   };
 
+  // Show login screen when no user is selected
+  if (!currentUser) {
+    return (
+      <LoginScreen
+        users={users}
+        onSelectUser={(u) => {
+          setCurrentUser(u);
+          setAppLanguage(u.language || 'es');
+          if (u.role === 'admin') setActiveTab('ANALYTICS');
+          else setActiveTab('REQUESTS');
+        }}
+        language={appLanguage}
+        onChangeLanguage={setAppLanguage}
+      />
+    );
+  }
+
   const activePendingRequestsCount = supplyRequests.filter(
     (r) => r.status === 'Pendiente'
   ).length;
@@ -353,21 +354,18 @@ export default function App() {
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
-  const t = getTranslation(currentUser.language || 'es');
+  const t = getTranslation(currentUser.language || appLanguage);
   const isLight = currentUser.theme === 'light';
 
-  // Sync html root class for theme styles
-  useEffect(() => {
-    if (isLight) {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-    }
-  }, [isLight]);
+  // Sync html root class for theme
+  if (isLight) {
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+  } else {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+  }
 
-  // Role-based navigation items
   const getNavTabs = () => {
     switch (currentUser.role) {
       case 'cocinero':
@@ -397,7 +395,6 @@ export default function App() {
         ? 'bg-slate-100 text-slate-900 selection:bg-emerald-500 selection:text-white'
         : 'bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-slate-950'
     }`}>
-      {/* Header */}
       <Header
         restaurants={restaurants}
         selectedRestaurantId={selectedRestaurantId}
@@ -411,9 +408,9 @@ export default function App() {
         onOpenProfileSettings={() => setShowProfileSettingsModal(true)}
         isPWAInstallable={!!deferredPrompt || isIOS}
         onInstallPWA={() => setShowPWAInstallModal(true)}
+        onLogout={() => setCurrentUser(null)}
       />
 
-      {/* Role-Based Streamlined Navigation Tabs */}
       <nav className={`border-b sticky top-[52px] z-30 backdrop-blur-md ${
         isLight ? 'bg-white/90 border-slate-200' : 'bg-slate-900/90 border-slate-800'
       }`}>
@@ -456,7 +453,6 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Main Content Workspace */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 w-full">
         {activeTab === 'CHECKLIST' && (
           <DailyChecklist
@@ -485,6 +481,7 @@ export default function App() {
             products={products}
             restaurants={restaurants}
             suppliers={INITIAL_SUPPLIERS}
+            currentUser={currentUser}
             onAddProduct={handleAddProduct}
             onUpdateProduct={handleUpdateProduct}
             onDeleteProduct={handleDeleteProduct}
@@ -492,10 +489,9 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'ANALYTICS' && <AnalyticsDashboard />}
+        {activeTab === 'ANALYTICS' && <AnalyticsDashboard currentUser={currentUser} />}
       </main>
 
-      {/* Shopping Mode Modal */}
       {shoppingModalRequest && (
         <ShoppingModeModal
           request={shoppingModalRequest}
@@ -506,19 +502,18 @@ export default function App() {
         />
       )}
 
-      {/* Notification Center Modal */}
       {showNotificationCenter && (
         <NotificationCenter
           onClose={() => setShowNotificationCenter(false)}
           sseConnected={sseConnected}
           currentUserPhone={currentUser.phone}
           currentUserRole={currentUser.role}
+          currentUserLanguage={currentUser.language}
           requests={supplyRequests}
           onSelectRequest={handleSelectRequestFromNotification}
         />
       )}
 
-      {/* Profile Settings Modal */}
       {showProfileSettingsModal && (
         <ProfileSettingsModal
           currentUser={currentUser}
@@ -527,7 +522,6 @@ export default function App() {
         />
       )}
 
-      {/* PWA Install Modal */}
       {showPWAInstallModal && (
         <PWAInstallPrompt
           onClose={() => setShowPWAInstallModal(false)}

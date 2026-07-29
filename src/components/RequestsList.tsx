@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SupplyRequest, RequestStatus, UserProfile } from '../types';
 import { formatCleanName } from '../lib/formatters';
+import { getTranslation } from '../lib/translations';
 import {
   Clock,
   User,
@@ -39,13 +40,11 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   selectedRestaurantId,
   highlightedRequestId,
 }) => {
-  // Tabs for grouping orders by status
+  const t = getTranslation(currentUser.language ?? 'es');
+
   const [filterTab, setFilterTab] = useState<'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ALL'>('ALL');
-  
-  // Set of request IDs that are expanded
   const [expandedRequestIds, setExpandedRequestIds] = useState<Set<string>>(new Set());
 
-  // Auto-expand highlighted request if provided
   React.useEffect(() => {
     if (highlightedRequestId) {
       setExpandedRequestIds((prev) => new Set(prev).add(highlightedRequestId));
@@ -65,7 +64,6 @@ export const RequestsList: React.FC<RequestsListProps> = ({
     });
   };
 
-  // Filter requests by restaurant & status group tab
   const filteredRequests = requests.filter((r) => {
     if (selectedRestaurantId && r.restaurantId !== selectedRestaurantId) return false;
     if (filterTab === 'PENDING') return r.status === 'Pendiente';
@@ -74,7 +72,6 @@ export const RequestsList: React.FC<RequestsListProps> = ({
     return true;
   });
 
-  // Calculate status counts
   const countPending = requests.filter((r) => (!selectedRestaurantId || r.restaurantId === selectedRestaurantId) && r.status === 'Pendiente').length;
   const countInProgress = requests.filter((r) => (!selectedRestaurantId || r.restaurantId === selectedRestaurantId) && ['Asignada', 'En Compra', 'Comprada'].includes(r.status)).length;
   const countCompleted = requests.filter((r) => (!selectedRestaurantId || r.restaurantId === selectedRestaurantId) && ['Entregada', 'Completada'].includes(r.status)).length;
@@ -96,14 +93,26 @@ export const RequestsList: React.FC<RequestsListProps> = ({
     }
   };
 
+  const getStatusLabel = (status: RequestStatus): string => {
+    const map: Record<RequestStatus, string> = {
+      Pendiente: t.pending,
+      Asignada: t.assigned,
+      'En Compra': t.inProgress,
+      Comprada: t.purchased,
+      Entregada: t.delivered,
+      Completada: t.completed,
+    };
+    return map[status] ?? status;
+  };
+
   const getTimeAgo = (dateStr: string) => {
     const diffMs = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diffMs / 60000);
-    if (mins < 1) return 'Hace un momento';
-    if (mins < 60) return `Hace ${mins} min`;
+    if (mins < 1) return t.timeJustNow;
+    if (mins < 60) return `${t.timePrefix}${mins} ${t.timeMin}${t.timeSuffix}`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `Hace ${hours} h`;
-    return `Hace ${Math.floor(hours / 24)} d`;
+    if (hours < 24) return `${t.timePrefix}${hours} ${t.timeHour}${t.timeSuffix}`;
+    return `${t.timePrefix}${Math.floor(hours / 24)} ${t.timeDay}${t.timeSuffix}`;
   };
 
   const isCook = currentUser.role === 'cocinero';
@@ -111,10 +120,17 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   const isAdmin = currentUser.role === 'admin';
 
   const getRoleHeaderTitle = () => {
-    if (isCook) return 'Mis Pedidos de Cocina';
-    if (isBuyer) return 'Tablero de Compras';
-    return 'Supervisión de Pedidos';
+    if (isCook) return t.requestsTitleCook;
+    if (isBuyer) return t.requestsTitleBuyer;
+    return t.requestsTitleAdmin;
   };
+
+  const getRoleSubtitle = () => {
+    if (isCook) return t.requestsSubCook;
+    if (isBuyer) return t.requestsSubBuyer;
+    return t.requestsSubAdmin;
+  };
+
   const isLight = currentUser.theme === 'light';
 
   return (
@@ -134,22 +150,18 @@ export const RequestsList: React.FC<RequestsListProps> = ({
             <p className={`text-xs sm:text-sm mt-0.5 ${
               isLight ? 'text-slate-600' : 'text-slate-400'
             }`}>
-              {isCook
-                ? 'Estado de solicitudes e insumos solicitados.'
-                : isBuyer
-                ? 'Solicitudes pendientes, compras y entregas.'
-                : 'Control unificado de logística y pedidos.'}
+              {getRoleSubtitle()}
             </p>
           </div>
 
           <span className={`self-start sm:self-auto px-3 py-1 rounded-lg border text-xs font-bold uppercase tracking-wider ${
             isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-950 border-slate-800 text-slate-300'
           }`}>
-            Rol: {currentUser.role}
+            {t.headerRolePrefix}: {currentUser.role}
           </span>
         </div>
 
-        {/* Grouping Filter Tabs (Pendiente, En Compra, Completado) */}
+        {/* Grouping Filter Tabs */}
         <div className={`grid grid-cols-4 gap-1.5 sm:gap-2 p-1.5 rounded-xl border text-center ${
           isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-950 border-slate-800'
         }`}>
@@ -161,7 +173,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                 : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>Todas</span>
+            <span>{t.filterAll}</span>
             <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
               isLight ? 'bg-slate-200 text-slate-800' : 'bg-slate-900 text-slate-300'
             }`}>
@@ -177,7 +189,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                 : isLight ? 'text-slate-600 hover:text-amber-700' : 'text-slate-400 hover:text-amber-300'
             }`}
           >
-            <span className="truncate">Pendientes</span>
+            <span className="truncate">{t.filterPending}</span>
             {countPending > 0 && (
               <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-xs font-black">
                 {countPending}
@@ -193,7 +205,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                 : isLight ? 'text-slate-600 hover:text-orange-700' : 'text-slate-400 hover:text-orange-300'
             }`}
           >
-            <span className="truncate">En Compra</span>
+            <span className="truncate">{t.filterInProgress}</span>
             {countInProgress > 0 && (
               <span className="px-2 py-0.5 rounded-full bg-orange-500 text-slate-950 text-xs font-black">
                 {countInProgress}
@@ -209,7 +221,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                 : isLight ? 'text-slate-600 hover:text-emerald-700' : 'text-slate-400 hover:text-emerald-300'
             }`}
           >
-            <span className="truncate">Completadas</span>
+            <span className="truncate">{t.filterCompleted}</span>
             {countCompleted > 0 && (
               <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                 isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/30 text-emerald-300'
@@ -221,15 +233,15 @@ export const RequestsList: React.FC<RequestsListProps> = ({
         </div>
       </div>
 
-      {/* Requests Feed - Compact Cards */}
+      {/* Requests Feed */}
       {filteredRequests.length === 0 ? (
         <div className={`border rounded-2xl p-8 text-center space-y-2 ${
           isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-800/80'
         }`}>
           <CheckCircle2 className={`w-10 h-10 mx-auto ${isLight ? 'text-slate-400' : 'text-slate-600'}`} />
-          <div className={`font-bold text-base ${isLight ? 'text-slate-800' : 'text-slate-300'}`}>No hay solicitudes en este grupo</div>
+          <div className={`font-bold text-base ${isLight ? 'text-slate-800' : 'text-slate-300'}`}>{t.noRequests}</div>
           <p className={`text-xs sm:text-sm max-w-sm mx-auto ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-            Selecciona otra pestaña o cambia el restaurante activo para ver más pedidos.
+            {t.selectTabHint}
           </p>
         </div>
       ) : (
@@ -279,7 +291,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       : 'bg-slate-900 border-slate-800 hover:border-slate-700 shadow-sm'
                 }`}
               >
-                {/* Compact Card Header */}
+                {/* Card Header */}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center space-x-2 min-w-0 flex-wrap">
                     <span className={`font-black text-base sm:text-lg whitespace-nowrap ${
@@ -297,7 +309,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     {isPending && (
                       <span className="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-black text-xs uppercase flex items-center space-x-1 animate-pulse">
                         <Clock className="w-3.5 h-3.5 text-slate-950" />
-                        <span>PENDIENTE</span>
+                        <span>{t.pending.toUpperCase()}</span>
                       </span>
                     )}
 
@@ -310,7 +322,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                         }`}
                       >
                         <Flame className={`w-3.5 h-3.5 ${isCompleted ? (isLight ? 'text-slate-500' : 'text-slate-400') : 'text-rose-600'}`} />
-                        <span>URGENTE</span>
+                        <span>{t.tagUrgent}</span>
                       </span>
                     )}
                   </div>
@@ -318,16 +330,14 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                   {/* Status Badge */}
                   <div className="flex items-center space-x-1.5 flex-shrink-0">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-black uppercase border tracking-wide ${getStatusBadge(
-                        req.status
-                      )}`}
+                      className={`px-3 py-1 rounded-full text-xs font-black uppercase border tracking-wide ${getStatusBadge(req.status)}`}
                     >
-                      {req.status}
+                      {getStatusLabel(req.status)}
                     </span>
                   </div>
                 </div>
 
-                {/* Subtitle Line: Metadata & Compact Products Summary */}
+                {/* Subtitle Line */}
                 <div className={`mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs sm:text-sm border-b pb-2.5 ${
                   isLight ? 'text-slate-600 border-slate-200' : 'text-slate-300 border-slate-800/60'
                 }`}>
@@ -337,24 +347,25 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       <span>{getTimeAgo(req.createdAt)}</span>
                     </span>
                     <span>•</span>
-                    <span>Solicitó: <strong className={isLight ? 'text-slate-900 font-bold' : 'text-slate-100'}>{cleanCookName}</strong></span>
+                    <span>{t.labelRequestedBy}: <strong className={isLight ? 'text-slate-900 font-bold' : 'text-slate-100'}>{cleanCookName}</strong></span>
                     {cleanBuyerName && (
                       <>
                         <span>•</span>
-                        <span>Comprador: <strong className={isLight ? 'text-emerald-800 font-bold' : 'text-emerald-300'}>{cleanBuyerName}</strong></span>
+                        <span>{t.labelBuyer}: <strong className={isLight ? 'text-emerald-800 font-bold' : 'text-emerald-300'}>{cleanBuyerName}</strong></span>
                       </>
                     )}
                   </div>
 
-                  {/* Compact Product Count Tag */}
+                  {/* Item count tag */}
                   <div className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${
                     isLight ? 'bg-slate-100 text-slate-800 border-slate-200' : 'bg-slate-950 text-slate-200 border-slate-800'
                   }`}>
-                    {totalItems} insumo{totalItems > 1 ? 's' : ''} {purchasedItems > 0 && `(${purchasedItems}/${totalItems} listos)`}
+                    {totalItems} {totalItems === 1 ? t.labelItemSingular : t.labelItems}
+                    {purchasedItems > 0 && ` (${purchasedItems}/${totalItems} ${t.labelReady})`}
                   </div>
                 </div>
 
-                {/* Progress Bar IF in active purchase mode */}
+                {/* Progress Bar for active purchases */}
                 {['Asignada', 'En Compra', 'Comprada'].includes(req.status) && (
                   <div className={`mt-2.5 p-2.5 sm:p-3 rounded-xl border ${
                     isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800/80'
@@ -364,8 +375,8 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                         <Store className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                         <span className="truncate">
                           {req.status === 'Comprada'
-                            ? '✅ Compra lista — En camino a cocina'
-                            : `Comprando en tienda (${cleanBuyerName || 'Comprador'})`}
+                            ? t.shopPurchasedMsg
+                            : `${t.shopActiveMsg} (${cleanBuyerName || t.labelBuyer})`}
                         </span>
                       </span>
                       <span className="text-emerald-600 font-black ml-2 flex-shrink-0">
@@ -381,7 +392,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                   </div>
                 )}
 
-                {/* Compact Product Chips (collapsed view snippet) */}
+                {/* Compact Product Chips (collapsed) */}
                 {!isExpanded && (
                   <div className="mt-2.5 flex flex-wrap gap-1.5 items-center">
                     {req.items.slice(0, 3).map((item) => (
@@ -405,18 +416,17 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                         onClick={() => toggleExpand(req.id)}
                         className="text-xs text-emerald-600 hover:underline font-extrabold px-2 py-1"
                       >
-                        +{req.items.length - 3} más...
+                        +{req.items.length - 3} {t.labelMore}...
                       </button>
                     )}
                   </div>
                 )}
 
-                {/* Expanded Details Section */}
+                {/* Expanded Details */}
                 {isExpanded && (
                   <div className={`mt-3 pt-3 border-t space-y-3 animate-fadeIn ${
                     isLight ? 'border-slate-200' : 'border-slate-800'
                   }`}>
-                    {/* Kitchen Notes */}
                     {req.notes && (
                       <div className={`px-3.5 py-2 border rounded-xl text-xs sm:text-sm italic flex items-start space-x-2 ${
                         isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-slate-950/80 border-slate-800 text-slate-200'
@@ -426,10 +436,9 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       </div>
                     )}
 
-                    {/* Full Item Breakdown */}
                     <div className="space-y-2">
                       <div className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                        Lista de Insumos Requeridos ({totalItems}):
+                        {t.labelRequiredItems} ({totalItems}):
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {req.items.map((item) => (
@@ -466,11 +475,11 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                   </div>
                 )}
 
-                {/* Compact Card Action Footer */}
+                {/* Card Action Footer */}
                 <div className={`mt-3 pt-2.5 border-t flex items-center justify-between gap-2 flex-wrap ${
                   isLight ? 'border-slate-200' : 'border-slate-800/80'
                 }`}>
-                  {/* Toggle Details Chevron Button */}
+                  {/* Toggle Details Button */}
                   <button
                     onClick={() => toggleExpand(req.id)}
                     className={`px-3 py-1.5 rounded-xl border text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition ${
@@ -479,7 +488,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                         : 'bg-slate-950 hover:bg-slate-800 border-slate-800 text-slate-200'
                     }`}
                   >
-                    <span>{isExpanded ? 'Ocultar detalles' : 'Ver detalles'}</span>
+                    <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
                     {isExpanded ? (
                       <ChevronUp className={`w-4 h-4 ${isLight ? 'text-slate-600' : 'text-slate-400'}`} />
                     ) : (
@@ -487,25 +496,22 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     )}
                   </button>
 
-                  {/* Role-Specific Direct Action Buttons */}
+                  {/* Action Buttons */}
                   <div className="flex items-center space-x-2 ml-auto">
-                    {/* WhatsApp Share Button */}
+                    {/* WhatsApp Share */}
                     <a
-                      href={generateWhatsAppLink(
-                        currentUser.phone,
-                        generateRequestWhatsAppSummary(req)
-                      )}
+                      href={generateWhatsAppLink(currentUser.phone, generateRequestWhatsAppSummary(req))}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`p-2 rounded-xl border text-emerald-600 text-xs font-bold transition flex items-center ${
                         isLight ? 'bg-slate-100 hover:bg-slate-200 border-slate-200' : 'bg-slate-950 hover:bg-slate-800 border-slate-800'
                       }`}
-                      title="Compartir en WhatsApp"
+                      title={t.labelShareWhatsApp}
                     >
                       <Share2 className="w-4 h-4" />
                     </a>
 
-                    {/* === COCINERO ACTIONS (NO Shopping Mode Button!) === */}
+                    {/* COCINERO ACTIONS */}
                     {isCook && (
                       <>
                         {['Comprada', 'Entregada'].includes(req.status) && (
@@ -517,54 +523,53 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                             className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm flex items-center space-x-1.5 shadow-xl shadow-emerald-500/40 animate-pulse ring-4 ring-emerald-400/80 transition scale-105"
                           >
                             <PackageCheck className="w-4 h-4 text-slate-950" />
-                            <span>Confirmar Recepción</span>
+                            <span>{t.btnConfirmReceipt}</span>
                           </button>
                         )}
 
                         {req.status === 'Pendiente' && (
                           <div className="px-3 py-1.5 rounded-xl bg-amber-950/40 border border-amber-800/50 text-amber-300 text-xs font-bold flex items-center space-x-1">
                             <AlertCircle className="w-4 h-4 text-amber-400" />
-                            <span>Esperando comprador</span>
+                            <span>{t.statusWaiting}</span>
                           </div>
                         )}
 
                         {req.status === 'Asignada' && (
                           <div className="px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs font-bold flex items-center space-x-1">
                             <Truck className="w-4 h-4 text-emerald-400 animate-pulse" />
-                            <span>En camino ({cleanBuyerName || 'Comprador'})</span>
+                            <span>{t.statusOnTheWay} ({cleanBuyerName || t.labelBuyer})</span>
                           </div>
                         )}
 
                         {req.status === 'En Compra' && (
                           <div className="px-3 py-1.5 rounded-xl bg-orange-950/40 border border-orange-800/50 text-orange-300 text-xs font-bold flex items-center space-x-1">
                             <ShoppingBag className="w-4 h-4 text-orange-400 animate-pulse" />
-                            <span>En tienda ({cleanBuyerName || 'Comprador'})</span>
+                            <span>{t.statusAtStore} ({cleanBuyerName || t.labelBuyer})</span>
                           </div>
                         )}
 
                         {req.status === 'Completada' && (
                           <div className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-emerald-400 text-xs font-extrabold flex items-center space-x-1">
                             <CheckCircle2 className="w-4 h-4" />
-                            <span>Recibido en cocina</span>
+                            <span>{t.statusReceived}</span>
                           </div>
                         )}
                       </>
                     )}
 
-                    {/* === COMPRADOR ACTIONS === */}
+                    {/* COMPRADOR ACTIONS */}
                     {isBuyer && (
                       <>
                         {isAssignedToOtherBuyer ? (
                           <div
                             className="px-3 py-1.5 rounded-xl bg-slate-950/90 border border-slate-800 text-slate-400 font-bold text-xs flex items-center space-x-1.5 opacity-80 cursor-not-allowed select-none"
-                            title={`Solicitud tomada por ${cleanBuyerName || 'otro comprador'}`}
+                            title={`${t.labelTakenBy} ${cleanBuyerName || t.labelOtherBuyer}`}
                           >
                             <Lock className="w-4 h-4 text-amber-400" />
-                            <span>Tomado por {cleanBuyerName || 'otro comprador'}</span>
+                            <span>{t.labelTakenBy} {cleanBuyerName || t.labelOtherBuyer}</span>
                           </div>
                         ) : (
                           <>
-                            {/* Claim Request */}
                             {req.status === 'Pendiente' && (
                               <button
                                 onClick={() => {
@@ -574,11 +579,10 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                                 className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center space-x-1 shadow-md transition"
                               >
                                 <User className="w-4 h-4" />
-                                <span>Tomar Pedido</span>
+                                <span>{t.btnTakeOrder}</span>
                               </button>
                             )}
 
-                            {/* Open Interactive Shopping Mode ONLY for Assigned Buyer or Unassigned */}
                             {['Asignada', 'En Compra', 'Pendiente'].includes(req.status) && (
                               <button
                                 onClick={() => {
@@ -588,11 +592,10 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                                 className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center space-x-1 shadow-md transition"
                               >
                                 <ShoppingBag className="w-3.5 h-3.5 text-slate-950" />
-                                <span>Modo Compra</span>
+                                <span>{t.btnShopMode}</span>
                               </button>
                             )}
 
-                            {/* Deliver to Kitchen */}
                             {req.status === 'Comprada' && (
                               <button
                                 onClick={() => {
@@ -602,7 +605,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                                 className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center space-x-1 shadow-md transition"
                               >
                                 <Truck className="w-3.5 h-3.5" />
-                                <span>Entregado</span>
+                                <span>{t.btnDelivered}</span>
                               </button>
                             )}
                           </>
@@ -610,7 +613,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       </>
                     )}
 
-                    {/* === ADMIN ACTIONS === */}
+                    {/* ADMIN ACTIONS */}
                     {isAdmin && (
                       <>
                         {req.status === 'Pendiente' && (
@@ -622,7 +625,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                             className="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center space-x-1 shadow-md transition"
                           >
                             <User className="w-3 h-3" />
-                            <span>Asignarme</span>
+                            <span>{t.btnAssignMe}</span>
                           </button>
                         )}
 
@@ -634,7 +637,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                           className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-xs flex items-center space-x-1 border border-slate-700 transition"
                         >
                           <ShoppingBag className="w-3.5 h-3.5" />
-                          <span>Modo Compra</span>
+                          <span>{t.btnShopMode}</span>
                         </button>
 
                         {req.status === 'Comprada' && (
@@ -646,7 +649,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                             className="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center space-x-1 transition"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>Completar</span>
+                            <span>{t.btnComplete}</span>
                           </button>
                         )}
                       </>

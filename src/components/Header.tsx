@@ -12,6 +12,7 @@ import {
   Flame,
   Volume2,
   Settings,
+  LogOut,
 } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
 
@@ -28,6 +29,7 @@ interface HeaderProps {
   onOpenProfileSettings: () => void;
   onInstallPWA?: () => void;
   isPWAInstallable?: boolean;
+  onLogout?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -43,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenProfileSettings,
   onInstallPWA,
   isPWAInstallable,
+  onLogout,
 }) => {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const selectedRest = restaurants.find((r) => r.id === selectedRestaurantId) || restaurants[0];
@@ -137,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => playAlertSound('urgent')}
               className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-              title="Probar chime de cocina"
+              title={t.headerTestChime}
             >
               <Volume2 className="w-4 h-4" />
             </button>
@@ -146,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onOpenNotifications}
               className="relative p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-              title="Alertas & Push"
+              title={t.headerNotifications}
             >
               <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
               {activeRequestsCount > 0 && (
@@ -252,7 +255,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <div className="flex-1 min-w-0">
                           <div className="font-bold text-slate-100 truncate">{formatCleanName(u.name)}</div>
                           <div className="text-xs text-slate-400">
-                            Rol: {getRoleLabel(u.role)}
+                            {t.headerRolePrefix}: {getRoleLabel(u.role)}
                           </div>
                         </div>
                         {u.id === currentUser.id && (
@@ -261,6 +264,22 @@ export const Header: React.FC<HeaderProps> = ({
                       </button>
                     ))}
                   </div>
+
+                  {/* Logout */}
+                  {onLogout && (
+                    <div className="p-1 border-t border-slate-800 mt-1">
+                      <button
+                        onClick={() => {
+                          setShowRoleDropdown(false);
+                          onLogout();
+                        }}
+                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl hover:bg-slate-800/80 text-slate-400 hover:text-rose-400 text-xs transition"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span className="font-semibold">{t.logout || 'Cerrar sesión'}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

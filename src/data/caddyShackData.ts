@@ -21,7 +21,7 @@ export const INITIAL_RESTAURANTS: Restaurant[] = [
   },
   {
     id: 'rest-3',
-    name: 'The Bower',
+    name: 'Devour',
     type: 'Bistro',
     address: 'E 4th St, Big Spring, TX',
     phone: '(432) 555-0388',
@@ -42,37 +42,41 @@ export const INITIAL_RESTAURANTS: Restaurant[] = [
 export const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user-1',
-    name: 'Mateo',
+    name: 'Yaciel',
     role: 'cocinero',
     phone: '+1 (432) 888-1020',
-    assignedLocations: ['rest-1'],
+    assignedLocations: ['rest-1', 'rest-2', 'rest-3', 'rest-4'],
     avatarUrl: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150',
+    language: 'es',
   },
   {
     id: 'user-2',
-    name: 'Carlos',
+    name: 'Pete',
     role: 'comprador',
     phone: '+1 (432) 888-2040',
     assignedLocations: ['rest-1', 'rest-2', 'rest-3', 'rest-4'],
     assignedCategories: ['INGREDIENTS', 'SNACKS', 'BEVERAGES', 'MIXERS', 'CANDY', 'ALCOHOL'],
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    language: 'en',
   },
   {
     id: 'user-3',
-    name: 'Ramiro',
+    name: 'Gene',
     role: 'comprador',
     phone: '+1 (432) 888-3050',
     assignedLocations: ['rest-1', 'rest-2', 'rest-3', 'rest-4'],
     assignedCategories: ['CHEMICALS', 'PAPER / DISPOSABLES', 'SUPPLIES'],
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    language: 'es',
   },
   {
     id: 'user-4',
-    name: 'Doña Elena',
+    name: 'Jacob',
     role: 'admin',
     phone: '+1 (432) 888-4090',
     assignedLocations: ['rest-1', 'rest-2', 'rest-3', 'rest-4'],
     avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+    language: 'en',
   },
 ];
 
@@ -82,9 +86,16 @@ export const INITIAL_SUPPLIERS: Supplier[] = [
   { id: 'sup-3', name: 'Panadería Local El Sol', phone: '432-555-3322', categorySpecialty: 'Pan de Hamburguesa y Tortillas frescas' },
   { id: 'sup-4', name: 'Sysco / US Foods', phone: '800-555-1234', categorySpecialty: 'Insumos institucionales' },
   { id: 'sup-5', name: 'Distribuidor Gas & Leña West Texas', phone: '432-555-7766', categorySpecialty: 'Propano, Leña y Carbón' },
+  { id: 'sup-6', name: 'Distribuidor de Licores', phone: '432-555-5500', categorySpecialty: 'Vinos, Cervezas y Licores' },
 ];
 
-export const INITIAL_PRODUCTS_CADDY_SHACK: Omit<Product, 'id' | 'updatedAt'>[] = [
+// All products for all restaurants (used as seed data)
+export const INITIAL_PRODUCTS: Omit<Product, 'id' | 'updatedAt'>[] = [
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // CADDY SHACK GRILL (rest-1)
+  // ════════════════════════════════════════════════════════════════════════════
+
   // --- INGREDIENTS ---
   { restaurantId: 'rest-1', name: 'American Cheese (squares)', category: 'INGREDIENTS', unit: 'Paquete', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Bacon', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Restaurant Depot', active: true },
@@ -93,12 +104,12 @@ export const INITIAL_PRODUCTS_CADDY_SHACK: Omit<Product, 'id' | 'updatedAt'>[] =
   { restaurantId: 'rest-1', name: 'Butter Blocks', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Cheese Sticks', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Cilantro', category: 'INGREDIENTS', unit: 'Atado', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Cilantro Cream Sauce', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: 'Sysco', active: true },
+  { restaurantId: 'rest-1', name: 'Cilantro Cream Sauce', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: 'Sysco / US Foods', active: true },
   { restaurantId: 'rest-1', name: 'Corn Dog', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Corn Tortillas', category: 'INGREDIENTS', unit: 'Paquete', minThreshold: 4, suggestedQuantity: 10, suggestedSupplier: 'Panadería Local El Sol', active: true },
   { restaurantId: 'rest-1', name: 'Eggs', category: 'INGREDIENTS', unit: 'Caja / Cartón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Fried Burritos', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Fried Pickles', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco', active: true },
+  { restaurantId: 'rest-1', name: 'Fried Pickles', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco / US Foods', active: true },
   { restaurantId: 'rest-1', name: 'Flour Tortillas', category: 'INGREDIENTS', unit: 'Paquete', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Panadería Local El Sol', active: true },
   { restaurantId: 'rest-1', name: 'Fries (Papas Fritas)', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Ham', category: 'INGREDIENTS', unit: 'Paquete', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Restaurant Depot', active: true },
@@ -113,11 +124,11 @@ export const INITIAL_PRODUCTS_CADDY_SHACK: Omit<Product, 'id' | 'updatedAt'>[] =
   { restaurantId: 'rest-1', name: 'Lettuce', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Restaurant Depot', active: true },
   { restaurantId: 'rest-1', name: 'Lime Juice Bottles', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Limes', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Mac N Cheese Bites', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco', active: true },
+  { restaurantId: 'rest-1', name: 'Mac N Cheese Bites', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco / US Foods', active: true },
   { restaurantId: 'rest-1', name: 'Mayonnaise Bottles', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Mayonnaise Packets', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Milk', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Marinara Sauce', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Sysco', active: true },
+  { restaurantId: 'rest-1', name: 'Marinara Sauce', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Sysco / US Foods', active: true },
   { restaurantId: 'rest-1', name: 'Mozzarella', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Restaurant Depot', active: true },
   { restaurantId: 'rest-1', name: 'Mustard Bottles', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Mustard Packets', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: "Sam's Club", active: true },
@@ -128,9 +139,9 @@ export const INITIAL_PRODUCTS_CADDY_SHACK: Omit<Product, 'id' | 'updatedAt'>[] =
   { restaurantId: 'rest-1', name: 'Pepperoni', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Restaurant Depot', active: true },
   { restaurantId: 'rest-1', name: 'Pickles', category: 'INGREDIENTS', unit: 'Cubeta', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Pineapple', category: 'INGREDIENTS', unit: 'Lata', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Pizza Flat Bread', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco', active: true },
+  { restaurantId: 'rest-1', name: 'Pizza Flat Bread', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco / US Foods', active: true },
   { restaurantId: 'rest-1', name: 'Ranch', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Remoulad Sauce', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: 'Sysco', active: true },
+  { restaurantId: 'rest-1', name: 'Remoulad Sauce', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: 'Sysco / US Foods', active: true },
   { restaurantId: 'rest-1', name: 'Salt', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Tomatoes', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Uncle Chris Gourmet Steak Seasoning', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: "Sam's Club", active: true },
@@ -213,22 +224,22 @@ export const INITIAL_PRODUCTS_CADDY_SHACK: Omit<Product, 'id' | 'updatedAt'>[] =
   { restaurantId: 'rest-1', name: '16 oz Tops (sippy)', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: '2 oz Cups', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: '2 oz Tops', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Charcoal (Carbón)', category: 'PAPER / DISPOSABLES', unit: 'Bolsa', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: 'Distribuidor Gas & Leña', active: true },
+  { restaurantId: 'rest-1', name: 'Charcoal (Carbón)', category: 'PAPER / DISPOSABLES', unit: 'Bolsa', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: 'Distribuidor Gas & Leña West Texas', active: true },
   { restaurantId: 'rest-1', name: 'Checkered Plates', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Fryer Oil (Aceite de freidora)', category: 'PAPER / DISPOSABLES', unit: 'Cubeta', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Grill Brick', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Sysco', active: true },
+  { restaurantId: 'rest-1', name: 'Grill Brick', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Sysco / US Foods', active: true },
   { restaurantId: 'rest-1', name: 'Large Vinyl Gloves', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Lighter (long)', category: 'PAPER / DISPOSABLES', unit: 'Unidad', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Lighter Fluid', category: 'PAPER / DISPOSABLES', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Medium Nitrile Gloves', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Napkins', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Plastic Ware (Cubiertos)', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Propane Tank', category: 'PAPER / DISPOSABLES', unit: 'Tanque', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Distribuidor Gas & Leña', active: true },
+  { restaurantId: 'rest-1', name: 'Propane Tank', category: 'PAPER / DISPOSABLES', unit: 'Tanque', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Distribuidor Gas & Leña West Texas', active: true },
   { restaurantId: 'rest-1', name: 'Straws', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Towels', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Trash Bags', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
   { restaurantId: 'rest-1', name: 'Wax Paper', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
-  { restaurantId: 'rest-1', name: 'Fire Wood (Leña)', category: 'PAPER / DISPOSABLES', unit: 'Atado', minThreshold: 5, suggestedQuantity: 10, suggestedSupplier: 'Distribuidor Gas & Leña', active: true },
+  { restaurantId: 'rest-1', name: 'Fire Wood (Leña)', category: 'PAPER / DISPOSABLES', unit: 'Atado', minThreshold: 5, suggestedQuantity: 10, suggestedSupplier: 'Distribuidor Gas & Leña West Texas', active: true },
 
   // --- ALCOHOL ---
   { restaurantId: 'rest-1', name: 'Bud Light', category: 'ALCOHOL', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
@@ -244,4 +255,182 @@ export const INITIAL_PRODUCTS_CADDY_SHACK: Omit<Product, 'id' | 'updatedAt'>[] =
   { restaurantId: 'rest-1', name: 'Vodka (wine base)', category: 'ALCOHOL', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Distribuidor de Licores', active: true },
   { restaurantId: 'rest-1', name: 'Whiskey (wine base)', category: 'ALCOHOL', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Distribuidor de Licores', active: true },
   { restaurantId: 'rest-1', name: 'Buzzballs', category: 'ALCOHOL', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Distribuidor de Licores', active: true },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // ALBERTO'S CRYSTAL CAFE (rest-2)
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // --- INGREDIENTS ---
+  { restaurantId: 'rest-2', name: 'Ground Beef', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 10, suggestedQuantity: 25, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-2', name: 'Chicken Breast', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 8, suggestedQuantity: 20, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-2', name: 'Pork (Carnitas)', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 8, suggestedQuantity: 20, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-2', name: 'Rice (long grain)', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Black Beans (canned)', category: 'INGREDIENTS', unit: 'Lata', minThreshold: 6, suggestedQuantity: 15, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Pinto Beans', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Corn Tortillas (fresh)', category: 'INGREDIENTS', unit: 'Paquete', minThreshold: 5, suggestedQuantity: 15, suggestedSupplier: 'Panadería Local El Sol', active: true },
+  { restaurantId: 'rest-2', name: 'Flour Tortillas (burrito)', category: 'INGREDIENTS', unit: 'Paquete', minThreshold: 4, suggestedQuantity: 12, suggestedSupplier: 'Panadería Local El Sol', active: true },
+  { restaurantId: 'rest-2', name: 'Avocados', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Roma Tomatoes', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'White Onions', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Cilantro', category: 'INGREDIENTS', unit: 'Atado', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Fresh Jalapeños', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Queso Fresco', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-2', name: 'Sour Cream', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Salsa Roja', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-2', name: 'Salsa Verde', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-2', name: 'Limes', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Mexican Shredded Cheese', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Refried Beans (canned)', category: 'INGREDIENTS', unit: 'Lata', minThreshold: 6, suggestedQuantity: 15, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Vegetable Oil', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Chili Powder', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Cumin', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Garlic (fresh)', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Tortilla Chips', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Hot Sauce (Valentina)', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: "Sam's Club", active: true },
+
+  // --- BEVERAGES ---
+  { restaurantId: 'rest-2', name: 'Horchata Mix', category: 'BEVERAGES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-2', name: 'Agua de Tamarindo', category: 'BEVERAGES', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Jarritos Assorted', category: 'BEVERAGES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Coke', category: 'BEVERAGES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 6, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Water Bottles', category: 'BEVERAGES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+
+  // --- CHEMICALS ---
+  { restaurantId: 'rest-2', name: 'Dish Soap', category: 'CHEMICALS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'All Purpose Cleaner', category: 'CHEMICALS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Bleach', category: 'CHEMICALS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Hand Soap', category: 'CHEMICALS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+
+  // --- PAPER / DISPOSABLES ---
+  { restaurantId: 'rest-2', name: 'Foam To-Go Containers', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Paper Bags', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Napkins', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Plastic Ware', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Aluminum Foil', category: 'PAPER / DISPOSABLES', unit: 'Rollo', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Latex Gloves', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Straws', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-2', name: 'Trash Bags', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // DEVOUR (rest-3) — Bistro
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // --- INGREDIENTS ---
+  { restaurantId: 'rest-3', name: 'Salmon Fillet (fresh)', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 5, suggestedQuantity: 15, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-3', name: 'Ribeye Steak', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 5, suggestedQuantity: 15, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-3', name: 'Chicken Thighs', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 5, suggestedQuantity: 15, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-3', name: 'Pasta (Spaghetti)', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Pasta (Fettuccine)', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Heavy Cream', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Unsalted Butter', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Fresh Garlic', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Arugula', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-3', name: 'Mixed Greens', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-3', name: 'Cherry Tomatoes', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Balsamic Vinegar', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Extra Virgin Olive Oil', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Parmesan (grated)', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-3', name: 'Fresh Mozzarella', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-3', name: 'Portobello Mushrooms', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Asparagus', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-3', name: 'Lemons', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'White Wine (cooking)', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Capers', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Dijon Mustard', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Fresh Rosemary', category: 'INGREDIENTS', unit: 'Atado', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Fresh Thyme', category: 'INGREDIENTS', unit: 'Atado', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Sea Salt (fleur)', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 1, suggestedQuantity: 2, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Artisan Bread', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Panadería Local El Sol', active: true },
+  { restaurantId: 'rest-3', name: 'Eggs (cage-free)', category: 'INGREDIENTS', unit: 'Caja / Cartón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+
+  // --- BEVERAGES ---
+  { restaurantId: 'rest-3', name: 'Sparkling Water', category: 'BEVERAGES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Cold Brew Coffee', category: 'BEVERAGES', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Espresso Beans', category: 'BEVERAGES', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Orange Juice (fresh)', category: 'BEVERAGES', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+
+  // --- ALCOHOL ---
+  { restaurantId: 'rest-3', name: 'House Red Wine', category: 'ALCOHOL', unit: 'Botella', minThreshold: 6, suggestedQuantity: 12, suggestedSupplier: 'Distribuidor de Licores', active: true },
+  { restaurantId: 'rest-3', name: 'House White Wine', category: 'ALCOHOL', unit: 'Botella', minThreshold: 6, suggestedQuantity: 12, suggestedSupplier: 'Distribuidor de Licores', active: true },
+  { restaurantId: 'rest-3', name: 'Prosecco', category: 'ALCOHOL', unit: 'Botella', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: 'Distribuidor de Licores', active: true },
+  { restaurantId: 'rest-3', name: 'Bourbon Whiskey', category: 'ALCOHOL', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Distribuidor de Licores', active: true },
+
+  // --- CHEMICALS ---
+  { restaurantId: 'rest-3', name: 'Commercial Dish Soap', category: 'CHEMICALS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Degreaser Spray', category: 'CHEMICALS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Hand Sanitizer', category: 'CHEMICALS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+
+  // --- PAPER / DISPOSABLES ---
+  { restaurantId: 'rest-3', name: 'Dinner Napkins (linen-like)', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Parchment Paper', category: 'PAPER / DISPOSABLES', unit: 'Rollo', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Aluminum Foil (heavy)', category: 'PAPER / DISPOSABLES', unit: 'Rollo', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Plastic Wrap', category: 'PAPER / DISPOSABLES', unit: 'Rollo', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Nitrile Gloves', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-3', name: 'Takeout Containers', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-3', name: 'Trash Bags', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // YASUMI (rest-4) — Japanese
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // --- INGREDIENTS ---
+  { restaurantId: 'rest-4', name: 'Sushi-Grade Salmon', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 5, suggestedQuantity: 15, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-4', name: 'Sushi-Grade Tuna', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 4, suggestedQuantity: 12, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-4', name: 'Cooked Shrimp', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 4, suggestedQuantity: 12, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-4', name: 'Imitation Crab', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-4', name: 'Sushi Rice', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Nori Sheets (full)', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Wasabi Paste', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Soy Sauce (premium)', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Rice Vinegar', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Sesame Seeds (white)', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Sesame Oil', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Ramen Noodles (fresh)', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Tonkotsu Broth Base', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Pork Belly', category: 'INGREDIENTS', unit: 'Libra', minThreshold: 4, suggestedQuantity: 12, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-4', name: 'Green Onions', category: 'INGREDIENTS', unit: 'Atado', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Pickled Ginger', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Cucumber', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Avocado', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Cream Cheese', category: 'INGREDIENTS', unit: 'Paquete', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Tobiko (Fish Roe)', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Restaurant Depot', active: true },
+  { restaurantId: 'rest-4', name: 'Tempura Batter Mix', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Frying Oil', category: 'INGREDIENTS', unit: 'Cubeta', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Edamame (frozen)', category: 'INGREDIENTS', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Miso Paste', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Dashi Stock', category: 'INGREDIENTS', unit: 'Galón', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Seaweed Salad', category: 'INGREDIENTS', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Ponzu Sauce', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Sriracha', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Kewpie Mayo', category: 'INGREDIENTS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+
+  // --- BEVERAGES ---
+  { restaurantId: 'rest-4', name: 'Green Tea (loose leaf)', category: 'BEVERAGES', unit: 'Bolsa', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Ramune Soda', category: 'BEVERAGES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Coke', category: 'BEVERAGES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Sprite', category: 'BEVERAGES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Water Bottles', category: 'BEVERAGES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: "Sam's Club", active: true },
+
+  // --- ALCOHOL ---
+  { restaurantId: 'rest-4', name: 'Sake (house)', category: 'ALCOHOL', unit: 'Botella', minThreshold: 4, suggestedQuantity: 10, suggestedSupplier: 'Distribuidor de Licores', active: true },
+  { restaurantId: 'rest-4', name: 'Sapporo Beer', category: 'ALCOHOL', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Plum Wine', category: 'ALCOHOL', unit: 'Botella', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: 'Distribuidor de Licores', active: true },
+
+  // --- CHEMICALS ---
+  { restaurantId: 'rest-4', name: 'Dish Soap', category: 'CHEMICALS', unit: 'Galón', minThreshold: 1, suggestedQuantity: 3, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Sanitizer Spray', category: 'CHEMICALS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Hand Soap', category: 'CHEMICALS', unit: 'Botella', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+
+  // --- PAPER / DISPOSABLES ---
+  { restaurantId: 'rest-4', name: 'Sushi Trays', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Chopsticks (disposable)', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 8, suggestedSupplier: 'Sysco / US Foods', active: true },
+  { restaurantId: 'rest-4', name: 'Paper Bags', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Napkins', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 3, suggestedQuantity: 6, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Plastic Wrap', category: 'PAPER / DISPOSABLES', unit: 'Rollo', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Aluminum Foil', category: 'PAPER / DISPOSABLES', unit: 'Rollo', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Nitrile Gloves', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 5, suggestedSupplier: "Sam's Club", active: true },
+  { restaurantId: 'rest-4', name: 'Trash Bags', category: 'PAPER / DISPOSABLES', unit: 'Caja', minThreshold: 2, suggestedQuantity: 4, suggestedSupplier: "Sam's Club", active: true },
 ];
+
+// Keep old export name as alias for backward compatibility with any imports
+export const INITIAL_PRODUCTS_CADDY_SHACK = INITIAL_PRODUCTS;

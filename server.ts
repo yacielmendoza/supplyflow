@@ -1,5 +1,7 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
+import { randomUUID } from 'crypto';
 import { createServer as createViteServer } from 'vite';
 import {
   Restaurant,
@@ -18,102 +20,180 @@ import {
 } from './src/data/caddyShackData';
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
+
+// CORS — allow all origins for demo
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 
 app.use(express.json());
 
+// --- JSON File Persistence ---
+const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_FILE = path.join(DATA_DIR, 'store.json');
+
+function loadData() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (e) {
+    console.warn('Could not load store.json, starting fresh:', e);
+  }
+  return null;
+}
+
+function saveData() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(
+      DATA_FILE,
+      JSON.stringify({ restaurants, users, suppliers, products, supplyRequests, auditLogs, requestCounter }, null, 2),
+      'utf-8'
+    );
+  } catch (e) {
+    console.error('Could not save store.json:', e);
+  }
+}
+
 // --- In-Memory State & Store ---
-let restaurants: Restaurant[] = [...INITIAL_RESTAURANTS];
-let users: UserProfile[] = [...INITIAL_USERS];
-let suppliers: Supplier[] = [...INITIAL_SUPPLIERS];
+let restaurants: Restaurant[];
+let users: UserProfile[];
+let suppliers: Supplier[];
+let products: Product[];
+let supplyRequests: SupplyRequest[];
+let auditLogs: StockAuditLog[];
+let requestCounter: number;
 
-let products: Product[] = INITIAL_PRODUCTS_CADDY_SHACK.map((p, index) => ({
-  ...p,
-  id: `prod-${index + 1}`,
-  updatedAt: new Date().toISOString(),
-}));
+const saved = loadData();
 
-let requestCounter = 124;
-let supplyRequests: SupplyRequest[] = [
-  {
-    id: 'req-101',
-    requestNumber: 124,
-    restaurantId: 'rest-1',
-    restaurantName: 'Caddy Shack Grill',
-    createdByUserId: 'user-1',
-    createdByUserName: 'Mateo',
-    assignedBuyerId: 'user-2',
-    assignedBuyerName: 'Carlos',
-    status: 'En Compra',
-    urgent: true,
-    notes: 'Requerimos tocino y pan urgente antes de las 11:00 AM para el turno del almuerzo.',
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    assignedAt: new Date(Date.now() - 3600000 * 1.5).toISOString(),
-    shoppingStartedAt: new Date(Date.now() - 3600000 * 0.5).toISOString(),
-    items: [
-      {
-        id: 'ri-1',
-        productId: 'prod-2',
-        productName: 'Bacon',
-        category: 'INGREDIENTS',
-        unit: 'Caja',
-        currentStockAtRequest: 0,
-        minThreshold: 2,
-        requestedQty: 4,
-        suggestedSupplier: 'Restaurant Depot',
-        purchased: true,
-        purchasedAt: new Date(Date.now() - 1800000).toISOString(),
-      },
-      {
-        id: 'ri-2',
-        productId: 'prod-3',
-        productName: 'Burger Buns',
-        category: 'INGREDIENTS',
-        unit: 'Paquete',
-        currentStockAtRequest: 1,
-        minThreshold: 3,
-        requestedQty: 8,
-        suggestedSupplier: 'Panadería Local El Sol',
-        purchased: true,
-        purchasedAt: new Date(Date.now() - 1200000).toISOString(),
-      },
-      {
-        id: 'ri-3',
-        productId: 'prod-1',
-        productName: 'American Cheese (squares)',
-        category: 'INGREDIENTS',
-        unit: 'Paquete',
-        currentStockAtRequest: 1,
-        minThreshold: 2,
-        requestedQty: 5,
-        suggestedSupplier: "Sam's Club",
-        purchased: false,
-      },
-      {
-        id: 'ri-4',
-        productId: 'prod-15',
-        productName: 'Fries (Papas Fritas)',
-        category: 'INGREDIENTS',
-        unit: 'Caja',
-        currentStockAtRequest: 1,
-        minThreshold: 3,
-        requestedQty: 6,
-        suggestedSupplier: "Sam's Club",
-        purchased: false,
-      },
-    ],
-  },
-];
+if (saved) {
+  restaurants = saved.restaurants;
+  users = saved.users;
+  suppliers = saved.suppliers;
+  products = saved.products;
+  supplyRequests = saved.supplyRequests;
+  auditLogs = saved.auditLogs || [];
+  requestCounter = saved.requestCounter || 124;
+} else {
+  // Seed from initial data
+  restaurants = [...INITIAL_RESTAURANTS];
+  users = [...INITIAL_USERS];
+  suppliers = [...INITIAL_SUPPLIERS];
 
-let auditLogs: StockAuditLog[] = [];
+  products = INITIAL_PRODUCTS_CADDY_SHACK.map((p, index) => ({
+    ...p,
+    id: `prod-${index + 1}`,
+    updatedAt: new Date().toISOString(),
+  }));
+
+  requestCounter = 124;
+  supplyRequests = [
+    {
+      id: 'req-101',
+      requestNumber: 124,
+      restaurantId: 'rest-1',
+      restaurantName: 'Caddy Shack Grill',
+      createdByUserId: 'user-1',
+      createdByUserName: 'Yaciel',
+      assignedBuyerId: 'user-2',
+      assignedBuyerName: 'Pete',
+      status: 'En Compra',
+      urgent: true,
+      notes: 'Requerimos tocino y pan urgente antes de las 11:00 AM para el turno del almuerzo.',
+      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+      assignedAt: new Date(Date.now() - 3600000 * 1.5).toISOString(),
+      shoppingStartedAt: new Date(Date.now() - 3600000 * 0.5).toISOString(),
+      items: [
+        {
+          id: 'ri-1',
+          productId: 'prod-2',
+          productName: 'Bacon',
+          category: 'INGREDIENTS',
+          unit: 'Caja',
+          currentStockAtRequest: 0,
+          minThreshold: 2,
+          requestedQty: 4,
+          suggestedSupplier: 'Restaurant Depot',
+          purchased: true,
+          purchasedAt: new Date(Date.now() - 1800000).toISOString(),
+        },
+        {
+          id: 'ri-2',
+          productId: 'prod-3',
+          productName: 'Burger Buns',
+          category: 'INGREDIENTS',
+          unit: 'Paquete',
+          currentStockAtRequest: 1,
+          minThreshold: 3,
+          requestedQty: 8,
+          suggestedSupplier: 'Panadería Local El Sol',
+          purchased: true,
+          purchasedAt: new Date(Date.now() - 1200000).toISOString(),
+        },
+        {
+          id: 'ri-3',
+          productId: 'prod-1',
+          productName: 'American Cheese (squares)',
+          category: 'INGREDIENTS',
+          unit: 'Paquete',
+          currentStockAtRequest: 1,
+          minThreshold: 2,
+          requestedQty: 5,
+          suggestedSupplier: "Sam's Club",
+          purchased: false,
+        },
+        {
+          id: 'ri-4',
+          productId: 'prod-15',
+          productName: 'Fries (Papas Fritas)',
+          category: 'INGREDIENTS',
+          unit: 'Caja',
+          currentStockAtRequest: 1,
+          minThreshold: 3,
+          requestedQty: 6,
+          suggestedSupplier: "Sam's Club",
+          purchased: false,
+        },
+      ],
+    },
+  ];
+
+  auditLogs = [];
+  saveData();
+}
 
 // --- Server-Sent Events (SSE) for Real-Time Sync ---
 let sseClients: express.Response[] = [];
 
 function broadcastUpdate(type: string, data: any) {
   const payload = `data: ${JSON.stringify({ type, data, timestamp: new Date().toISOString() })}\n\n`;
-  sseClients.forEach((client) => client.write(payload));
+  sseClients.forEach((client) => {
+    try {
+      client.write(payload);
+    } catch (_) {
+      sseClients = sseClients.filter((c) => c !== client);
+    }
+  });
 }
+
+// SSE heartbeat — keeps mobile connections alive
+setInterval(() => {
+  sseClients = sseClients.filter((client) => {
+    try {
+      client.write(': heartbeat\n\n');
+      return true;
+    } catch (_) {
+      return false;
+    }
+  });
+}, 30000);
 
 app.get('/api/stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -142,7 +222,7 @@ app.get('/api/restaurants', (req, res) => {
 app.post('/api/restaurants', (req, res) => {
   const { name, type, address, phone, colorBadge } = req.body;
   const newRest: Restaurant = {
-    id: `rest-${restaurants.length + 1}`,
+    id: randomUUID(),
     name,
     type: type || 'Restaurante',
     address: address || 'Big Spring, TX',
@@ -151,6 +231,7 @@ app.post('/api/restaurants', (req, res) => {
     colorBadge: colorBadge || 'bg-blue-600',
   };
   restaurants.push(newRest);
+  saveData();
   broadcastUpdate('RESTAURANT_CREATED', newRest);
   res.status(201).json(newRest);
 });
@@ -172,10 +253,11 @@ app.get('/api/products', (req, res) => {
 app.post('/api/products', (req, res) => {
   const newProduct: Product = {
     ...req.body,
-    id: `prod-${products.length + 1}`,
+    id: randomUUID(),
     updatedAt: new Date().toISOString(),
   };
   products.push(newProduct);
+  saveData();
   broadcastUpdate('PRODUCT_ADDED', newProduct);
   res.status(201).json(newProduct);
 });
@@ -191,6 +273,7 @@ app.put('/api/products/:id', (req, res) => {
     ...req.body,
     updatedAt: new Date().toISOString(),
   };
+  saveData();
   broadcastUpdate('PRODUCT_UPDATED', products[index]);
   res.json(products[index]);
 });
@@ -198,6 +281,7 @@ app.put('/api/products/:id', (req, res) => {
 app.delete('/api/products/:id', (req, res) => {
   const { id } = req.params;
   products = products.filter((p) => p.id !== id);
+  saveData();
   broadcastUpdate('PRODUCT_DELETED', { id });
   res.json({ success: true });
 });
@@ -212,7 +296,6 @@ app.get('/api/requests', (req, res) => {
   if (status) {
     filtered = filtered.filter((r) => r.status === status);
   }
-  // Sort newest first
   filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   res.json(filtered);
 });
@@ -229,7 +312,7 @@ app.post('/api/requests', (req, res) => {
     restaurantId: restaurantId || 'rest-1',
     restaurantName: rest ? rest.name : 'Caddy Shack Grill',
     createdByUserId: createdByUserId || 'user-1',
-    createdByUserName: user ? user.name : 'Mateo (Cocinero)',
+    createdByUserName: user ? user.name : 'Yaciel',
     status: 'Pendiente',
     urgent: !!urgent,
     notes: notes || '',
@@ -249,6 +332,7 @@ app.post('/api/requests', (req, res) => {
   };
 
   supplyRequests.unshift(newReq);
+  saveData();
   broadcastUpdate('REQUEST_CREATED', newReq);
   res.status(201).json(newReq);
 });
@@ -268,11 +352,12 @@ app.put('/api/requests/:id/claim', (req, res) => {
   supplyRequests[reqIndex].status = 'Asignada';
   supplyRequests[reqIndex].assignedAt = new Date().toISOString();
 
+  saveData();
   broadcastUpdate('REQUEST_UPDATED', supplyRequests[reqIndex]);
   res.json(supplyRequests[reqIndex]);
 });
 
-// Update Request Status (Pendiente -> Asignada -> En Compra -> Comprada -> Entregada -> Completada)
+// Update Request Status
 app.put('/api/requests/:id/status', (req, res) => {
   const { id } = req.params;
   const { status, buyerId } = req.body;
@@ -304,16 +389,13 @@ app.put('/api/requests/:id/status', (req, res) => {
 
   let newPendingReq: SupplyRequest | null = null;
 
-  // If finishing/completing purchase, check for unpurchased items to split into a new pending request
   if (['Comprada', 'Entregada', 'Completada'].includes(status)) {
     const unpurchasedItems = targetReq.items.filter((i) => !i.purchased);
     const purchasedItems = targetReq.items.filter((i) => i.purchased);
 
     if (unpurchasedItems.length > 0 && purchasedItems.length > 0) {
-      // Keep only purchased items in target completed request
       targetReq.items = purchasedItems;
 
-      // Create new pending request for missing items
       requestCounter += 1;
       newPendingReq = {
         id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -338,13 +420,13 @@ app.put('/api/requests/:id/status', (req, res) => {
       supplyRequests.unshift(newPendingReq);
       broadcastUpdate('REQUEST_CREATED', newPendingReq);
     } else if (purchasedItems.length === 0) {
-      // If 0 items were purchased, reset status to 'Pendiente' and clear buyer assignment
       targetReq.status = 'Pendiente';
       targetReq.assignedBuyerId = undefined;
       targetReq.assignedBuyerName = undefined;
     }
   }
 
+  saveData();
   broadcastUpdate('REQUEST_UPDATED', targetReq);
   res.json({ request: targetReq, newPendingRequest: newPendingReq });
 });
@@ -367,21 +449,24 @@ app.put('/api/requests/:requestId/items/:itemId', (req, res) => {
   if (itemNote !== undefined) targetItem.itemNote = itemNote;
   if (boughtQty !== undefined) targetItem.boughtQty = boughtQty;
 
-  // Auto transition to "Comprada" if all items checked
   const allPurchased = targetReq.items.every((i) => i.purchased);
   if (allPurchased && targetReq.status === 'En Compra') {
     targetReq.status = 'Comprada';
     targetReq.purchasedAt = new Date().toISOString();
   }
 
+  saveData();
   broadcastUpdate('REQUEST_UPDATED', targetReq);
   res.json({ request: targetReq, item: targetItem });
 });
 
-// Daily Checklist Submission (Core Workflow Step 1 & 2 & 3)
+// Daily Checklist Submission
 app.post('/api/checklist', (req, res) => {
   const { restaurantId, userId, stockReadings, notes, urgent } = req.body;
-  // stockReadings: { [productId: string]: number }
+
+  if (!stockReadings || typeof stockReadings !== 'object') {
+    return res.status(400).json({ error: 'stockReadings requerido' });
+  }
 
   const rest = restaurants.find((r) => r.id === restaurantId) || restaurants[0];
   const user = users.find((u) => u.id === userId) || users[0];
@@ -392,13 +477,11 @@ app.post('/api/checklist', (req, res) => {
     const prod = products.find((p) => p.id === prodId);
     if (!prod) return;
 
-    // Update product's currentStock in database
     prod.currentStock = currentStock;
     prod.updatedAt = new Date().toISOString();
 
     const needsReplenishment = currentStock < prod.minThreshold;
 
-    // Log Audit
     auditLogs.push({
       id: `audit-${Date.now()}-${prodId}`,
       restaurantId: rest.id,
@@ -413,7 +496,6 @@ app.post('/api/checklist', (req, res) => {
     });
 
     if (needsReplenishment) {
-      // Calculate missing amount or standard suggested pack
       const needed = Math.max(1, prod.minThreshold - currentStock + prod.suggestedQuantity);
       itemsToReplenish.push({
         id: `ri-${Date.now()}-${prod.id}`,
@@ -454,6 +536,8 @@ app.post('/api/checklist', (req, res) => {
     broadcastUpdate('REQUEST_CREATED', createdRequest);
   }
 
+  saveData();
+
   res.json({
     success: true,
     itemsAuditCount: Object.keys(stockReadings).length,
@@ -484,7 +568,6 @@ app.get('/api/analytics', (req, res) => {
   const inProgressRequests = supplyRequests.filter((r) => ['Asignada', 'En Compra'].includes(r.status)).length;
   const completedRequests = supplyRequests.filter((r) => ['Entregada', 'Completada'].includes(r.status)).length;
 
-  // Top requested items
   const itemCounts: Record<string, number> = {};
   supplyRequests.forEach((r) => {
     r.items.forEach((item) => {
@@ -524,7 +607,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server RestoSupply execution on http://0.0.0.0:${PORT}`);
+    console.log(`SupplyFlow running on http://0.0.0.0:${PORT}`);
   });
 }
 

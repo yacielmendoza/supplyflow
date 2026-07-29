@@ -94,7 +94,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 {currentT.settingsTitle}
               </h2>
               <p className="text-xs text-slate-400">
-                Ajusta tu foto, contacto WhatsApp, idioma y tema visual.
+                {currentT.settingsSubtitle}
               </p>
             </div>
           </div>
@@ -145,7 +145,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
               {/* Avatar Presets */}
               <div className="flex-1 space-y-2">
-                <div className="text-xs text-slate-400">Elige un avatar o pega un enlace de foto:</div>
+                <div className="text-xs text-slate-400">{currentT.avatarChooseLabel}</div>
                 <div className="flex flex-wrap gap-2">
                   {AVATAR_PRESETS.map((preset) => (
                     <button
@@ -224,7 +224,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             <div className="flex items-center justify-between pt-2 text-xs text-slate-400 border-t border-slate-800/60">
               <span className="flex items-center space-x-1">
                 <Shield className="w-3.5 h-3.5 text-purple-400" />
-                <span>Rol de Usuario en Sistema:</span>
+                <span>{currentT.userRoleLabel}</span>
               </span>
               <span className="px-2.5 py-0.5 rounded-lg bg-slate-900 border border-slate-800 font-black text-slate-200 uppercase">
                 {currentUser.role}
@@ -239,7 +239,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 <MessageCircle className="w-4 h-4 text-emerald-400" />
                 <span>{currentT.phoneWhatsApp}</span>
               </span>
-              <span className="text-[10px] text-emerald-400 font-bold">Activo para Alertas</span>
+              <span className="text-[10px] text-emerald-400 font-bold">{currentT.activeForAlerts}</span>
             </label>
 
             <div className="relative">

@@ -1,18 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Product, Category, Restaurant, UserProfile } from '../types';
 import { formatCategoryName } from '../lib/formatters';
+import { getTranslation } from '../lib/translations';
 import {
   CheckCircle2,
-  AlertTriangle,
   Send,
   Plus,
   Minus,
   Search,
-  Filter,
-  Sparkles,
-  ClipboardList,
-  Flame,
-  Check,
   MessageSquare,
 } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
@@ -36,17 +31,16 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   onSubmitChecklist,
   isSubmitting,
 }) => {
-  // Local state for stock readings during checklist execution
+  const t = getTranslation(currentUser.language ?? 'es');
+
   const [readings, setReadings] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     products.forEach((p) => {
-      // Default to existing currentStock or minThreshold + 1 if unread
       initial[p.id] = p.currentStock !== undefined ? p.currentStock : p.minThreshold + 2;
     });
     return initial;
   });
 
-  // Track products that have been explicitly checked or updated in this inspection session
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
 
   const toggleReviewed = (productId: string) => {
@@ -78,7 +72,6 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const [isUrgent, setIsUrgent] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
 
-  // Active products count
   const activeProducts = useMemo(() => products.filter((p) => p.active), [products]);
   const totalReviewedCount = useMemo(
     () => activeProducts.filter((p) => reviewedIds.has(p.id)).length,
@@ -87,7 +80,6 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const reviewProgressPct =
     activeProducts.length > 0 ? Math.round((totalReviewedCount / activeProducts.length) * 100) : 0;
 
-  // Filter products
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchCat = selectedCategory === 'TODAS' || p.category === selectedCategory;
@@ -103,7 +95,6 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
     });
   }, [products, selectedCategory, searchQuery, reviewFilter, reviewedIds]);
 
-  // Calculate items needing replenishment based on threshold
   const itemsNeedingReplenishment = useMemo(() => {
     return products.filter((p) => {
       const currentVal = readings[p.id] !== undefined ? readings[p.id] : p.minThreshold + 1;
@@ -150,16 +141,16 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           <div className="space-y-0.5 min-w-0">
             <div className="flex items-center space-x-2">
               <h2 className={`text-base sm:text-lg font-extrabold truncate ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                Inspección de Existencias — {selectedRestaurant.name}
+                {t.checklistTitle} — {selectedRestaurant.name}
               </h2>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${
                 isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-800 text-emerald-400 border-slate-700'
               }`}>
-                &lt; 60s
+                {t.checklistSpeed}
               </span>
             </div>
             <p className={`text-xs truncate ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-              Registra el stock. El sistema detecta faltantes contra el <strong className={isLight ? 'text-slate-900 font-bold' : 'text-slate-200'}>mínimo operativo</strong>.
+              {t.checklistSubtitle}
             </p>
           </div>
 
@@ -167,7 +158,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             <div className={`text-right px-3 py-1.5 rounded-xl border ${
               isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
             }`}>
-              <div className={`text-[9px] font-bold uppercase ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Progreso Revisión</div>
+              <div className={`text-[9px] font-bold uppercase ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{t.checklistProgressLabel}</div>
               <div className="text-sm font-black text-emerald-600">
                 {totalReviewedCount} / {activeProducts.length} <span className={`text-[11px] font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>({reviewProgressPct}%)</span>
               </div>
@@ -176,9 +167,9 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             <div className={`text-right px-3 py-1.5 rounded-xl border ${
               isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
             }`}>
-              <div className={`text-[9px] font-bold uppercase ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Bajo Mínimo</div>
+              <div className={`text-[9px] font-bold uppercase ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{t.checklistBelowMin}</div>
               <div className={`text-sm font-black ${itemsNeedingReplenishment.length > 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
-                {itemsNeedingReplenishment.length} items
+                {itemsNeedingReplenishment.length}
               </div>
             </div>
           </div>
@@ -197,8 +188,8 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           <div className={`flex items-center justify-between text-[10px] ${isLight ? 'text-slate-600 font-medium' : 'text-slate-400'}`}>
             <span>
               {totalReviewedCount === activeProducts.length
-                ? '¡Inspección completa! Todos los insumos revisados.'
-                : `${activeProducts.length - totalReviewedCount} insumos pendientes por revisar`}
+                ? t.checklistComplete
+                : `${activeProducts.length - totalReviewedCount} ${t.checklistPending}`}
             </span>
             <span className="font-bold text-emerald-600">{reviewProgressPct}%</span>
           </div>
@@ -210,11 +201,11 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-emerald-950 border-emerald-500/50 text-emerald-200'
         }`}>
           <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <span>¡Solicitud enviada a los compradores en tiempo real!</span>
+          <span>{t.checklistSentMsg}</span>
         </div>
       )}
 
-      {/* Search Bar & Category Chips & Review Filters */}
+      {/* Search Bar & Review Filters */}
       <div className="space-y-2">
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
@@ -223,7 +214,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar ingrediente o insumo..."
+              placeholder={t.checklistSearch}
               className={`w-full pl-9 pr-3 py-2 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                 isLight
                   ? 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 shadow-xs'
@@ -244,7 +235,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   : isLight ? 'text-slate-700 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Todos ({activeProducts.length})
+              {t.checklistFilterAll} ({activeProducts.length})
             </button>
             <button
               onClick={() => setReviewFilter('UNREVIEWED')}
@@ -254,7 +245,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   : isLight ? 'text-slate-700 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Sin Revisar ({activeProducts.length - totalReviewedCount})
+              {t.checklistFilterUnreviewed} ({activeProducts.length - totalReviewedCount})
             </button>
             <button
               onClick={() => setReviewFilter('REVIEWED')}
@@ -264,16 +255,16 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   : isLight ? 'text-slate-700 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Revisados ({totalReviewedCount})
+              {t.checklistFilterReviewed} ({totalReviewedCount})
             </button>
           </div>
         </div>
 
         {/* Category Horizontal Selector */}
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
-          {['TODAS', 'INGREDIENTS', 'SNACKS', 'BEVERAGES', 'MIXERS', 'CANDY', 'CHEMICALS', 'PAPER / DISPOSABLES', 'ALCOHOL'].map((cat) => {
+          {(['TODAS', 'INGREDIENTS', 'SNACKS', 'BEVERAGES', 'MIXERS', 'CANDY', 'CHEMICALS', 'PAPER / DISPOSABLES', 'ALCOHOL'] as const).map((cat) => {
             const isSelected = selectedCategory === cat;
-            const displayLabel = cat === 'TODAS' ? 'Todas' : formatCategoryName(cat);
+            const displayLabel = cat === 'TODAS' ? t.checklistFilterAll : formatCategoryName(cat);
             return (
               <button
                 key={cat}
@@ -328,16 +319,15 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   <div className="text-xs space-x-2 mt-0.5">
                     <span className={`font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>{formatCategoryName(p.category)}</span>
                     <span className={isLight ? 'text-slate-300' : 'text-slate-600'}>•</span>
-                    <span className={isLight ? 'text-slate-600 font-medium' : 'text-slate-300'}>Mínimo: <strong className={isLight ? 'text-slate-900 font-extrabold' : 'text-slate-100 font-bold'}>{p.minThreshold} {p.unit}s</strong></span>
+                    <span className={isLight ? 'text-slate-600 font-medium' : 'text-slate-300'}>{t.minimum} <strong className={isLight ? 'text-slate-900 font-extrabold' : 'text-slate-100 font-bold'}>{p.minThreshold} {p.unit}s</strong></span>
                   </div>
                 </div>
 
-                {/* Reviewed Check Badge + Stock Status Badge */}
+                {/* Reviewed Badge + Stock Status Badge */}
                 <div className="flex items-center space-x-1.5 flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => toggleReviewed(p.id)}
-                    title={isReviewed ? 'Hacer clic para desmarcar' : 'Hacer clic para marcar como revisado'}
                     className={`px-2.5 py-1 rounded-full text-xs font-extrabold uppercase flex items-center space-x-1 transition-all ${
                       isReviewed
                         ? isLight ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-500 text-slate-950 shadow-sm'
@@ -345,27 +335,26 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                     }`}
                   >
                     <CheckCircle2 className={`w-3.5 h-3.5 ${isReviewed ? (isLight ? 'text-white' : 'text-slate-950') : (isLight ? 'text-slate-500' : 'text-slate-400')}`} />
-                    <span>{isReviewed ? 'REVISADO' : 'SIN REVISAR'}</span>
+                    <span>{isReviewed ? t.tagReviewed : t.tagUnreviewed}</span>
                   </button>
 
-                  {/* Stock Status Badge */}
                   {isCriticalZero ? (
                     <span className={`px-2.5 py-1 rounded-md text-xs font-black uppercase ${
                       isLight ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                     }`}>
-                      AGOTADO
+                      {t.tagEmpty}
                     </span>
                   ) : isBelowThreshold ? (
                     <span className={`px-2.5 py-1 rounded-md text-xs font-black uppercase ${
                       isLight ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                     }`}>
-                      REPOSICIÓN
+                      {t.tagReplenish}
                     </span>
                   ) : (
                     <span className={`px-2.5 py-1 rounded-md text-xs font-extrabold uppercase ${
                       isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                     }`}>
-                      OK
+                      {t.tagOk}
                     </span>
                   )}
                 </div>
@@ -375,7 +364,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               <div className={`flex items-center justify-between pt-2 border-t gap-2 ${
                 isLight ? 'border-slate-200' : 'border-slate-800/80'
               }`}>
-                {/* Presets */}
+                {/* Quick Presets */}
                 <div className="flex items-center space-x-1 sm:space-x-1.5">
                   <button
                     type="button"
@@ -397,7 +386,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                         : isLight ? 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200' : 'bg-slate-800 text-slate-300 hover:text-slate-100 border border-slate-700/60'
                     }`}
                   >
-                    Bajo
+                    {t.stockLow}
                   </button>
                   <button
                     type="button"
@@ -408,7 +397,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                         : isLight ? 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200' : 'bg-slate-800 text-slate-300 hover:text-slate-100 border border-slate-700/60'
                     }`}
                   >
-                    Suficiente
+                    {t.stockSufficient}
                   </button>
                 </div>
 
@@ -452,11 +441,11 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
         })}
       </div>
 
-      {/* Sticky Bottom Action Bar with Optional Expandable Note */}
+      {/* Sticky Bottom Action Bar */}
       <div className={`fixed bottom-0 left-0 right-0 z-30 backdrop-blur-md border-t shadow-2xl transition-colors ${
         isLight ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
       }`}>
-        {/* Optional Expandable Note Drawer */}
+        {/* Optional Note Drawer */}
         {showNoteInput && (
           <div className={`border-b p-2.5 space-y-1.5 animate-fadeIn max-w-7xl mx-auto ${
             isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
@@ -464,20 +453,20 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             <div className="flex items-center justify-between text-xs">
               <label className={`font-bold flex items-center space-x-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
                 <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Nota Opcional para los Compradores</span>
+                <span>{t.noteForBuyers}</span>
               </label>
               <button
                 type="button"
                 onClick={() => setShowNoteInput(false)}
                 className={`text-[11px] font-medium ${isLight ? 'text-slate-500 hover:text-slate-800' : 'text-slate-400 hover:text-slate-200'}`}
               >
-                Ocultar ✕
+                {t.hideNote}
               </button>
             </div>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ej: Entregar por la puerta trasera antes de las 11:00 AM, carne magra, marca preferencia..."
+              placeholder={t.checklistNotePlaceholder}
               rows={2}
               className={`w-full border rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none ${
                 isLight ? 'bg-white border-slate-300 text-slate-900 placeholder-slate-400' : 'bg-slate-900 border-slate-800 text-slate-100 placeholder-slate-500'
@@ -501,22 +490,21 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             <div className="min-w-0">
               <div className={`font-bold text-xs truncate ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>
                 {itemsNeedingReplenishment.length > 0
-                  ? `${itemsNeedingReplenishment.length} items a reponer`
-                  : 'Stock completo por encima del mínimo'}
+                  ? `${itemsNeedingReplenishment.length} ${t.itemsToReplenish}`
+                  : t.stockCompleteMsg}
               </div>
               <div className={`text-[10px] truncate flex items-center space-x-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                <span>Notificación a compradores</span>
-                {notes.trim() && <span className="text-emerald-600 font-bold">• Con nota</span>}
+                <span>{t.notifyBuyers}</span>
+                {notes.trim() && <span className="text-emerald-600 font-bold">• {t.withNote}</span>}
               </div>
             </div>
           </div>
 
           <div className="flex items-center space-x-2 flex-shrink-0">
-            {/* Optional Note Toggle Button */}
+            {/* Note Toggle */}
             <button
               type="button"
               onClick={() => setShowNoteInput((prev) => !prev)}
-              title={notes.trim() ? 'Nota personalizada incluida' : 'Agregar nota u observaciones'}
               className={`flex items-center space-x-1 text-xs font-bold p-2 sm:px-2.5 sm:py-1.5 rounded-lg border transition flex-shrink-0 ${
                 notes.trim()
                   ? 'bg-emerald-600 text-white border-emerald-500'
@@ -527,7 +515,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             >
               <MessageSquare className={`w-4 h-4 sm:w-3.5 sm:h-3.5 ${notes.trim() ? 'text-white' : 'text-emerald-600'}`} />
               <span className="hidden sm:inline">
-                {notes.trim() ? 'Nota Activada' : showNoteInput ? 'Cerrar Nota' : '+ Agregar Nota'}
+                {notes.trim() ? t.noteActive : showNoteInput ? t.closeNote : t.noteAddBtn}
               </span>
             </button>
 
@@ -540,7 +528,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                 onChange={(e) => setIsUrgent(e.target.checked)}
                 className="rounded text-rose-500 focus:ring-rose-500"
               />
-              <span className="text-rose-600 font-extrabold text-[11px]">Urgente</span>
+              <span className="text-rose-600 font-extrabold text-[11px]">{t.checklistUrgent}</span>
             </label>
 
             <button
@@ -555,10 +543,10 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               <Send className="w-3.5 h-3.5" />
               <span>
                 {isSubmitting
-                  ? 'Enviando...'
+                  ? t.btnSending
                   : itemsNeedingReplenishment.length > 0
-                  ? 'Enviar Solicitud'
-                  : 'Guardar Stock'}
+                  ? t.btnSendRequest
+                  : t.btnSaveStock}
               </span>
             </button>
           </div>

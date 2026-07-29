@@ -1,6 +1,6 @@
 {
-  "short_name": "RestoSupply",
-  "name": "RestoSupply - Coordinación de Abastecimiento",
+  "short_name": "SupplyFlow",
+  "name": "SupplyFlow - Coordinación de Abastecimiento",
   "description": "Plataforma mobile-first para gestión de abastecimiento de restaurantes por mínimos operativos.",
   "start_url": "/",
   "background_color": "#020617",
@@ -9,9 +9,10 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/pwa-icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

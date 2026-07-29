@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { SupplyRequest, RequestItem, UserProfile } from '../types';
+import { getTranslation } from '../lib/translations';
 import {
   X,
   CheckCircle2,
@@ -7,13 +8,9 @@ import {
   ShoppingBag,
   Store,
   MessageSquare,
-  Phone,
-  Share2,
-  Sparkles,
-  AlertCircle,
   Truck,
 } from 'lucide-react';
-import { playAlertSound, generateWhatsAppLink } from '../lib/notifications';
+import { playAlertSound } from '../lib/notifications';
 
 interface ShoppingModeModalProps {
   request: SupplyRequest;
@@ -30,6 +27,8 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
   onToggleItem,
   onCompleteShopping,
 }) => {
+  const t = getTranslation(currentUser.language ?? 'es');
+
   const [selectedSupplierFilter, setSelectedSupplierFilter] = useState<string>('TODOS');
   const [editingNoteItemId, setEditingNoteItemId] = useState<string | null>(null);
   const [itemNotes, setItemNotes] = useState<Record<string, string>>(() => {
@@ -39,23 +38,23 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
     });
     return initial;
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Group suppliers
+  const supplierFallback = t.storeGeneral;
+
   const suppliers = Array.from(
-    new Set(request.items.map((i) => i.suggestedSupplier || 'General / Varios'))
+    new Set(request.items.map((i) => i.suggestedSupplier || supplierFallback))
   );
 
   const filteredItems = request.items.filter((item) => {
     if (selectedSupplierFilter === 'TODOS') return true;
-    const sup = item.suggestedSupplier || 'General / Varios';
+    const sup = item.suggestedSupplier || supplierFallback;
     return sup === selectedSupplierFilter;
   });
 
   const totalItems = request.items.length;
   const purchasedCount = request.items.filter((i) => i.purchased).length;
-  const progressPct = Math.round((purchasedCount / totalItems) * 100);
+  const progressPct = totalItems === 0 ? 0 : Math.round((purchasedCount / totalItems) * 100);
 
   const handleCheck = async (item: RequestItem) => {
     playAlertSound(item.purchased ? 'click' : 'success');
@@ -92,15 +91,13 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
             <div>
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-white text-base">
-                  Modo Compra — Solicitud #{request.requestNumber}
+                  {t.shopModeTitle}{request.requestNumber}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-400 font-semibold text-xs">
                   {request.restaurantName}
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Lista de compras interactiva optimizada para pasillos de tienda.
-              </p>
+              <p className="text-xs text-slate-400">{t.shopModeSubtitle}</p>
             </div>
           </div>
 
@@ -115,9 +112,9 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
         {/* Live Progress Bar */}
         <div className="max-w-4xl mx-auto mt-3">
           <div className="flex justify-between items-center text-xs font-bold mb-1">
-            <span className="text-slate-300">Progreso del Carrito:</span>
+            <span className="text-slate-300">{t.cartProgress}</span>
             <span className="text-emerald-400">
-              {purchasedCount} de {totalItems} marcados ({progressPct}%)
+              {purchasedCount} / {totalItems} {t.cartMarked} ({progressPct}%)
             </span>
           </div>
           <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
@@ -132,7 +129,7 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
         <div className="max-w-4xl mx-auto mt-3 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1 flex-shrink-0">
             <Store className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Tienda:</span>
+            <span>{t.storeFilterLabel}</span>
           </span>
 
           <button
@@ -143,12 +140,12 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-750'
             }`}
           >
-            Todas ({request.items.length})
+            {t.storeAll} ({request.items.length})
           </button>
 
           {suppliers.map((sup) => {
             const count = request.items.filter(
-              (i) => (i.suggestedSupplier || 'General / Varios') === sup
+              (i) => (i.suggestedSupplier || supplierFallback) === sup
             ).length;
             return (
               <button
@@ -211,17 +208,17 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
                   {item.category}
                 </span>
                 <span>•</span>
-                <span>Tienda: {item.suggestedSupplier || 'Cualquier tienda'}</span>
+                <span>{t.storeFilterLabel} {item.suggestedSupplier || t.storeAny}</span>
               </div>
 
-              {/* Item Note if present */}
+              {/* Item Note */}
               {item.itemNote && (
                 <div className="mt-2 text-xs text-amber-300 bg-amber-950/40 p-2 rounded-lg border border-amber-800/50">
-                  Note: {item.itemNote}
+                  {t.noteLabel} {item.itemNote}
                 </div>
               )}
 
-              {/* Add Note Button */}
+              {/* Add / Edit Note */}
               <div className="mt-2 flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                 {editingNoteItemId === item.id ? (
                   <div className="flex items-center space-x-2 w-full mt-1">
@@ -231,14 +228,14 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
                       onChange={(e) =>
                         setItemNotes((prev) => ({ ...prev, [item.id]: e.target.value }))
                       }
-                      placeholder="Ej: Marca sustituta, no había suficiente..."
+                      placeholder={t.notePlaceholder}
                       className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
                     />
                     <button
                       onClick={() => handleSaveNote(item.id)}
                       className="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-xs font-bold"
                     >
-                      Guardar
+                      {t.noteSave}
                     </button>
                   </div>
                 ) : (
@@ -247,7 +244,7 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
                     className="text-[11px] text-slate-400 hover:text-emerald-400 flex items-center space-x-1"
                   >
                     <MessageSquare className="w-3 h-3" />
-                    <span>{item.itemNote ? 'Editar nota' : '+ Añadir nota de compra'}</span>
+                    <span>{item.itemNote ? t.noteEdit : t.noteAdd}</span>
                   </button>
                 )}
               </div>
@@ -261,7 +258,7 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center space-x-2 text-xs text-slate-300">
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            <span>Al completar, se notificará inmediatamente al cocinero en la cocina.</span>
+            <span>{t.shopNotifyMsg}</span>
           </div>
 
           <div className="flex items-center space-x-2 w-full sm:w-auto">
@@ -271,9 +268,7 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
               className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/50 hover:brightness-110 transition flex items-center justify-center space-x-2"
             >
               <Truck className="w-4 h-4" />
-              <span>
-                {isSubmitting ? 'Procesando...' : '✅ Confirmar y Notificar Entrega'}
-              </span>
+              <span>{isSubmitting ? t.shopProcessing : t.shopConfirmDelivery}</span>
             </button>
           </div>
         </div>

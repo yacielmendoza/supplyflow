@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { SupplyRequest } from '../types';
+import { getTranslation } from '../lib/translations';
 import { formatCleanName } from '../lib/formatters';
 import {
   Bell,
@@ -17,7 +18,6 @@ import {
   Check,
   PackageCheck,
   User,
-  Trash2,
 } from 'lucide-react';
 import {
   playAlertSound,
@@ -32,6 +32,7 @@ interface NotificationCenterProps {
   sseConnected: boolean;
   currentUserPhone: string;
   currentUserRole?: 'cocinero' | 'comprador' | 'admin';
+  currentUserLanguage?: 'es' | 'en';
   requests?: SupplyRequest[];
   onSelectRequest?: (requestId: string) => void;
 }
@@ -41,16 +42,18 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   sseConnected,
   currentUserPhone,
   currentUserRole,
+  currentUserLanguage,
   requests = [],
   onSelectRequest,
 }) => {
+  const t = getTranslation(currentUserLanguage ?? 'es');
+
   const [activeTab, setActiveTab] = useState<'FEED' | 'SETTINGS'>('FEED');
   const [pushGranted, setPushGranted] = useState<boolean | null>(null);
   const [testTitle, setTestTitle] = useState('🚨 ATENCIÓN COCINA / COMPRADORES');
   const [testBody, setTestBody] = useState('Solicitud #125 generada para Caddy Shack Grill - Falta Tocino y Pan');
   const [simulatedSent, setSimulatedSent] = useState(false);
 
-  // Read dismissed IDs from local memory / state so read items are removed
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem('restosupply_read_notifications');
@@ -122,7 +125,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         <div className="flex justify-between items-center border-b border-slate-800 pb-2.5 flex-shrink-0">
           <div className="flex items-center space-x-2 min-w-0">
             <Bell className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-            <h3 className="font-extrabold text-white text-sm sm:text-base truncate">Bandeja de Notificaciones</h3>
+            <h3 className="font-extrabold text-white text-sm sm:text-base truncate">{t.notifBandejaTitle}</h3>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white p-1">
             <X className="w-5 h-5" />
@@ -140,7 +143,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             }`}
           >
             <Bell className="w-3.5 h-3.5" />
-            <span>Pendientes por Leer</span>
+            <span>{t.notifTabFeed}</span>
             {visibleRequests.length > 0 && (
               <span className="ml-1 px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 text-[10px] font-black rounded-full">
                 {visibleRequests.length}
@@ -157,14 +160,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             }`}
           >
             <Settings className="w-3.5 h-3.5" />
-            <span>Ajustes & Push</span>
+            <span>{t.notifTabSettings}</span>
           </button>
         </div>
 
         {/* TAB 1: NOTIFICATIONS FEED */}
         {activeTab === 'FEED' && (
           <div className="space-y-3 overflow-y-auto pr-1 flex-1 min-h-[280px]">
-            {/* Quick Status Bar & Dismiss All */}
             <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between gap-2 text-xs">
               <div className="flex items-center space-x-2 min-w-0">
                 <span
@@ -173,7 +175,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   }`}
                 />
                 <span className="font-bold text-slate-200 truncate">
-                  {sseConnected ? 'Servicio activo en tiempo real' : 'Conectando'}
+                  {sseConnected ? t.notifStatusActive : t.notifStatusConnecting}
                 </span>
               </div>
 
@@ -181,7 +183,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 {urgentCount > 0 && (
                   <span className="text-[10px] bg-rose-950/80 text-rose-300 px-2 py-0.5 rounded border border-rose-800 font-extrabold flex items-center space-x-1">
                     <Flame className="w-3 h-3 text-rose-400" />
-                    <span>{urgentCount} Urgentes</span>
+                    <span>{urgentCount} {t.notifUrgentLabel}</span>
                   </span>
                 )}
 
@@ -190,26 +192,25 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     onClick={handleDismissAll}
                     className="text-[10px] text-slate-400 hover:text-emerald-400 underline font-bold"
                   >
-                    Marcar todas leídas
+                    {t.notifMarkAllRead}
                   </button>
                 )}
               </div>
             </div>
 
-            {/* List of Recent Request Notifications */}
             {visibleRequests.length === 0 ? (
               <div className="text-center py-10 space-y-3 bg-slate-950/50 rounded-xl border border-slate-800/60 p-4">
                 <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto opacity-80" />
-                <div className="text-sm font-extrabold text-slate-200">¡Bandeja al día!</div>
+                <div className="text-sm font-extrabold text-slate-200">{t.notifInboxEmpty}</div>
                 <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                  No tienes notificaciones pendientes por leer. Las nuevas inspecciones y actualizaciones aparecerán aquí.
+                  {t.notifInboxEmptyText}
                 </p>
                 {dismissedIds.size > 0 && (
                   <button
                     onClick={handleClearDismissedHistory}
                     className="text-xs text-emerald-400 hover:underline font-bold pt-2 block mx-auto"
                   >
-                    Ver notificaciones leídas anteriores ({dismissedIds.size})
+                    {t.notifShowReadCount} ({dismissedIds.size})
                   </button>
                 )}
               </div>
@@ -227,7 +228,6 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     minute: '2-digit',
                   });
 
-                  // Check if current user needs action on this request
                   const cookNeedsAction = currentUserRole === 'cocinero' && ['Comprada', 'Entregada'].includes(req.status);
                   const buyerNeedsAction = currentUserRole === 'comprador' && req.status === 'Pendiente';
 
@@ -264,11 +264,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                             )}
                           </div>
                           <div className="text-xs text-slate-300 font-medium">
-                            Creada por <strong className="text-slate-100">{formatCleanName(req.createdByUserName)}</strong>
+                            {t.notifCreatedBy} <strong className="text-slate-100">{formatCleanName(req.createdByUserName)}</strong>
                           </div>
                         </div>
 
-                        {/* Status Badge + Dismiss Button */}
                         <div className="flex items-center space-x-1.5 flex-shrink-0">
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
@@ -284,7 +283,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
                           <button
                             onClick={(e) => handleDismiss(req.id, e)}
-                            title="Marcar como leída y eliminar de esta bandeja"
+                            title={t.notifMarkReadTitle}
                             className="p-1 text-slate-500 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition"
                           >
                             <Check className="w-3.5 h-3.5" />
@@ -292,12 +291,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         </div>
                       </div>
 
-                      {/* Item Summary */}
                       <div className="text-[11px] text-slate-400 bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-                        <strong className="text-slate-300">{req.items.length} insumos:</strong> {itemSummary}{extraCount}
+                        <strong className="text-slate-300">{req.items.length} {t.notifItemCount}</strong> {itemSummary}{extraCount}
                       </div>
 
-                      {/* Custom Chef Note if Present */}
                       {req.notes && (
                         <div className="text-[11px] text-emerald-300 bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/50 flex items-start space-x-1.5">
                           <MessageSquare className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
@@ -307,27 +304,25 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         </div>
                       )}
 
-                      {/* Action Prompt or Navigation Link */}
                       <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[11px]">
                         <span className="text-[10px] text-slate-500 flex items-center space-x-1">
                           <Clock className="w-2.5 h-2.5" />
                           <span>{formattedTime}</span>
                         </span>
 
-                        {/* Action Highlight Badge */}
                         {cookNeedsAction ? (
                           <div className="text-emerald-400 font-extrabold flex items-center space-x-1 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 animate-pulse">
                             <PackageCheck className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>Acción: Confirmar Recepción ➔</span>
+                            <span>{t.notifActionConfirmReceipt}</span>
                           </div>
                         ) : buyerNeedsAction ? (
                           <div className="text-amber-300 font-extrabold flex items-center space-x-1 bg-amber-950 px-2 py-0.5 rounded border border-amber-800">
                             <User className="w-3.5 h-3.5 text-amber-400" />
-                            <span>Acción: Tomar Pedido ➔</span>
+                            <span>{t.notifActionTakeOrder}</span>
                           </div>
                         ) : (
                           <div className="text-slate-400 group-hover:text-emerald-400 font-bold flex items-center space-x-1 transition">
-                            <span>Ver en Pedidos</span>
+                            <span>{t.notifViewRequests}</span>
                             <ArrowRight className="w-3 h-3" />
                           </div>
                         )}
@@ -343,7 +338,6 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         {/* TAB 2: SETTINGS & PUSH SIMULATOR */}
         {activeTab === 'SETTINGS' && (
           <div className="space-y-3.5 overflow-y-auto pr-1 flex-1">
-            {/* Real-time SSE Connection Banner */}
             <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between gap-2 text-xs">
               <div className="flex items-center space-x-2 min-w-0">
                 <span
@@ -352,7 +346,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   }`}
                 />
                 <span className="font-bold text-slate-200 truncate">
-                  Servidor SSE: {sseConnected ? 'Activo & Sincronizado' : 'Conectando'}
+                  {t.notifSsePrefix} {sseConnected ? t.notifSseActive : t.notifStatusConnecting}
                 </span>
               </div>
               <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800 font-mono flex-shrink-0">
@@ -360,13 +354,12 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               </span>
             </div>
 
-            {/* Browser Push Permission Setup */}
             <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="space-y-0.5 min-w-0">
-                  <div className="font-bold text-slate-200 text-xs">Notificaciones Push del Navegador</div>
+                  <div className="font-bold text-slate-200 text-xs">{t.notifPushBrowserTitle}</div>
                   <p className="text-[10px] sm:text-[11px] text-slate-400">
-                    Permite alertas instantáneas de pedidos en iPhone/Android.
+                    {t.notifPushBrowserDesc}
                   </p>
                 </div>
 
@@ -374,21 +367,20 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   onClick={handleEnablePush}
                   className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg flex-shrink-0 whitespace-nowrap shadow-sm"
                 >
-                  Activar Push
+                  {t.notifPushActivate}
                 </button>
               </div>
 
               {pushGranted !== null && (
                 <div className="text-[10px] font-bold text-emerald-400">
-                  {pushGranted ? '✅ Notificaciones activadas en el sistema' : '⚠️ Notificaciones bloqueadas en el navegador'}
+                  {pushGranted ? t.notifPushActive : t.notifPushBlocked}
                 </div>
               )}
             </div>
 
-            {/* Test Audio Chimes */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-300">
-                Probar Alertas Sonoras de Cocina (Web Audio API)
+                {t.notifSoundTestLabel}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -396,7 +388,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   className="px-2.5 py-2 bg-rose-950/60 border border-rose-800 text-rose-300 rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1 transition"
                 >
                   <Volume2 className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
-                  <span className="truncate">Chime Urgente</span>
+                  <span className="truncate">{t.notifChimeUrgent}</span>
                 </button>
 
                 <button
@@ -404,16 +396,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   className="px-2.5 py-2 bg-emerald-950/60 border border-emerald-800 text-emerald-300 rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1 transition"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                  <span className="truncate">Chime Compra OK</span>
+                  <span className="truncate">{t.notifChimeSuccess}</span>
                 </button>
               </div>
             </div>
 
-            {/* Push Notification Simulator */}
             <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs">
               <div className="font-bold text-slate-200 flex items-center space-x-1.5">
                 <Zap className="w-4 h-4 text-amber-400" />
-                <span>Simular Envío de Alerta Real a Todos los Dispositivos</span>
+                <span>{t.notifSimulateLabel}</span>
               </div>
 
               <input
@@ -438,7 +429,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   className="px-3 py-1.5 bg-emerald-950 border border-emerald-800 text-emerald-300 font-bold rounded-lg flex items-center space-x-1"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span>Link WhatsApp</span>
+                  <span>{t.notifWhatsAppLink}</span>
                 </a>
 
                 <button
@@ -446,13 +437,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   className="px-4 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold rounded-lg flex items-center space-x-1 shadow-md"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>Lanzar Alerta</span>
+                  <span>{t.notifLaunchAlert}</span>
                 </button>
               </div>
 
               {simulatedSent && (
                 <div className="p-2 bg-emerald-950 text-emerald-300 rounded border border-emerald-700 text-[11px] font-bold">
-                  ¡Alerta transmitida vía SSE + Web Push!
+                  {t.notifSentSuccess}
                 </div>
               )}
             </div>
