@@ -1,4 +1,4 @@
-const CACHE_NAME = 'supplyflow-v1';
+const CACHE_NAME = 'supplyflow-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -24,12 +24,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Let API and SSE requests always go to network
-  if (url.pathname.startsWith('/api/')) {
-    return;
-  }
+  if (url.pathname.startsWith('/api/')) return;
 
-  // Cache-first for static assets; network-first for navigation
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() =>
@@ -49,4 +45,36 @@ self.addEventListener('fetch', (event) => {
       )
     );
   }
+});
+
+// Handle push notifications from server (enables background push on Android)
+self.addEventListener('push', (event) => {
+  let data = { title: 'RestoSupply', body: 'Nueva notificación' };
+  try {
+    if (event.data) data = event.data.json();
+  } catch (_) {}
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/pwa-icon.png',
+      badge: '/pwa-icon.png',
+      data: { requestId: data.requestId },
+      requireInteraction: true,
+      vibrate: [200, 100, 200],
+    })
+  );
+});
+
+// Handle notification click — bring the app to focus
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if ('focus' in client) return client.focus();
+      }
+      return clients.openWindow('/');
+    })
+  );
 });

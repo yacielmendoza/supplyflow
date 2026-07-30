@@ -30,13 +30,13 @@ import { Header } from './components/Header';
 import { DailyChecklist } from './components/DailyChecklist';
 import { RequestsList } from './components/RequestsList';
 import { ShoppingModeModal } from './components/ShoppingModeModal';
-import { AdminCatalog } from './components/AdminCatalog';
+import { AdminCatalog, OverdueSettings } from './components/AdminCatalog';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { NotificationCenter } from './components/NotificationCenter';
 import { ProfileSettingsModal } from './components/ProfileSettingsModal';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { LoginScreen } from './components/LoginScreen';
-import { showLocalNotification, playAlertSound } from './lib/notifications';
+import { showLocalNotification, playAlertSound, setAppBadge } from './lib/notifications';
 import { getTranslation } from './lib/translations';
 import {
   ClipboardList,
@@ -71,6 +71,15 @@ export default function App() {
   const [showPWAInstallModal, setShowPWAInstallModal] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [highlightedRequestId, setHighlightedRequestId] = useState<string | null>(null);
+
+  const [overdueSettings, setOverdueSettings] = useState<OverdueSettings>(() => {
+    try {
+      const s = localStorage.getItem('restosupply_overdue_settings');
+      return s ? JSON.parse(s) : { normalMinutes: 15, urgentMinutes: 5 };
+    } catch { return { normalMinutes: 15, urgentMinutes: 5 }; }
+  });
+  const [overdueRequestIds, setOverdueRequestIds] = useState<Set<string>>(new Set());
+  const notifiedOverdueIds = useRef<Set<string>>(new Set());
 
   const handleSaveProfile = (updatedProfile: UserProfile) => {
     setCurrentUser(updatedProfile);
@@ -168,6 +177,38 @@ export default function App() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [loadInitialData]);
+
+  // Detect overdue (unassigned Pendiente) requests and notify once per request
+  useEffect(() => {
+    const check = () => {
+      const now = Date.now();
+      const newOverdue = new Set<string>();
+      supplyRequests.forEach((req) => {
+        if (req.status !== 'Pendiente' || req.assignedBuyerId) return;
+        const ageMin = (now - new Date(req.createdAt).getTime()) / 60000;
+        const limit = req.urgent ? overdueSettings.urgentMinutes : overdueSettings.normalMinutes;
+        if (ageMin < limit) return;
+        newOverdue.add(req.id);
+        if (!notifiedOverdueIds.current.has(req.id) && currentUser && (currentUser.role === 'comprador' || currentUser.role === 'admin')) {
+          notifiedOverdueIds.current.add(req.id);
+          showLocalNotification(
+            `⏰ PEDIDO ATRASADO #${req.requestNumber}`,
+            `${req.restaurantName} lleva más de ${limit} min sin asignar.`
+          );
+        }
+      });
+      setOverdueRequestIds(newOverdue);
+    };
+    check();
+    const id = setInterval(check, 60000);
+    return () => clearInterval(id);
+  }, [supplyRequests, overdueSettings, currentUser]);
+
+  // Update PWA icon badge with pending request count
+  useEffect(() => {
+    const count = supplyRequests.filter((r) => r.status === 'Pendiente').length;
+    setAppBadge(count);
+  }, [supplyRequests]);
 
   const selectedRestaurant =
     restaurants.find((r) => r.id === selectedRestaurantId) ||
@@ -433,6 +474,12 @@ export default function App() {
     setSelectedRestaurantId(newRest.id);
   };
 
+  const handleSaveOverdueSettings = (settings: OverdueSettings) => {
+    setOverdueSettings(settings);
+    localStorage.setItem('restosupply_overdue_settings', JSON.stringify(settings));
+    notifiedOverdueIds.current.clear();
+  };
+
   const handleSelectUser = (u: UserProfile) => {
     setCurrentUser(u);
     if (u.role === 'cocinero') {
@@ -590,6 +637,7 @@ export default function App() {
             onUpdateStatus={handleUpdateStatus}
             selectedRestaurantId={selectedRestaurantId}
             highlightedRequestId={highlightedRequestId}
+            overdueRequestIds={overdueRequestIds}
           />
         )}
 
@@ -603,6 +651,8 @@ export default function App() {
             onUpdateProduct={handleUpdateProduct}
             onDeleteProduct={handleDeleteProduct}
             onAddRestaurant={handleAddRestaurant}
+            overdueSettings={overdueSettings}
+            onSaveOverdueSettings={handleSaveOverdueSettings}
           />
         )}
 

@@ -9,8 +9,15 @@ import {
   X,
   Search,
   SlidersHorizontal,
+  Clock,
+  Flame,
 } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
+
+export interface OverdueSettings {
+  normalMinutes: number;
+  urgentMinutes: number;
+}
 
 interface AdminCatalogProps {
   products: Product[];
@@ -21,6 +28,8 @@ interface AdminCatalogProps {
   onUpdateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   onDeleteProduct: (id: string) => Promise<void>;
   onAddRestaurant: (rest: { name: string; type: any; address: string; phone: string }) => Promise<void>;
+  overdueSettings: OverdueSettings;
+  onSaveOverdueSettings: (settings: OverdueSettings) => void;
 }
 
 export const AdminCatalog: React.FC<AdminCatalogProps> = ({
@@ -32,10 +41,12 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
   onUpdateProduct,
   onDeleteProduct,
   onAddRestaurant,
+  overdueSettings,
+  onSaveOverdueSettings,
 }) => {
   const t = getTranslation(currentUser.language ?? 'es');
 
-  const [activeTab, setActiveTab] = useState<'PRODUCTS' | 'RESTAURANTS' | 'SUPPLIERS'>('PRODUCTS');
+  const [activeTab, setActiveTab] = useState<'PRODUCTS' | 'RESTAURANTS' | 'SUPPLIERS' | 'TIEMPOS'>('PRODUCTS');
   const [selectedRestFilter, setSelectedRestFilter] = useState<string>('rest-1');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingProdId, setEditingProdId] = useState<string | null>(null);
@@ -146,6 +157,15 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             }`}
           >
             {t.adminTabSuppliers} ({suppliers.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('TIEMPOS')}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition flex items-center space-x-1 ${
+              activeTab === 'TIEMPOS' ? 'bg-slate-800 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Tiempos de Espera</span>
           </button>
         </div>
       </div>
@@ -494,6 +514,14 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
         </div>
       )}
 
+      {/* TAB 4: TIEMPOS DE ESPERA */}
+      {activeTab === 'TIEMPOS' && (
+        <OverdueSettingsPanel
+          settings={overdueSettings}
+          onSave={onSaveOverdueSettings}
+        />
+      )}
+
       {/* Modal Add Product */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -648,3 +676,97 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
     </div>
   );
 };
+
+function OverdueSettingsPanel({
+  settings,
+  onSave,
+}: {
+  settings: OverdueSettings;
+  onSave: (s: OverdueSettings) => void;
+}) {
+  const [normal, setNormal] = useState(String(settings.normalMinutes));
+  const [urgent, setUrgent] = useState(String(settings.urgentMinutes));
+  const [saved, setSaved] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const n = Math.max(1, parseInt(normal, 10) || 15);
+    const u = Math.max(1, parseInt(urgent, 10) || 5);
+    onSave({ normalMinutes: n, urgentMinutes: u });
+    setNormal(String(n));
+    setUrgent(String(u));
+    setSaved(true);
+    playAlertSound('success');
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  return (
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-5 max-w-md">
+      <div className="flex items-center space-x-2">
+        <Clock className="w-5 h-5 text-amber-400" />
+        <div>
+          <h3 className="font-black text-white text-base">Tiempos de Espera Máximos</h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Si un pedido sin asignar supera este tiempo, se marcará como <span className="text-red-400 font-bold">ATRASADO</span> y se enviará una notificación a compradores y administradores.
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="block text-slate-300 font-bold text-xs uppercase tracking-wider">
+              Pedido Normal (min)
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                min={1}
+                max={240}
+                value={normal}
+                onChange={(e) => setNormal(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm font-bold text-center"
+              />
+            </div>
+            <p className="text-xs text-slate-500">Umbral para pedidos estándar</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-rose-400 font-bold text-xs uppercase tracking-wider flex items-center space-x-1">
+              <Flame className="w-3.5 h-3.5" />
+              <span>Urgente (min)</span>
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                min={1}
+                max={60}
+                value={urgent}
+                onChange={(e) => setUrgent(e.target.value)}
+                className="w-full bg-slate-950 border border-rose-800/60 rounded-xl px-3 py-2.5 text-white text-sm font-bold text-center"
+              />
+            </div>
+            <p className="text-xs text-slate-500">Umbral para pedidos urgentes</p>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          className={`w-full py-2.5 rounded-xl font-black text-sm transition ${
+            saved
+              ? 'bg-emerald-500 text-slate-950'
+              : 'bg-amber-500 hover:bg-amber-400 text-slate-950'
+          }`}
+        >
+          {saved ? '✓ Guardado' : 'Guardar Tiempos'}
+        </button>
+      </form>
+
+      <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 space-y-1">
+        <div className="font-bold text-slate-300">Configuración actual:</div>
+        <div>• Normal: <span className="text-amber-400 font-bold">{settings.normalMinutes} minutos</span></div>
+        <div>• Urgente: <span className="text-rose-400 font-bold">{settings.urgentMinutes} minutos</span></div>
+      </div>
+    </div>
+  );
+}

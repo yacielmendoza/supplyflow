@@ -29,6 +29,7 @@ interface RequestsListProps {
   onUpdateStatus: (requestId: string, status: RequestStatus) => Promise<void>;
   selectedRestaurantId?: string;
   highlightedRequestId?: string | null;
+  overdueRequestIds?: Set<string>;
 }
 
 export const RequestsList: React.FC<RequestsListProps> = ({
@@ -39,6 +40,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   onUpdateStatus,
   selectedRestaurantId,
   highlightedRequestId,
+  overdueRequestIds,
 }) => {
   const t = getTranslation(currentUser.language ?? 'es');
 
@@ -258,6 +260,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
               isBuyer && Boolean(req.assignedBuyerId) && req.assignedBuyerId !== currentUser.id;
 
             const isHighlighted = req.id === highlightedRequestId;
+            const isOverdue = overdueRequestIds?.has(req.id) ?? false;
             const cleanCookName = formatCleanName(req.createdByUserName);
             const cleanBuyerName = formatCleanName(req.assignedBuyerName);
 
@@ -274,6 +277,10 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     ? isLight
                       ? 'bg-slate-50/80 border-slate-200 opacity-80 hover:opacity-100 shadow-none'
                       : 'bg-slate-900/40 border-slate-800/60 opacity-80 hover:opacity-100 shadow-none'
+                    : isOverdue
+                    ? isLight
+                      ? 'bg-red-50/90 border-2 border-red-500 shadow-md shadow-red-100 ring-1 ring-red-300'
+                      : 'bg-gradient-to-r from-red-950/40 via-slate-900 to-slate-900 border-2 border-red-500/80 shadow-md shadow-red-950/30 ring-1 ring-red-500/20'
                     : isPending
                     ? isLight
                       ? 'bg-amber-50/80 border-2 border-amber-400 shadow-sm'
@@ -323,6 +330,13 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       >
                         <Flame className={`w-3.5 h-3.5 ${isCompleted ? (isLight ? 'text-slate-500' : 'text-slate-400') : 'text-rose-600'}`} />
                         <span>{t.tagUrgent}</span>
+                      </span>
+                    )}
+
+                    {isOverdue && (
+                      <span className="px-2.5 py-1 rounded-lg bg-red-600 text-white font-black text-xs uppercase flex items-center space-x-1 flex-shrink-0 animate-pulse">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>ATRASADO</span>
                       </span>
                     )}
                   </div>

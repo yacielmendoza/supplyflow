@@ -88,18 +88,40 @@ export async function requestPushPermission(): Promise<boolean> {
   return false;
 }
 
-export function showLocalNotification(title: string, body: string) {
+// Show notification via Service Worker when available (required for Android background)
+// Falls back to direct Notification API for browsers without SW support
+export async function showLocalNotification(title: string, body: string): Promise<void> {
   playAlertSound('urgent');
-  if ('Notification' in window && Notification.permission === 'granted') {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  // Prefer SW showNotification — works in Android background, iOS PWA background (16.4+)
+  if ('serviceWorker' in navigator) {
     try {
-      new Notification(title, {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification(title, {
         body,
         icon: '/pwa-icon.png',
         badge: '/pwa-icon.png',
-      });
-    } catch (e) {
-      console.log('Push notification shown in-app');
+        requireInteraction: false,
+      } as NotificationOptions);
+      return;
+    } catch (_) {
+      // fall through to direct API
     }
+  }
+
+  try {
+    new Notification(title, { body, icon: '/pwa-icon.png', badge: '/pwa-icon.png' });
+  } catch (_) {}
+}
+
+// Update the PWA icon badge count (Chrome 81+ Android/desktop, Safari 17+ iOS)
+export function setAppBadge(count: number): void {
+  if (!('setAppBadge' in navigator)) return;
+  if (count > 0) {
+    (navigator as any).setAppBadge(count).catch(() => {});
+  } else {
+    (navigator as any).clearAppBadge?.().catch(() => {});
   }
 }
 
