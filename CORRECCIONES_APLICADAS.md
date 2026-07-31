@@ -128,3 +128,54 @@ modal nuevo, el fallback público de Supabase sigue intacto, i18n sigue en
   (346/346, sin huecos) tras añadir las nuevas claves de este ciclo.
 - Cero modales: no se introdujo ningún `fixed inset-0`/overlay nuevo.
 - `NUNCA` se tocó el fallback público de Supabase en `src/lib/supabase.ts`.
+
+## Ciclo de corrección (2026-07-31, sobre `2f6882c`)
+
+`AUDITORIA_RESULTADOS.md` seguía mostrando `VEREDICTO: CON HALLAZGOS` (documenta
+el estado de `7cd65cd`, previo a los dos ciclos de corrección anteriores).
+Verificación independiente confirmó que A1, A2, M1–M6 y las mejoras Bajas
+parciales (B4/B6/B8) descritas arriba **siguen correctas en el código actual**
+— no hubo regresión. Se hizo además una auditoría rápida propia enfocada en
+teclado, i18n y consistencia funcional, y se encontraron 3 defectos reales
+nuevos, no documentados en ningún ciclo anterior:
+
+1. **(Alto, funcional) Bug de teclado: los inputs/botones anidados dentro de
+   tarjetas `role="button"` no detenían la propagación de `keydown`.**
+   En `ShoppingView.tsx` (fila de ítem) y `NotificationsView.tsx` (tarjeta de
+   solicitud), la tarjeta contenedora captura `Enter`/`Espacio` para su propia
+   acción (marcar comprado / navegar a la solicitud). El contenedor de la nota
+   y el botón "marcar leída" sólo detenían el evento `onClick` (mouse), no
+   `onKeyDown`: un usuario de teclado que escribía un espacio dentro del campo
+   de nota disparaba también el toggle de "comprado" del ítem (y sonido),
+   hacía imposible escribir notas con espacios, y pulsar Enter en el botón de
+   "marcar leída" navegaba a la solicitud además de descartarla. Corregido
+   añadiendo `onKeyDown={(e) => e.stopPropagation()}` en el wrapper de nota de
+   `ShoppingView.tsx` y en el botón de "marcar leída" de
+   `NotificationsView.tsx`.
+2. **(Medio, i18n) Resumen de WhatsApp para compartir una solicitud
+   (`RequestsList.tsx`) se generaba siempre en español**, ignorando el idioma
+   del usuario — `generateRequestWhatsAppSummary` en `src/lib/notifications.ts`
+   no aceptaba idioma. Ahora recibe `lang` (`currentUser.language`) y usa 6
+   claves nuevas (`waSummary*`) en `translations.ts` (ES/EN).
+3. **(Medio, i18n) Notificaciones push del sistema y la nota autogenerada de
+   solicitudes pendientes, todas hardcodeadas en español en `App.tsx`**
+   (nueva solicitud por Realtime, pedido atrasado, acceso restringido, nueva
+   solicitud de compra automática al cambiar estado, solicitud generada al
+   finalizar compra, y el texto de `notes` de esa solicitud generada). Se
+   movieron a 17 claves nuevas en `translations.ts` (ES/EN) y se leen a través
+   de un `tRef` (mismo patrón ya usado en el repo para `shoppingModalRequestRef`)
+   para evitar closures obsoletos dentro del listener de Supabase Realtime y
+   del intervalo de detección de atrasos, que sólo se registran una vez y no
+   deben quedarse con el idioma de render inicial.
+
+No se encontraron más defectos reales (sin modales nuevos, tokens/temas
+intactos, fallback público de Supabase sin tocar).
+
+### Verificación
+
+- `npx tsc --noEmit`: **sin errores**.
+- `npm run build`: **build limpio** (613.17 kB / 160.46 kB gzip — aviso de
+  chunk preexistente B7, no bloqueante, sin cambio de alcance).
+- i18n: `translations.ts` pasa de 346 a 370 claves en **ambos** idiomas
+  (ES/EN), sin huecos.
+- Cero modales, cero cambios al fallback público de Supabase.
