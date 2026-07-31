@@ -347,7 +347,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
 
                   <div className="flex items-center gap-2 ml-auto">
                     <a
-                      href={generateWhatsAppLink(currentUser.phone, generateRequestWhatsAppSummary(req))}
+                      href={generateWhatsAppLink(currentUser.phone, generateRequestWhatsAppSummary(req, currentUser.language ?? 'es'))}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="sf-btn-ghost w-11 h-11 rounded-xl sf-accent transition flex items-center justify-center flex-shrink-0"

@@ -1,3 +1,5 @@
+import { getTranslation, type Language } from './translations';
+
 // Web Audio API Sound Synthesizer for alerts without external audio files
 export function playAlertSound(type: 'urgent' | 'success' | 'click' = 'urgent') {
   try {
@@ -132,21 +134,25 @@ export function generateWhatsAppLink(phone: string, text: string): string {
   return `https://wa.me/${cleanPhone}?text=${encodedText}`;
 }
 
-export function generateRequestWhatsAppSummary(req: {
-  requestNumber: number;
-  restaurantName: string;
-  items: Array<{ productName: string; requestedQty: number; unit: string; suggestedSupplier?: string }>;
-  createdByUserName: string;
-}): string {
-  let msg = `🚨 *SOLICITUD DE ABASTECIMIENTO #${req.requestNumber}*\n`;
-  msg += `📍 *Restaurante:* ${req.restaurantName}\n`;
-  msg += `👤 *Solicitado por:* ${req.createdByUserName}\n\n`;
-  msg += `📦 *PRODUCTOS REQUERIDOS:*\n`;
+export function generateRequestWhatsAppSummary(
+  req: {
+    requestNumber: number;
+    restaurantName: string;
+    items: Array<{ productName: string; requestedQty: number; unit: string; suggestedSupplier?: string }>;
+    createdByUserName: string;
+  },
+  lang: Language = 'es'
+): string {
+  const t = getTranslation(lang);
+  let msg = `🚨 *${t.waSummaryHeader} #${req.requestNumber}*\n`;
+  msg += `📍 *${t.waSummaryRestaurant}* ${req.restaurantName}\n`;
+  msg += `👤 *${t.waSummaryRequestedBy}* ${req.createdByUserName}\n\n`;
+  msg += `📦 *${t.waSummaryProducts}*\n`;
 
   req.items.forEach((item, idx) => {
-    msg += `${idx + 1}. *${item.productName}* - ${item.requestedQty} ${item.unit} (${item.suggestedSupplier || 'General'})\n`;
+    msg += `${idx + 1}. *${item.productName}* - ${item.requestedQty} ${item.unit} (${item.suggestedSupplier || t.waSummaryGeneral})\n`;
   });
 
-  msg += `\n⚡ *Abre la app para asignarte o ir a Modo Compra:* ${window.location.origin}`;
+  msg += `\n⚡ *${t.waSummaryFooter}* ${window.location.origin}`;
   return msg;
 }
