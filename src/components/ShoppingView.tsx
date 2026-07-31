@@ -203,7 +203,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                 </div>
               )}
 
-              <div className="mt-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <div className="mt-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                 {editingNoteItemId === item.id ? (
                   <div className="flex items-center gap-2 w-full mt-1">
                     <input

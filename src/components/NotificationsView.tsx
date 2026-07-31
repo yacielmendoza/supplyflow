@@ -261,6 +261,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                           </span>
                           <button
                             onClick={(e) => handleDismiss(req.id, e)}
+                            onKeyDown={(e) => e.stopPropagation()}
                             title={t.notifMarkReadTitle}
                             aria-label={t.notifMarkReadTitle}
                             className="w-11 h-11 flex items-center justify-center rounded-lg sf-btn-ghost transition"
