@@ -1,7 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string).replace(/^﻿/, '');
-const supabaseKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string).replace(/^﻿/, '');
+// Public Supabase client credentials (publishable key + public project URL).
+// These are already shipped in the client bundle, so falling back to them keeps
+// preview/branch deployments working even when the VITE_* env vars are only set
+// for the Production environment on Vercel.
+const FALLBACK_SUPABASE_URL = 'https://ulzbzoixdnulfpjpiebb.supabase.co';
+const FALLBACK_SUPABASE_KEY = 'sb_publishable_aXLeJJHVnFTamrZ2Y2PmNg_mnN7QBC_';
+
+const supabaseUrl = ((import.meta.env.VITE_SUPABASE_URL as string) || FALLBACK_SUPABASE_URL).replace(/^﻿/, '');
+const supabaseKey = ((import.meta.env.VITE_SUPABASE_ANON_KEY as string) || FALLBACK_SUPABASE_KEY).replace(/^﻿/, '');
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   realtime: { params: { eventsPerSecond: 10 } },
