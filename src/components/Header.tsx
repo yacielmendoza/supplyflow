@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Restaurant, UserProfile } from '../types';
 import { formatCleanName } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
-import { Store, Bell, Flame, ChevronDown } from 'lucide-react';
+import { Store, Bell, Flame, ChevronDown, Check } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
 
 interface HeaderProps {
@@ -18,9 +18,9 @@ interface HeaderProps {
 
 /**
  * Simplified top bar (2026 refresh): brand logo · restaurant selector ·
- * notifications (with pending badge) · profile avatar. Everything else that
- * used to live here (settings, audio test, PWA install, user switch) now lives
- * in the Settings tab, keeping the header calm and roomy.
+ * notifications (with pending badge) · profile avatar. The restaurant selector
+ * is a custom popover (not a native <select>) so the picker matches the app's
+ * design language instead of the OS control.
  */
 export const Header: React.FC<HeaderProps> = ({
   restaurants,
@@ -33,6 +33,24 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenProfile,
 }) => {
   const t = getTranslation(currentUser.language || 'es');
+  const [open, setOpen] = useState(false);
+  const selectorRef = useRef<HTMLDivElement>(null);
+
+  const selected = restaurants.find((r) => r.id === selectedRestaurantId) || restaurants[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
 
   return (
     <header
@@ -51,25 +69,59 @@ export const Header: React.FC<HeaderProps> = ({
               <Flame className="w-5 h-5 text-white stroke-[2.5]" />
             </div>
 
-            <div className="relative flex items-center sf-pill rounded-2xl pl-3 pr-2 h-11 min-w-0">
-              <Store className="w-4 h-4 sf-accent mr-2 flex-shrink-0" />
-              <select
-                value={selectedRestaurantId}
-                onChange={(e) => {
-                  onSelectRestaurant(e.target.value);
+            <div className="relative min-w-0" ref={selectorRef}>
+              <button
+                onClick={() => {
+                  setOpen((o) => !o);
                   playAlertSound('click');
                 }}
+                aria-haspopup="listbox"
+                aria-expanded={open}
                 aria-label={t.headerRestaurantSelector}
-                className="appearance-none bg-transparent font-bold focus:outline-none cursor-pointer pr-5 text-sm max-w-[42vw] sm:max-w-[240px] truncate"
-                style={{ color: 'var(--sf-text)' }}
+                className="flex items-center sf-pill rounded-2xl pl-3 pr-2.5 h-11 min-w-0 transition"
+                style={open ? { borderColor: 'var(--sf-accent)' } : undefined}
               >
-                {restaurants.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 sf-subtle absolute right-2 pointer-events-none" />
+                <Store className="w-4 h-4 sf-accent mr-2 flex-shrink-0" />
+                <span className="font-bold text-sm truncate max-w-[42vw] sm:max-w-[240px]" style={{ color: 'var(--sf-text)' }}>
+                  {selected?.name}
+                </span>
+                <ChevronDown
+                  className="w-4 h-4 sf-subtle ml-1.5 flex-shrink-0 transition-transform"
+                  style={{ transform: open ? 'rotate(180deg)' : 'none' }}
+                />
+              </button>
+
+              {open && (
+                <div
+                  role="listbox"
+                  className="sf-card absolute left-0 top-full mt-2 min-w-[220px] max-h-72 overflow-y-auto p-1.5 z-50 animate-fadeIn"
+                  style={{ borderRadius: '20px' }}
+                >
+                  {restaurants.map((r) => {
+                    const active = r.id === selectedRestaurantId;
+                    return (
+                      <button
+                        key={r.id}
+                        role="option"
+                        aria-selected={active}
+                        onClick={() => {
+                          onSelectRestaurant(r.id);
+                          setOpen(false);
+                          playAlertSound('click');
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-2xl text-left transition"
+                        style={active ? { background: 'var(--sf-accent-soft)' } : undefined}
+                      >
+                        <Store className="w-4 h-4 flex-shrink-0" style={{ color: active ? 'var(--sf-accent)' : 'var(--sf-text-subtle)' }} />
+                        <span className="flex-1 min-w-0 truncate font-bold text-sm" style={{ color: active ? 'var(--sf-accent)' : 'var(--sf-text)' }}>
+                          {r.name}
+                        </span>
+                        {active && <Check className="w-4 h-4 sf-accent flex-shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
@@ -97,32 +149,36 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenProfile();
                 playAlertSound('click');
               }}
-              className="relative w-11 h-11 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 transition ring-2"
+              className="relative w-11 h-11 rounded-full flex-shrink-0 transition ring-2"
               style={{ ['--tw-ring-color' as string]: 'var(--sf-accent)' }}
               title={formatCleanName(currentUser.name)}
               aria-label={t.tabSettings}
             >
-              {currentUser.avatarUrl ? (
-                <img
-                  src={currentUser.avatarUrl}
-                  alt={currentUser.name}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <span
-                  className="w-full h-full flex items-center justify-center text-base font-black"
-                  style={{ background: 'var(--sf-accent-soft)', color: 'var(--sf-accent)' }}
-                >
-                  {currentUser.name.charAt(0).toUpperCase()}
-                </span>
-              )}
+              <span className="block w-full h-full rounded-full overflow-hidden">
+                {currentUser.avatarUrl ? (
+                  <img
+                    src={currentUser.avatarUrl}
+                    alt={currentUser.name}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span
+                    className="w-full h-full flex items-center justify-center text-base font-black"
+                    style={{ background: 'var(--sf-accent-soft)', color: 'var(--sf-accent)' }}
+                  >
+                    {currentUser.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </span>
+              {/* Presence dot — sits on the ring, outside the clipped image wrapper */}
               <span
-                className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2"
+                className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full"
                 style={{
                   background: sseConnected ? 'var(--sf-accent)' : 'var(--sf-amber)',
-                  borderColor: 'var(--sf-surface)',
+                  border: '2.5px solid var(--sf-surface)',
                 }}
+                title={sseConnected ? t.online : t.reconnecting}
               />
             </button>
           </div>

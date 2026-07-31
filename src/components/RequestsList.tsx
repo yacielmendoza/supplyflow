@@ -218,9 +218,6 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     <span className="font-black text-base sm:text-lg" style={{ color: 'var(--sf-text)' }}>
                       #{req.requestNumber}
                     </span>
-                    <span className="sf-pill px-2.5 py-1 rounded-lg font-extrabold text-xs truncate max-w-[45vw] sm:max-w-[220px] sf-accent">
-                      {req.restaurantName}
-                    </span>
                     {req.urgent && !isCompleted && (
                       <span className="px-2 py-0.5 rounded-lg text-xs font-black uppercase flex items-center gap-1"
                         style={{ background: tint('var(--sf-rose)', 16), color: 'var(--sf-rose)' }}>

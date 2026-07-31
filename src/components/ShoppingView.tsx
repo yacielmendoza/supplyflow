@@ -103,17 +103,23 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
         }}
       >
         <div className="max-w-3xl mx-auto px-4 py-3 space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="sf-subtle text-xs truncate">{request.restaurantName}</span>
-            <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--sf-surface-2)' }}>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="sf-muted text-xs font-bold uppercase tracking-wider truncate">
+                {request.restaurantName}
+              </span>
+              <span className="text-xs font-black flex-shrink-0" style={{ color: 'var(--sf-text)' }}>
+                <span className="sf-accent">{purchasedCount}</span>
+                <span className="sf-subtle"> / {totalItems}</span>
+                <span className="sf-muted"> · {progressPct}%</span>
+              </span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--sf-surface-2)' }}>
               <div
-                className="h-full rounded-full transition-all duration-300"
+                className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, var(--sf-accent), #2dd4bf)' }}
               />
             </div>
-            <span className="text-xs font-black sf-accent flex-shrink-0">
-              {purchasedCount}/{totalItems}
-            </span>
           </div>
 
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">

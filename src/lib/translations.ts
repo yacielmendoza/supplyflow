@@ -138,7 +138,7 @@ export const translations = {
     notePlaceholder: 'Ej: Marca sustituta, no había suficiente...',
     shopNotifyMsg: 'Al completar, se notificará inmediatamente al cocinero en la cocina.',
     shopProcessing: 'Procesando...',
-    shopConfirmDelivery: '✅ Confirmar y Notificar Entrega',
+    shopConfirmDelivery: 'Confirmar y Notificar Entrega',
 
     // ── Daily Checklist ────────────────────────────────────────────────────────
     checklistTitle: 'Inspección de Existencias',
@@ -547,7 +547,7 @@ export const translations = {
     notePlaceholder: 'E.g., Substitute brand, not enough stock...',
     shopNotifyMsg: 'Upon completion, the kitchen chef will be immediately notified.',
     shopProcessing: 'Processing...',
-    shopConfirmDelivery: '✅ Confirm and Notify Delivery',
+    shopConfirmDelivery: 'Confirm and Notify Delivery',
 
     // ── Daily Checklist ────────────────────────────────────────────────────────
     checklistTitle: 'Stock Inspection',

@@ -220,29 +220,29 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               </div>
 
               <div className="flex items-center justify-between pt-2 gap-2" style={{ borderTop: '1px solid var(--sf-border)' }}>
-                <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="flex items-center gap-1.5">
                   {([['out', '0', 'var(--sf-rose)', currentVal === 0], ['low', t.stockLow, 'var(--sf-amber)', isBelowThreshold && currentVal > 0], ['ok', t.stockSufficient, 'var(--sf-accent)', !isBelowThreshold]] as const).map(
                     ([status, label, color, active]) => (
                       <button key={status} type="button" onClick={() => handleQuickSet(p.id, status)}
                         aria-pressed={active}
-                        className="px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition"
-                        style={active ? { background: color, color: '#fff' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
+                        className="px-3 py-1.5 rounded-full text-xs font-extrabold transition"
+                        style={active ? { background: color, color: status === 'low' ? 'var(--sf-amber-contrast)' : '#fff' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
                         {label}
                       </button>
                     )
                   )}
                 </div>
 
-                <div className="sf-inset flex items-center gap-1.5 px-2 py-1">
+                <div className="sf-inset rounded-full flex items-center gap-1 p-1">
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal - 1)}
                     aria-label={`${t.ariaDecreaseStock} ${p.name}`}
-                    className="w-11 h-11 rounded-lg flex items-center justify-center font-black transition sf-btn-ghost">
+                    className="w-10 h-10 rounded-full flex items-center justify-center font-black transition sf-btn-ghost">
                     <Minus className="w-4 h-4" />
                   </button>
-                  <div className="w-10 text-center font-black text-base sm:text-lg" style={{ color: 'var(--sf-text)' }}>{currentVal}</div>
+                  <div className="w-9 text-center font-black text-base sm:text-lg tabular-nums" style={{ color: 'var(--sf-text)' }}>{currentVal}</div>
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal + 1)}
                     aria-label={`${t.ariaIncreaseStock} ${p.name}`}
-                    className="w-11 h-11 rounded-lg flex items-center justify-center font-black transition sf-btn-ghost">
+                    className="w-10 h-10 rounded-full flex items-center justify-center font-black transition sf-btn-ghost">
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
