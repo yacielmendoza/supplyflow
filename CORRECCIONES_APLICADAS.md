@@ -100,6 +100,25 @@ priorizados por la propia auditoría.
   cacheando chunks); se deja para un ciclo enfocado en performance con
   verificación de la PWA instalada, no solo `npm run build`.
 
+## Ciclo de verificación posterior (2026-07-31, sobre `3d2a561`)
+
+`AUDITORIA_RESULTADOS.md` seguía documentando el estado de `7cd65cd` (previo
+a este mismo ciclo de correcciones). Antes de aceptar el veredicto como
+resuelto se hizo una verificación independiente de los 8 hallazgos A1/A2/M1–M6
+contra el código real de `3d2a561`: 7 de 8 quedaron correctos tal como se
+describe arriba. Se encontró un resto real de **M1** (radios inconsistentes)
+que el commit anterior no cubrió:
+
+- `src/components/AdminCatalog.tsx:278` — el tag de categoría de la fila de
+  tabla de escritorio (`AdminCatalog`, vista no-edición) seguía usando
+  `rounded` (4px) en vez de `rounded-lg` (8px), igual que el resto de tags de
+  categoría ya corregidos en `ShoppingView.tsx` y en las tarjetas móviles de
+  `AdminCatalog.tsx`. Corregido a `rounded-lg`.
+
+No se encontraron más defectos reales en esta pasada (no se creó ningún
+modal nuevo, el fallback público de Supabase sigue intacto, i18n sigue en
+346/346 claves sin huecos).
+
 ## Verificación
 
 - `npx tsc --noEmit`: **sin errores**.

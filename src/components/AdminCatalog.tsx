@@ -275,7 +275,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                             <select value={editForm.category} onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value as any }))} className="sf-inset px-2 py-1 rounded text-xs" style={inputStyle}>
                               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
                             </select>
-                          ) : <span className="sf-inset px-2 py-0.5 rounded font-mono text-[10px] sf-muted">{p.category}</span>}
+                          ) : <span className="sf-inset px-2 py-0.5 rounded-lg font-mono text-[10px] sf-muted">{p.category}</span>}
                         </td>
                         <td className="p-3">
                           {isEditing ? (
