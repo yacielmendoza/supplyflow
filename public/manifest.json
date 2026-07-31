@@ -3,8 +3,8 @@
   "name": "SupplyFlow - Coordinación de Abastecimiento",
   "description": "Plataforma mobile-first para gestión de abastecimiento de restaurantes por mínimos operativos.",
   "start_url": "/",
-  "background_color": "#020617",
-  "theme_color": "#020617",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
   "display": "standalone",
   "orientation": "portrait",
   "icons": [

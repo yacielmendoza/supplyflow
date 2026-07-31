@@ -523,6 +523,12 @@ export default function App() {
     document.documentElement.classList.remove('light');
   }
 
+  // Keep the PWA/browser chrome (status bar, task switcher) color matching the active theme
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
+  }
+
   const getNavTabs = (): BottomNavTab[] => {
     const dashboard: BottomNavTab = { id: 'DASHBOARD', label: t.tabDashboard, icon: LayoutDashboard };
     switch (currentUser.role) {
