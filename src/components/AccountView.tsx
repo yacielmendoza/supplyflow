@@ -100,7 +100,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
     <div className="min-h-screen sf-page">
       <ViewHeader title={t.accountTitle} onBack={onBack} backLabel={t.back} />
 
-      <div className="max-w-2xl mx-auto px-4 pb-16 pt-4 space-y-5">
+      <div className="max-w-2xl mx-auto px-4 pb-16 pt-4 space-y-5 safe-bottom">
         {/* Profile — inline editable */}
         <section className="sf-card p-5 space-y-4">
           <div className="flex items-center gap-4">

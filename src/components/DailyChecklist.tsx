@@ -231,12 +231,12 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
                 <div className="sf-inset flex items-center gap-1.5 px-2 py-1">
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal - 1)}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-black transition sf-btn-ghost">
+                    className="w-11 h-11 rounded-lg flex items-center justify-center font-black transition sf-btn-ghost">
                     <Minus className="w-4 h-4" />
                   </button>
                   <div className="w-10 text-center font-black text-base sm:text-lg" style={{ color: 'var(--sf-text)' }}>{currentVal}</div>
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal + 1)}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-black transition sf-btn-ghost">
+                    className="w-11 h-11 rounded-lg flex items-center justify-center font-black transition sf-btn-ghost">
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>

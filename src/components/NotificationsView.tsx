@@ -152,7 +152,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
         }
       />
 
-      <div className="max-w-2xl mx-auto px-4 pb-16 pt-4 space-y-4">
+      <div className="max-w-2xl mx-auto px-4 pb-16 pt-4 space-y-4 safe-bottom">
         {/* Segmented control */}
         <div className="sf-inset p-1 grid grid-cols-2 gap-1">
           {([['FEED', Bell, t.notifTabFeed, visibleRequests.length], ['SETTINGS', Zap, t.notifTabSettings, 0]] as const).map(
@@ -253,7 +253,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                           <button
                             onClick={(e) => handleDismiss(req.id, e)}
                             title={t.notifMarkReadTitle}
-                            className="p-1.5 rounded-lg sf-btn-ghost transition"
+                            aria-label={t.notifMarkReadTitle}
+                            className="w-9 h-9 flex items-center justify-center rounded-lg sf-btn-ghost transition"
                           >
                             <Check className="w-4 h-4" />
                           </button>

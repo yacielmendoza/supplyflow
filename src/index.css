@@ -132,6 +132,22 @@ html.dark {
   }
 }
 
+/* Global visible keyboard focus ring. Unlayered on purpose — Tailwind's
+   `focus:outline-none` utilities (used to suppress the default focus ring in
+   favor of custom card/pill styling) live in the `utilities` cascade layer,
+   and unlayered rules always beat layered ones regardless of source order or
+   specificity. This guarantees every input/button/link gets a visible ring
+   on keyboard focus without touching each component's className. */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--sf-accent);
+  outline-offset: 2px;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
