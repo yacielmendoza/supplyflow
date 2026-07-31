@@ -52,8 +52,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
   const t = getTranslation(currentUserLanguage ?? 'es');
   const [segment, setSegment] = useState<'FEED' | 'SETTINGS'>('FEED');
   const [pushGranted, setPushGranted] = useState<boolean | null>(null);
-  const [testTitle, setTestTitle] = useState('🚨 ATENCIÓN COCINA / COMPRADORES');
-  const [testBody, setTestBody] = useState('Solicitud #125 generada para Caddy Shack Grill - Falta Tocino y Pan');
+  const [testTitle, setTestTitle] = useState(t.notifTestDefaultTitle);
+  const [testBody, setTestBody] = useState(t.notifTestDefaultBody);
   const [simulatedSent, setSimulatedSent] = useState(false);
 
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => {
@@ -105,7 +105,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
     const granted = await requestPushPermission();
     setPushGranted(granted);
     if (granted) {
-      showLocalNotification('Notificaciones Activadas', 'Recibirás alertas instantáneas cuando haya pedidos pendientes.');
+      showLocalNotification(t.notifPushEnabledTitle, t.notifPushEnabledBody);
     }
   };
 
@@ -117,7 +117,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
     setTimeout(() => setSimulatedSent(false), 3000);
   };
 
-  const sampleWhatsAppText = `🚨 *RESTOSUPPLY ALERTA DE COMPRA*\nNueva solicitud urgente de Caddy Shack Grill.\nVer en app: ${window.location.href}`;
+  const sampleWhatsAppText = t.notifWhatsAppSampleText.replace('{url}', window.location.href);
 
   const statusColors: Record<string, string> = {
     Pendiente: 'var(--sf-amber)',
@@ -229,7 +229,15 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                 return (
                   <li key={req.id}>
                     <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => onSelectRequest?.(req.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelectRequest?.(req.id);
+                        }
+                      }}
                       className="sf-card p-4 space-y-2.5 cursor-pointer transition hover:brightness-[0.98]"
                       style={req.urgent ? { borderColor: 'var(--sf-rose)' } : undefined}
                     >
@@ -255,7 +263,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                             onClick={(e) => handleDismiss(req.id, e)}
                             title={t.notifMarkReadTitle}
                             aria-label={t.notifMarkReadTitle}
-                            className="w-9 h-9 flex items-center justify-center rounded-lg sf-btn-ghost transition"
+                            className="w-11 h-11 flex items-center justify-center rounded-lg sf-btn-ghost transition"
                           >
                             <Check className="w-4 h-4" />
                           </button>

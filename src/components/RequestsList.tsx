@@ -350,7 +350,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       href={generateWhatsAppLink(currentUser.phone, generateRequestWhatsAppSummary(req))}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="sf-btn-ghost p-2 rounded-xl sf-accent transition flex items-center"
+                      className="sf-btn-ghost w-11 h-11 rounded-xl sf-accent transition flex items-center justify-center flex-shrink-0"
                       title={t.labelShareWhatsApp}
                       aria-label={t.labelShareWhatsApp}
                     >

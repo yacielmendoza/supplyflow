@@ -38,7 +38,10 @@ const AVATAR_PRESETS = [
   { id: 'chef', url: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=150&auto=format&fit=crop&q=80' },
   { id: 'runner', url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80' },
   { id: 'admin', url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80' },
-];
+] as const;
+
+const avatarPresetLabel = (id: string, t: ReturnType<typeof getTranslation>) =>
+  id === 'chef' ? t.avatarPresetChef : id === 'runner' ? t.avatarPresetRunner : t.avatarPresetAdmin;
 
 const roleLabel = (role: UserProfile['role'], t: ReturnType<typeof getTranslation>) =>
   role === 'cocinero' ? t.roleCook : role === 'comprador' ? t.roleBuyer : t.roleAdmin;
@@ -137,10 +140,12 @@ export const AccountView: React.FC<AccountViewProps> = ({
                   <button
                     key={p.id}
                     onClick={() => setAvatarUrl(p.url)}
-                    className="w-9 h-9 rounded-xl overflow-hidden transition"
+                    aria-label={avatarPresetLabel(p.id, t)}
+                    aria-pressed={active}
+                    className="w-11 h-11 rounded-xl overflow-hidden transition"
                     style={{ outline: active ? '2px solid var(--sf-accent)' : '1px solid var(--sf-border)', outlineOffset: '1px' }}
                   >
-                    <img src={p.url} alt={p.id} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <img src={p.url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   </button>
                 );
               })}

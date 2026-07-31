@@ -235,11 +235,13 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
                 <div className="sf-inset flex items-center gap-1.5 px-2 py-1">
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal - 1)}
+                    aria-label={`${t.ariaDecreaseStock} ${p.name}`}
                     className="w-11 h-11 rounded-lg flex items-center justify-center font-black transition sf-btn-ghost">
                     <Minus className="w-4 h-4" />
                   </button>
                   <div className="w-10 text-center font-black text-base sm:text-lg" style={{ color: 'var(--sf-text)' }}>{currentVal}</div>
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal + 1)}
+                    aria-label={`${t.ariaIncreaseStock} ${p.name}`}
                     className="w-11 h-11 rounded-lg flex items-center justify-center font-black transition sf-btn-ghost">
                     <Plus className="w-4 h-4" />
                   </button>
@@ -291,7 +293,8 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
           <div className="flex items-center gap-2 flex-shrink-0">
             <button type="button" onClick={() => setShowNoteInput((prev) => !prev)}
-              className="flex items-center gap-1 text-xs font-bold p-2 sm:px-2.5 sm:py-1.5 rounded-lg transition flex-shrink-0"
+              aria-label={notes.trim() ? t.noteActive : showNoteInput ? t.closeNote : t.noteAddBtn}
+              className="flex items-center justify-center gap-1 text-xs font-bold min-w-11 min-h-11 px-2 sm:px-2.5 sm:py-1.5 rounded-lg transition flex-shrink-0"
               style={notes.trim() ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">{notes.trim() ? t.noteActive : showNoteInput ? t.closeNote : t.noteAddBtn}</span>

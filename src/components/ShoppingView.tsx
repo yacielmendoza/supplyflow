@@ -151,7 +151,16 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
         {filteredItems.map((item) => (
           <div
             key={item.id}
+            role="button"
+            tabIndex={0}
+            aria-pressed={item.purchased}
             onClick={() => handleCheck(item)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCheck(item);
+              }
+            }}
             className="sf-card p-4 flex items-start gap-3.5 cursor-pointer select-none transition"
             style={item.purchased ? { borderColor: 'var(--sf-accent)', background: 'var(--sf-accent-soft)' } : undefined}
           >
@@ -183,7 +192,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
               </div>
 
               <div className="flex items-center gap-2 text-xs sf-muted mt-1">
-                <span className="sf-inset px-1.5 py-0.5 rounded text-[10px] uppercase font-mono">{item.category}</span>
+                <span className="sf-inset px-1.5 py-0.5 rounded-lg text-[10px] uppercase font-mono">{item.category}</span>
                 <span>•</span>
                 <span className="truncate">{item.suggestedSupplier || t.storeAny}</span>
               </div>

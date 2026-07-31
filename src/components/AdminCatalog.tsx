@@ -165,7 +165,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             <form onSubmit={handleCreateProductSubmit} className="sf-card p-4 space-y-3 text-xs animate-fadeIn">
               <div className="flex items-center justify-between">
                 <h3 className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>{t.adminModalAddProductTitle}</h3>
-                <button type="button" onClick={() => setShowAddForm(false)} aria-label={t.adminCancel} className="sf-btn-ghost w-9 h-9 rounded-lg flex items-center justify-center"><X className="w-4 h-4" /></button>
+                <button type="button" onClick={() => setShowAddForm(false)} aria-label={t.adminCancel} className="sf-btn-ghost w-11 h-11 rounded-lg flex items-center justify-center"><X className="w-4 h-4" /></button>
               </div>
               <div>
                 <label className="block sf-muted font-bold mb-1">{t.adminProductName}</label>
@@ -217,13 +217,13 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                     <div>
                       <div className="font-extrabold text-sm" style={{ color: 'var(--sf-text)' }}>{p.name}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="sf-inset px-2 py-0.5 rounded font-mono text-[10px] sf-muted">{p.category}</span>
+                        <span className="sf-inset px-2 py-0.5 rounded-lg font-mono text-[10px] sf-muted">{p.category}</span>
                         <span className="text-[11px] sf-muted">• {t.adminUnitLabel} {p.unit}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => handleStartEdit(p)} aria-label={t.adminEdit} className="sf-btn-ghost w-10 h-10 rounded-lg flex items-center justify-center"><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => onDeleteProduct(p.id)} aria-label={t.adminDelete} className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleStartEdit(p)} aria-label={t.adminEdit} className="sf-btn-ghost w-11 h-11 rounded-lg flex items-center justify-center"><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => onDeleteProduct(p.id)} aria-label={t.adminDelete} className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pt-1.5 text-xs" style={{ borderTop: '1px solid var(--sf-border)' }}>
@@ -333,7 +333,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             <form onSubmit={handleCreateRestaurantSubmit} className="sf-card p-4 space-y-3 text-xs animate-fadeIn">
               <div className="flex items-center justify-between">
                 <h3 className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>{t.adminModalAddRestTitle}</h3>
-                <button type="button" onClick={() => setShowAddRestForm(false)} aria-label={t.adminCancel} className="sf-btn-ghost w-9 h-9 rounded-lg flex items-center justify-center"><X className="w-4 h-4" /></button>
+                <button type="button" onClick={() => setShowAddRestForm(false)} aria-label={t.adminCancel} className="sf-btn-ghost w-11 h-11 rounded-lg flex items-center justify-center"><X className="w-4 h-4" /></button>
               </div>
               <div>
                 <label className="block sf-muted font-bold mb-1">{t.adminCommercialName}</label>
@@ -344,7 +344,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                 <select value={newRestType} onChange={(e) => setNewRestType(e.target.value as any)} className={inputCls} style={inputStyle}>
                   <option value="Food Truck">Food Truck</option>
                   <option value="Restaurante">Restaurante</option>
-                  <option value="Cafe">Cafe / Desayunos</option>
+                  <option value="Cafe">{t.adminTypeCafe}</option>
                   <option value="Bistro">Bistro</option>
                 </select>
               </div>
@@ -365,7 +365,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${r.colorBadge || 'bg-emerald-500'}`} />
                   <span className="font-bold text-base" style={{ color: 'var(--sf-text)' }}>{r.name}</span>
-                  <span className="sf-inset px-2 py-0.5 rounded text-[10px] font-mono sf-accent">{r.type}</span>
+                  <span className="sf-inset px-2 py-0.5 rounded-lg text-[10px] font-mono sf-accent">{r.type}</span>
                 </div>
                 <p className="text-xs sf-muted mt-1">{r.address}</p>
                 <p className="text-xs sf-subtle">{t.adminPhoneLabel} {r.phone}</p>

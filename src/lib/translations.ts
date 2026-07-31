@@ -372,6 +372,19 @@ export const translations = {
     save: 'Guardar',
     cancel: 'Cancelar',
     logout: 'Cerrar sesión',
+
+    // ── Accessibility / misc additions ──────────────────────────────────────
+    ariaDecreaseStock: 'Disminuir stock de',
+    ariaIncreaseStock: 'Aumentar stock de',
+    adminTypeCafe: 'Cafe / Desayunos',
+    avatarPresetChef: 'Chef',
+    avatarPresetRunner: 'Repartidor',
+    avatarPresetAdmin: 'Administrador',
+    notifTestDefaultTitle: '🚨 ATENCIÓN COCINA / COMPRADORES',
+    notifTestDefaultBody: 'Solicitud #125 generada para Caddy Shack Grill - Falta Tocino y Pan',
+    notifPushEnabledTitle: 'Notificaciones Activadas',
+    notifPushEnabledBody: 'Recibirás alertas instantáneas cuando haya pedidos pendientes.',
+    notifWhatsAppSampleText: '🚨 *RESTOSUPPLY ALERTA DE COMPRA*\nNueva solicitud urgente de Caddy Shack Grill.\nVer en app: {url}',
   },
 
   en: {
@@ -745,6 +758,19 @@ export const translations = {
     save: 'Save',
     cancel: 'Cancel',
     logout: 'Log out',
+
+    // ── Accessibility / misc additions ──────────────────────────────────────
+    ariaDecreaseStock: 'Decrease stock of',
+    ariaIncreaseStock: 'Increase stock of',
+    adminTypeCafe: 'Cafe / Breakfast',
+    avatarPresetChef: 'Chef',
+    avatarPresetRunner: 'Runner',
+    avatarPresetAdmin: 'Admin',
+    notifTestDefaultTitle: '🚨 ATTENTION KITCHEN / BUYERS',
+    notifTestDefaultBody: 'Request #125 generated for Caddy Shack Grill - Missing Bacon and Bread',
+    notifPushEnabledTitle: 'Notifications Enabled',
+    notifPushEnabledBody: 'You will receive instant alerts when there are pending orders.',
+    notifWhatsAppSampleText: '🚨 *RESTOSUPPLY PURCHASE ALERT*\nNew urgent request from Caddy Shack Grill.\nView in app: {url}',
   },
 } as const;
 

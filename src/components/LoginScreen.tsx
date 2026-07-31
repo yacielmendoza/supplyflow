@@ -65,6 +65,8 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
       <div className="absolute top-4 right-4 z-10 safe-top">
         <button
           onClick={() => onChangeLanguage(language === 'es' ? 'en' : 'es')}
+          aria-pressed={language === 'en'}
+          aria-label={t.languagePreference}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl sf-btn-ghost text-xs font-bold transition"
         >
           <Globe className="w-3.5 h-3.5" />

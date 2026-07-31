@@ -48,13 +48,38 @@ import {
 type TabId = 'DASHBOARD' | 'REQUESTS' | 'CHECKLIST' | 'ADMIN';
 type Screen = 'NONE' | 'NOTIFICATIONS' | 'ACCOUNT';
 
+const SESSION_KEY = 'restosupply_session_user';
+const LANGUAGE_KEY = 'restosupply_language';
+const PRODUCTS_OVERRIDE_KEY = 'restosupply_products_override';
+const RESTAURANTS_OVERRIDE_KEY = 'restosupply_restaurants_override';
+
+function readStoredJSON<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistJSON(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* storage unavailable — in-memory state still works for this session */
+  }
+}
+
 export default function App() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('rest-1');
 
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [appLanguage, setAppLanguage] = useState<'es' | 'en'>('es');
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => readStoredJSON<UserProfile>(SESSION_KEY));
+  const [appLanguage, setAppLanguage] = useState<'es' | 'en'>(() => {
+    const stored = readStoredJSON<UserProfile>(SESSION_KEY);
+    return stored?.language || (localStorage.getItem(LANGUAGE_KEY) as 'es' | 'en' | null) || 'es';
+  });
 
   const [products, setProducts] = useState<Product[]>([]);
   const [supplyRequests, setSupplyRequests] = useState<SupplyRequest[]>([]);
@@ -87,6 +112,8 @@ export default function App() {
     setUsers((prev) =>
       prev.map((u) => (u.id === updatedProfile.id ? updatedProfile : u))
     );
+    persistJSON(SESSION_KEY, updatedProfile);
+    if (updatedProfile.language) localStorage.setItem(LANGUAGE_KEY, updatedProfile.language);
   };
 
   const handleSelectRequestFromNotification = (requestId: string) => {
@@ -112,9 +139,19 @@ export default function App() {
       fetchSupplyRequests(),
     ]);
 
-    if (rests.length > 0) setRestaurants(rests);
+    // Products/restaurants have no backend table yet (demo-only catalog); a
+    // locally-saved override lets admin edits survive a refresh on this device.
+    const storedRestaurants = readStoredJSON<Restaurant[]>(RESTAURANTS_OVERRIDE_KEY);
+    const storedProducts = readStoredJSON<Product[]>(PRODUCTS_OVERRIDE_KEY);
+
+    if (storedRestaurants && storedRestaurants.length > 0) setRestaurants(storedRestaurants);
+    else if (rests.length > 0) setRestaurants(rests);
+
     if (usrs.length > 0) setUsers(usrs);
-    if (prods.length > 0) setProducts(prods);
+
+    if (storedProducts && storedProducts.length > 0) setProducts(storedProducts);
+    else if (prods.length > 0) setProducts(prods);
+
     if (reqs.length > 0) {
       const uniqueReqs = Array.from(new Map(reqs.map((r: SupplyRequest) => [r.id, r])).values());
       setSupplyRequests(uniqueReqs);
@@ -456,22 +493,38 @@ export default function App() {
 
   const handleAddProduct = async (productData: Omit<Product, 'id' | 'updatedAt'>) => {
     const newProd = await createProduct(productData);
-    setProducts((prev) => [...prev, newProd]);
+    setProducts((prev) => {
+      const next = [...prev, newProd];
+      persistJSON(PRODUCTS_OVERRIDE_KEY, next);
+      return next;
+    });
   };
 
   const handleUpdateProduct = async (id: string, updates: Partial<Product>) => {
     const updated = await updateProduct(id, updates);
-    setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    setProducts((prev) => {
+      const next = prev.map((p) => (p.id === id ? updated : p));
+      persistJSON(PRODUCTS_OVERRIDE_KEY, next);
+      return next;
+    });
   };
 
   const handleDeleteProduct = async (id: string) => {
     await deleteProduct(id);
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    setProducts((prev) => {
+      const next = prev.filter((p) => p.id !== id);
+      persistJSON(PRODUCTS_OVERRIDE_KEY, next);
+      return next;
+    });
   };
 
   const handleAddRestaurant = async (restData: { name: string; type: any; address: string; phone: string }) => {
     const newRest = { ...restData, id: `rest-${Date.now()}`, active: true, colorBadge: 'bg-emerald-600' };
-    setRestaurants((prev) => [...prev, newRest]);
+    setRestaurants((prev) => {
+      const next = [...prev, newRest];
+      persistJSON(RESTAURANTS_OVERRIDE_KEY, next);
+      return next;
+    });
     setSelectedRestaurantId(newRest.id);
   };
 
@@ -486,6 +539,22 @@ export default function App() {
     setAppLanguage(u.language || 'es');
     setActiveTab('DASHBOARD');
     setScreen('NONE');
+    persistJSON(SESSION_KEY, u);
+    if (u.language) localStorage.setItem(LANGUAGE_KEY, u.language);
+  };
+
+  const handleChangeLanguage = (lang: 'es' | 'en') => {
+    setAppLanguage(lang);
+    localStorage.setItem(LANGUAGE_KEY, lang);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem(SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
   };
 
   // Show login screen when no user is selected
@@ -493,13 +562,9 @@ export default function App() {
     return (
       <LoginScreen
         users={users}
-        onSelectUser={(u) => {
-          setCurrentUser(u);
-          setAppLanguage(u.language || 'es');
-          setActiveTab('DASHBOARD');
-        }}
+        onSelectUser={handleSelectUser}
         language={appLanguage}
-        onChangeLanguage={setAppLanguage}
+        onChangeLanguage={handleChangeLanguage}
       />
     );
   }
@@ -601,13 +666,13 @@ export default function App() {
             deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
           }
         }}
-        onLogout={() => setCurrentUser(null)}
+        onLogout={handleLogout}
       />
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-sans sf-page selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen flex flex-col font-sans sf-page selection:bg-[var(--sf-accent)] selection:text-[var(--sf-accent-contrast)]">
       <Header
         restaurants={restaurants}
         selectedRestaurantId={selectedRestaurantId}

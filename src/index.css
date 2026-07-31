@@ -164,13 +164,3 @@ a:focus-visible,
 .sf-pop {
   animation: sfPop 0.22s ease-out;
 }
-
-/* Global Theme Root Configuration (legacy screens still read these) */
-html.light {
-  background-color: #f3f5f9;
-  color: #0f172a;
-}
-html.dark {
-  background-color: #070b14;
-  color: #f8fafc;
-}
