@@ -24,6 +24,7 @@ import {
   generateWhatsAppLink,
 } from '../lib/notifications';
 import { triggerNotification } from '../lib/api';
+import { STATUS_COLORS, getStatusLabels } from '../lib/colors';
 import { ViewHeader } from './ViewHeader';
 
 interface NotificationsViewProps {
@@ -119,23 +120,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
 
   const sampleWhatsAppText = t.notifWhatsAppSampleText.replace('{url}', window.location.href);
 
-  const statusColors: Record<string, string> = {
-    Pendiente: 'var(--sf-amber)',
-    Asignada: 'var(--sf-sky)',
-    'En Compra': 'var(--sf-violet)',
-    Comprada: 'var(--sf-accent)',
-    Entregada: 'var(--sf-accent)',
-    Completada: 'var(--sf-text-subtle)',
-  };
-
-  const statusLabels: Record<string, string> = {
-    Pendiente: t.pending,
-    Asignada: t.assigned,
-    'En Compra': t.inProgress,
-    Comprada: t.purchased,
-    Entregada: t.delivered,
-    Completada: t.completed,
-  };
+  const statusColors = STATUS_COLORS;
+  const statusLabels = getStatusLabels(t);
 
   return (
     <div className="min-h-screen sf-page">
@@ -382,7 +368,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                 </button>
               </div>
               {simulatedSent && (
-                <div className="text-xs font-bold px-3 py-2 rounded-xl" style={{ background: 'var(--sf-accent-soft)', color: 'var(--sf-accent)' }}>
+                <div role="status" aria-live="polite" className="text-xs font-bold px-3 py-2 rounded-xl" style={{ background: 'var(--sf-accent-soft)', color: 'var(--sf-accent)' }}>
                   {t.notifSentSuccess}
                 </div>
               )}

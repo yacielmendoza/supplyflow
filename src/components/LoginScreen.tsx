@@ -2,6 +2,7 @@ import { useState, useEffect, ComponentType } from 'react';
 import { Flame, ChefHat, ShoppingCart, BarChart3, Globe, ChevronRight, Loader2 } from 'lucide-react';
 import { UserProfile, Role } from '../types';
 import { getTranslation } from '../lib/translations';
+import { tint } from '../lib/colors';
 
 type Language = 'es' | 'en';
 
@@ -17,8 +18,6 @@ const ROLE_CONFIG: Record<Role, { color: string; icon: ComponentType<any> }> = {
   comprador: { color: 'var(--sf-accent)', icon: ShoppingCart },
   admin: { color: 'var(--sf-violet)', icon: BarChart3 },
 };
-
-const tint = (color: string, pct = 12) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
 function getInitials(name: string): string {
   return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();

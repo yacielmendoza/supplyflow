@@ -20,6 +20,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { playAlertSound, generateWhatsAppLink, generateRequestWhatsAppSummary } from '../lib/notifications';
+import { tint, STATUS_COLORS, getStatusLabels } from '../lib/colors';
 
 interface RequestsListProps {
   requests: SupplyRequest[];
@@ -31,17 +32,6 @@ interface RequestsListProps {
   highlightedRequestId?: string | null;
   overdueRequestIds?: Set<string>;
 }
-
-const STATUS_COLOR: Record<RequestStatus, string> = {
-  Pendiente: 'var(--sf-amber)',
-  Asignada: 'var(--sf-sky)',
-  'En Compra': 'var(--sf-violet)',
-  Comprada: 'var(--sf-accent)',
-  Entregada: 'var(--sf-accent)',
-  Completada: 'var(--sf-text-subtle)',
-};
-
-const tint = (color: string, pct = 14) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
 export const RequestsList: React.FC<RequestsListProps> = ({
   requests,
@@ -88,17 +78,8 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   const countCompleted = requests.filter((r) => inScope(r) && ['Entregada', 'Completada'].includes(r.status)).length;
   const countAll = requests.filter(inScope).length;
 
-  const getStatusLabel = (status: RequestStatus): string => {
-    const map: Record<RequestStatus, string> = {
-      Pendiente: t.pending,
-      Asignada: t.assigned,
-      'En Compra': t.inProgress,
-      Comprada: t.purchased,
-      Entregada: t.delivered,
-      Completada: t.completed,
-    };
-    return map[status] ?? status;
-  };
+  const statusLabels = getStatusLabels(t);
+  const getStatusLabel = (status: RequestStatus): string => statusLabels[status] ?? status;
 
   const getTimeAgo = (dateStr: string) => {
     const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
@@ -189,7 +170,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
             const isOverdue = overdueRequestIds?.has(req.id) ?? false;
             const cleanCookName = formatCleanName(req.createdByUserName);
             const cleanBuyerName = formatCleanName(req.assignedBuyerName);
-            const statusColor = STATUS_COLOR[req.status];
+            const statusColor = STATUS_COLORS[req.status];
 
             // Card accent border by state priority
             const accent = isHighlighted
@@ -276,7 +257,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     </div>
                     <div className="w-full rounded-full h-2 overflow-hidden" style={{ background: 'var(--sf-surface-2)' }}>
                       <div className="h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, var(--sf-accent), #2dd4bf)' }} />
+                        style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, var(--sf-accent), var(--sf-accent-2))' }} />
                     </div>
                   </div>
                 )}

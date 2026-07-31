@@ -162,6 +162,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
           <button
             onClick={saveProfile}
             disabled={!dirty && !savedFlash}
+            aria-live="polite"
             className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-sm transition disabled:opacity-45"
             style={
               savedFlash

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Product, Category, Restaurant, UserProfile } from '../types';
 import { formatCategoryName } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
+import { tint } from '../lib/colors';
 import { CheckCircle2, Send, Plus, Minus, Search, MessageSquare } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
 
@@ -12,8 +13,6 @@ interface DailyChecklistProps {
   onSubmitChecklist: (stockReadings: Record<string, number>, notes: string, urgent: boolean) => Promise<void>;
   isSubmitting: boolean;
 }
-
-const tint = (color: string, pct = 14) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
 export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   products,
@@ -127,12 +126,12 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           </div>
         </div>
         <div className="w-full rounded-full h-2 overflow-hidden" style={{ background: 'var(--sf-surface-2)' }}>
-          <div className="h-2 rounded-full transition-all duration-300" style={{ width: `${reviewProgressPct}%`, background: 'linear-gradient(90deg, var(--sf-accent), #2dd4bf)' }} />
+          <div className="h-2 rounded-full transition-all duration-300" style={{ width: `${reviewProgressPct}%`, background: 'linear-gradient(90deg, var(--sf-accent), var(--sf-accent-2))' }} />
         </div>
       </div>
 
       {submittedSuccess && (
-        <div className="p-3 rounded-2xl flex items-center gap-2.5 text-xs font-bold" style={{ background: tint('var(--sf-accent)', 14), color: 'var(--sf-accent)' }}>
+        <div role="status" aria-live="polite" className="p-3 rounded-2xl flex items-center gap-2.5 text-xs font-bold" style={{ background: tint('var(--sf-accent)', 14), color: 'var(--sf-accent)' }}>
           <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
           {t.checklistSentMsg}
         </div>
@@ -148,6 +147,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.checklistSearch}
+              aria-label={t.checklistSearch}
               className="w-full sf-inset pl-9 pr-3 py-2.5 text-xs font-medium focus:outline-none"
               style={{ color: 'var(--sf-text)' }}
             />
@@ -226,7 +226,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                       <button key={status} type="button" onClick={() => handleQuickSet(p.id, status)}
                         aria-pressed={active}
                         className="px-3 py-1.5 rounded-full text-xs font-extrabold transition"
-                        style={active ? { background: color, color: status === 'low' ? 'var(--sf-amber-contrast)' : '#fff' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
+                        style={active ? { background: color, color: status === 'low' ? 'var(--sf-amber-contrast)' : 'var(--sf-accent-contrast)' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
                         {label}
                       </button>
                     )
@@ -236,13 +236,13 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                 <div className="sf-inset rounded-full flex items-center gap-1 p-1">
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal - 1)}
                     aria-label={`${t.ariaDecreaseStock} ${p.name}`}
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-black transition sf-btn-ghost">
+                    className="w-11 h-11 rounded-full flex items-center justify-center font-black transition sf-btn-ghost">
                     <Minus className="w-4 h-4" />
                   </button>
                   <div className="w-9 text-center font-black text-base sm:text-lg tabular-nums" style={{ color: 'var(--sf-text)' }}>{currentVal}</div>
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal + 1)}
                     aria-label={`${t.ariaIncreaseStock} ${p.name}`}
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-black transition sf-btn-ghost">
+                    className="w-11 h-11 rounded-full flex items-center justify-center font-black transition sf-btn-ghost">
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>

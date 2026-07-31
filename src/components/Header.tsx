@@ -35,15 +35,21 @@ export const Header: React.FC<HeaderProps> = ({
   const t = getTranslation(currentUser.language || 'es');
   const [open, setOpen] = useState(false);
   const selectorRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const selected = restaurants.find((r) => r.id === selectedRestaurantId) || restaurants[0];
+
+  const closePopover = (returnFocus: boolean) => {
+    setOpen(false);
+    if (returnFocus) triggerRef.current?.focus();
+  };
 
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
       if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) setOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closePopover(true);
     document.addEventListener('mousedown', onDoc);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -71,11 +77,12 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div className="relative min-w-0" ref={selectorRef}>
               <button
+                ref={triggerRef}
                 onClick={() => {
                   setOpen((o) => !o);
                   playAlertSound('click');
                 }}
-                aria-haspopup="listbox"
+                aria-haspopup="true"
                 aria-expanded={open}
                 aria-label={t.headerRestaurantSelector}
                 className="flex items-center sf-pill rounded-2xl pl-3 pr-2.5 h-11 min-w-0 transition"
@@ -93,7 +100,6 @@ export const Header: React.FC<HeaderProps> = ({
 
               {open && (
                 <div
-                  role="listbox"
                   className="sf-card absolute left-0 top-full mt-2 min-w-[220px] max-h-72 overflow-y-auto p-1.5 z-50 animate-fadeIn"
                   style={{ borderRadius: '20px' }}
                 >
@@ -102,11 +108,10 @@ export const Header: React.FC<HeaderProps> = ({
                     return (
                       <button
                         key={r.id}
-                        role="option"
-                        aria-selected={active}
+                        aria-current={active ? 'true' : undefined}
                         onClick={() => {
                           onSelectRestaurant(r.id);
-                          setOpen(false);
+                          closePopover(true);
                           playAlertSound('click');
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-2xl text-left transition"

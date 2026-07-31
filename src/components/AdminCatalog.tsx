@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Product, Restaurant, Supplier, Category, UnitType, UserProfile } from '../types';
 import { getTranslation } from '../lib/translations';
+import { tint } from '../lib/colors';
 import { Plus, Edit2, Trash2, Save, X, Search, SlidersHorizontal, Clock, Flame } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
 
@@ -24,8 +25,6 @@ interface AdminCatalogProps {
 
 const inputCls = 'w-full sf-inset px-3 py-2 text-xs focus:outline-none';
 const inputStyle: React.CSSProperties = { color: 'var(--sf-text)' };
-const tint = (color: string, pct = 14) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
-
 export const AdminCatalog: React.FC<AdminCatalogProps> = ({
   products,
   restaurants,
@@ -151,7 +150,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             <div className="relative flex-1 max-w-xs w-full">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 sf-subtle" />
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t.adminSearchPlaceholder} className="w-full sf-inset pl-9 pr-3 py-1.5 text-xs focus:outline-none" style={inputStyle} />
+                placeholder={t.adminSearchPlaceholder} aria-label={t.adminSearchPlaceholder} className="w-full sf-inset pl-9 pr-3 py-1.5 text-xs focus:outline-none" style={inputStyle} />
             </div>
             <button onClick={() => setShowAddForm((s) => !s)}
               className="w-full sm:w-auto px-3.5 py-1.5 sf-btn-accent font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 flex-shrink-0 whitespace-nowrap">

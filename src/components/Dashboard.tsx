@@ -2,6 +2,7 @@ import React from 'react';
 import { UserProfile, SupplyRequest, Product } from '../types';
 import { getTranslation } from '../lib/translations';
 import { formatCleanName } from '../lib/formatters';
+import { STATUS_COLORS, getStatusLabels } from '../lib/colors';
 import {
   AlertTriangle,
   PackageCheck,
@@ -38,15 +39,6 @@ const isToday = (iso?: string) => {
     d.getMonth() === n.getMonth() &&
     d.getDate() === n.getDate()
   );
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  Pendiente: 'var(--sf-amber)',
-  Asignada: 'var(--sf-sky)',
-  'En Compra': 'var(--sf-violet)',
-  Comprada: 'var(--sf-accent)',
-  Entregada: 'var(--sf-accent)',
-  Completada: 'var(--sf-text-subtle)',
 };
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -117,14 +109,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
-  const statusLabels: Record<string, string> = {
-    Pendiente: t.pending,
-    Asignada: t.assigned,
-    'En Compra': t.inProgress,
-    Comprada: t.purchased,
-    Entregada: t.delivered,
-    Completada: t.completed,
-  };
+  const statusLabels = getStatusLabels(t);
 
   return (
     <div className="space-y-6 animate-fadeIn">

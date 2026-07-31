@@ -117,7 +117,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
             <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--sf-surface-2)' }}>
               <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, var(--sf-accent), #2dd4bf)' }}
+                style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, var(--sf-accent), var(--sf-accent-2))' }}
               />
             </div>
           </div>
