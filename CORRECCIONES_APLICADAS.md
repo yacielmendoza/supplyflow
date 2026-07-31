@@ -32,6 +32,20 @@ priorizados por la propia auditoría.
    dispositivos — documentado aquí para que quede explícito el alcance, tal
    como sugería la auditoría.
 
+   **Verificación con Playwright + hallazgo adicional real:** al probar esto
+   en un navegador real, la restauración funcionaba en `localStorage` pero
+   la UI tardaba en reflejarla porque `loadInitialData()` esperaba (`Promise.all`)
+   a que **las 4** fuentes resolvieran, incluida `fetchSupplyRequests()`
+   (la única que depende de la red/Supabase) antes de aplicar la restauración
+   de catálogo/localStorage — si Supabase está lento o inalcanzable, el
+   catálogo (que no depende de red) queda bloqueado con él. Corregido en
+   `App.tsx`: `fetchRestaurants`/`fetchUsers`/`fetchProducts` (instantáneos,
+   estáticos + override local) ya no esperan a `fetchSupplyRequests`, que
+   ahora se resuelve por separado y actualiza `supplyRequests` cuando
+   termine. Confirmado con Playwright: agregar un producto y un local nuevo,
+   recargar la página y verlos persistidos de inmediato en la pestaña
+   Catálogo.
+
 ### 🟡 Medio
 
 3. **M1 — Radios inconsistentes (4px vs 8px) en tags de categoría.** Unificados

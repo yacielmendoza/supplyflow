@@ -132,15 +132,18 @@ export default function App() {
   const [isSubmittingChecklist, setIsSubmittingChecklist] = useState(false);
 
   const loadInitialData = useCallback(async () => {
-    const [rests, usrs, prods, reqs] = await Promise.all([
+    // Restaurants/users/products are static + localStorage-only (no backend
+    // table yet for the catalog) and resolve instantly. Supply requests are
+    // the only part that depends on the Supabase network round-trip, which
+    // can be slow or briefly unavailable — fetch it independently so a slow
+    // or failed connection never delays restoring the session/catalog.
+    const [rests, usrs, prods] = await Promise.all([
       fetchRestaurants(),
       fetchUsers(),
       fetchProducts(),
-      fetchSupplyRequests(),
     ]);
 
-    // Products/restaurants have no backend table yet (demo-only catalog); a
-    // locally-saved override lets admin edits survive a refresh on this device.
+    // A locally-saved override lets admin catalog edits survive a refresh on this device.
     const storedRestaurants = readStoredJSON<Restaurant[]>(RESTAURANTS_OVERRIDE_KEY);
     const storedProducts = readStoredJSON<Product[]>(PRODUCTS_OVERRIDE_KEY);
 
@@ -152,10 +155,12 @@ export default function App() {
     if (storedProducts && storedProducts.length > 0) setProducts(storedProducts);
     else if (prods.length > 0) setProducts(prods);
 
-    if (reqs.length > 0) {
-      const uniqueReqs = Array.from(new Map(reqs.map((r: SupplyRequest) => [r.id, r])).values());
-      setSupplyRequests(uniqueReqs);
-    }
+    fetchSupplyRequests().then((reqs) => {
+      if (reqs.length > 0) {
+        const uniqueReqs = Array.from(new Map(reqs.map((r: SupplyRequest) => [r.id, r])).values());
+        setSupplyRequests(uniqueReqs);
+      }
+    });
   }, []);
 
   useEffect(() => {
