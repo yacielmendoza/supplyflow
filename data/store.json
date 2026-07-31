@@ -157,7 +157,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-1",
-      "updatedAt": "2026-07-29T06:50:57.983Z"
+      "updatedAt": "2026-07-29T22:32:26.938Z",
+      "currentStock": 1
     },
     {
       "restaurantId": "rest-1",
@@ -169,7 +170,8 @@
       "suggestedSupplier": "Restaurant Depot",
       "active": true,
       "id": "prod-2",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 1
     },
     {
       "restaurantId": "rest-1",
@@ -181,7 +183,8 @@
       "suggestedSupplier": "Panadería Local El Sol",
       "active": true,
       "id": "prod-3",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 2
     },
     {
       "restaurantId": "rest-1",
@@ -193,7 +196,8 @@
       "suggestedSupplier": "Restaurant Depot",
       "active": true,
       "id": "prod-4",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -205,7 +209,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-5",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -217,7 +222,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-6",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -229,7 +235,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-7",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -241,7 +248,8 @@
       "suggestedSupplier": "Sysco / US Foods",
       "active": true,
       "id": "prod-8",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -253,7 +261,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-9",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -265,7 +274,8 @@
       "suggestedSupplier": "Panadería Local El Sol",
       "active": true,
       "id": "prod-10",
-      "updatedAt": "2026-07-29T06:50:57.985Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 6
     },
     {
       "restaurantId": "rest-1",
@@ -277,7 +287,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-11",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -289,7 +300,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-12",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -301,7 +313,8 @@
       "suggestedSupplier": "Sysco / US Foods",
       "active": true,
       "id": "prod-13",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -313,7 +326,8 @@
       "suggestedSupplier": "Panadería Local El Sol",
       "active": true,
       "id": "prod-14",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 5
     },
     {
       "restaurantId": "rest-1",
@@ -325,7 +339,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-15",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 5
     },
     {
       "restaurantId": "rest-1",
@@ -337,7 +352,8 @@
       "suggestedSupplier": "Restaurant Depot",
       "active": true,
       "id": "prod-16",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -349,7 +365,8 @@
       "suggestedSupplier": "Panadería Local El Sol",
       "active": true,
       "id": "prod-17",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -361,7 +378,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-18",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -373,7 +391,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-19",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -385,7 +404,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-20",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -397,7 +417,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-21",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 5
     },
     {
       "restaurantId": "rest-1",
@@ -409,7 +430,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-22",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -421,7 +443,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-23",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -433,7 +456,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-24",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -445,7 +469,8 @@
       "suggestedSupplier": "Restaurant Depot",
       "active": true,
       "id": "prod-25",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -457,7 +482,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-26",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -469,7 +495,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-27",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -481,7 +508,8 @@
       "suggestedSupplier": "Sysco / US Foods",
       "active": true,
       "id": "prod-28",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -493,7 +521,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-29",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -505,7 +534,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-30",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -517,7 +547,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-31",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -529,7 +560,8 @@
       "suggestedSupplier": "Sysco / US Foods",
       "active": true,
       "id": "prod-32",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -541,7 +573,8 @@
       "suggestedSupplier": "Restaurant Depot",
       "active": true,
       "id": "prod-33",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -553,7 +586,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-34",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -565,7 +599,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-35",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -577,7 +612,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-36",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -589,7 +625,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-37",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -601,7 +638,8 @@
       "suggestedSupplier": "Restaurant Depot",
       "active": true,
       "id": "prod-38",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 12
     },
     {
       "restaurantId": "rest-1",
@@ -613,7 +651,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-39",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -625,7 +664,8 @@
       "suggestedSupplier": "Restaurant Depot",
       "active": true,
       "id": "prod-40",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -637,7 +677,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-41",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -649,7 +690,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-42",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -661,7 +703,8 @@
       "suggestedSupplier": "Sysco / US Foods",
       "active": true,
       "id": "prod-43",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.939Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -673,7 +716,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-44",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -685,7 +729,8 @@
       "suggestedSupplier": "Sysco / US Foods",
       "active": true,
       "id": "prod-45",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -697,7 +742,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-46",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -709,7 +755,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-47",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -721,7 +768,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-48",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -733,7 +781,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-49",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -745,7 +794,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-50",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -757,7 +807,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-51",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -769,7 +820,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-52",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -781,7 +833,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-53",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -793,7 +846,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-54",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -805,7 +859,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-55",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -817,7 +872,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-56",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -829,7 +885,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-57",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -841,7 +898,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-58",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -853,7 +911,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-59",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -865,7 +924,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-60",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -877,7 +937,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-61",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -889,7 +950,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-62",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -901,7 +963,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-63",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -913,7 +976,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-64",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -925,7 +989,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-65",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -937,7 +1002,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-66",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -949,7 +1015,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-67",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -961,7 +1028,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-68",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -973,7 +1041,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-69",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -985,7 +1054,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-70",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.940Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -997,7 +1067,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-71",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1009,7 +1080,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-72",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1021,7 +1093,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-73",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1033,7 +1106,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-74",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 5
     },
     {
       "restaurantId": "rest-1",
@@ -1045,7 +1119,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-75",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1057,7 +1132,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-76",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1069,7 +1145,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-77",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 5
     },
     {
       "restaurantId": "rest-1",
@@ -1081,7 +1158,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-78",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1093,7 +1171,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-79",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1105,7 +1184,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-80",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1117,7 +1197,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-81",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1129,7 +1210,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-82",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1141,7 +1223,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-83",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1153,7 +1236,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-84",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1165,7 +1249,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-85",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1177,7 +1262,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-86",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1189,7 +1275,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-87",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1201,7 +1288,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-88",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 6
     },
     {
       "restaurantId": "rest-1",
@@ -1213,7 +1301,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-89",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1225,7 +1314,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-90",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1237,7 +1327,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-91",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1249,7 +1340,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-92",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1261,7 +1353,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-93",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1273,7 +1366,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-94",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1285,7 +1379,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-95",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1297,7 +1392,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-96",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1309,7 +1405,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-97",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1321,7 +1418,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-98",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1333,7 +1431,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-99",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1345,7 +1444,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-100",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1357,7 +1457,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-101",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1369,7 +1470,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-102",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1381,7 +1483,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-103",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1393,7 +1496,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-104",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1405,7 +1509,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-105",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1417,7 +1522,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-106",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1429,7 +1535,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-107",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1441,7 +1548,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-108",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1453,7 +1561,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-109",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1465,7 +1574,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-110",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.941Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1477,7 +1587,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-111",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1489,7 +1600,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-112",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1501,7 +1613,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-113",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1513,7 +1626,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-114",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1525,7 +1639,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-115",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1537,7 +1652,8 @@
       "suggestedSupplier": "Distribuidor Gas & Leña West Texas",
       "active": true,
       "id": "prod-116",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 5
     },
     {
       "restaurantId": "rest-1",
@@ -1549,7 +1665,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-117",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1561,7 +1678,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-118",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1573,7 +1691,8 @@
       "suggestedSupplier": "Sysco / US Foods",
       "active": true,
       "id": "prod-119",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1585,7 +1704,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-120",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1597,7 +1717,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-121",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1609,7 +1730,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-122",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1621,7 +1743,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-123",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1633,7 +1756,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-124",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 5
     },
     {
       "restaurantId": "rest-1",
@@ -1645,7 +1769,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-125",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1657,7 +1782,8 @@
       "suggestedSupplier": "Distribuidor Gas & Leña West Texas",
       "active": true,
       "id": "prod-126",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1669,7 +1795,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-127",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1681,7 +1808,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-128",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1693,7 +1821,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-129",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1705,7 +1834,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-130",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1717,7 +1847,8 @@
       "suggestedSupplier": "Distribuidor Gas & Leña West Texas",
       "active": true,
       "id": "prod-131",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 7
     },
     {
       "restaurantId": "rest-1",
@@ -1729,7 +1860,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-132",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1741,7 +1873,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-133",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1753,7 +1886,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-134",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1765,7 +1899,8 @@
       "suggestedSupplier": "Distribuidor de Licores",
       "active": true,
       "id": "prod-135",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1777,7 +1912,8 @@
       "suggestedSupplier": "Distribuidor de Licores",
       "active": true,
       "id": "prod-136",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1789,7 +1925,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-137",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1801,7 +1938,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-138",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1813,7 +1951,8 @@
       "suggestedSupplier": "Sam's Club",
       "active": true,
       "id": "prod-139",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1825,7 +1964,8 @@
       "suggestedSupplier": "Distribuidor de Licores",
       "active": true,
       "id": "prod-140",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-1",
@@ -1837,7 +1977,8 @@
       "suggestedSupplier": "Distribuidor de Licores",
       "active": true,
       "id": "prod-141",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1849,7 +1990,8 @@
       "suggestedSupplier": "Distribuidor de Licores",
       "active": true,
       "id": "prod-142",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1861,7 +2003,8 @@
       "suggestedSupplier": "Distribuidor de Licores",
       "active": true,
       "id": "prod-143",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 4
     },
     {
       "restaurantId": "rest-1",
@@ -1873,7 +2016,8 @@
       "suggestedSupplier": "Distribuidor de Licores",
       "active": true,
       "id": "prod-144",
-      "updatedAt": "2026-07-29T06:50:57.986Z"
+      "updatedAt": "2026-07-29T22:32:26.942Z",
+      "currentStock": 3
     },
     {
       "restaurantId": "rest-2",
@@ -3498,6 +3642,164 @@
   ],
   "supplyRequests": [
     {
+      "id": "req-1785364346942-o1tvk",
+      "requestNumber": 128,
+      "restaurantId": "rest-1",
+      "restaurantName": "Caddy Shack Grill",
+      "createdByUserId": "user-1",
+      "createdByUserName": "Yaciel",
+      "status": "Completada",
+      "urgent": false,
+      "notes": "Generada automáticamente desde Checklist Diaria. 3 productos bajo mínimo.",
+      "createdAt": "2026-07-29T22:32:26.942Z",
+      "items": [
+        {
+          "id": "ri-1785364346938-prod-1",
+          "productId": "prod-1",
+          "productName": "American Cheese (squares)",
+          "category": "INGREDIENTS",
+          "unit": "Paquete",
+          "currentStockAtRequest": 1,
+          "minThreshold": 2,
+          "requestedQty": 6,
+          "suggestedSupplier": "Sam's Club",
+          "purchased": true,
+          "purchasedAt": "2026-07-29T22:33:48.835Z"
+        },
+        {
+          "id": "ri-1785364346939-prod-2",
+          "productId": "prod-2",
+          "productName": "Bacon",
+          "category": "INGREDIENTS",
+          "unit": "Caja",
+          "currentStockAtRequest": 1,
+          "minThreshold": 2,
+          "requestedQty": 5,
+          "suggestedSupplier": "Restaurant Depot",
+          "purchased": true,
+          "purchasedAt": "2026-07-29T22:33:49.414Z"
+        },
+        {
+          "id": "ri-1785364346939-prod-3",
+          "productId": "prod-3",
+          "productName": "Burger Buns",
+          "category": "INGREDIENTS",
+          "unit": "Paquete",
+          "currentStockAtRequest": 2,
+          "minThreshold": 3,
+          "requestedQty": 9,
+          "suggestedSupplier": "Panadería Local El Sol",
+          "purchased": true,
+          "purchasedAt": "2026-07-29T22:33:49.975Z"
+        }
+      ],
+      "assignedBuyerId": "user-2",
+      "assignedBuyerName": "Pete",
+      "assignedAt": "2026-07-29T22:33:46.712Z",
+      "purchasedAt": "2026-07-29T22:33:51.817Z",
+      "deliveredAt": "2026-07-29T22:33:54.101Z",
+      "completedAt": "2026-07-29T22:33:59.843Z"
+    },
+    {
+      "id": "req-1785346082511-fptqe",
+      "requestNumber": 127,
+      "restaurantId": "rest-1",
+      "restaurantName": "Caddy Shack Grill",
+      "createdByUserId": "user-1",
+      "createdByUserName": "Yaciel",
+      "status": "Completada",
+      "urgent": false,
+      "notes": "Generada automáticamente por 1 insumos faltantes de Solicitud #126.",
+      "createdAt": "2026-07-29T17:28:02.511Z",
+      "items": [
+        {
+          "id": "ri-1785346082511-0",
+          "productId": "prod-3",
+          "productName": "Burger Buns",
+          "category": "INGREDIENTS",
+          "unit": "Paquete",
+          "currentStockAtRequest": 2,
+          "minThreshold": 3,
+          "requestedQty": 9,
+          "suggestedSupplier": "Panadería Local El Sol",
+          "purchased": true,
+          "purchasedAt": "2026-07-29T22:31:49.959Z"
+        }
+      ],
+      "assignedBuyerId": "user-2",
+      "assignedBuyerName": "Pete",
+      "assignedAt": "2026-07-29T22:31:48.206Z",
+      "purchasedAt": "2026-07-29T22:31:51.849Z",
+      "deliveredAt": "2026-07-29T22:31:56.773Z",
+      "completedAt": "2026-07-29T22:32:03.867Z"
+    },
+    {
+      "id": "req-1785344721506-k1ctd",
+      "requestNumber": 126,
+      "restaurantId": "rest-1",
+      "restaurantName": "Caddy Shack Grill",
+      "createdByUserId": "user-1",
+      "createdByUserName": "Yaciel",
+      "status": "Completada",
+      "urgent": false,
+      "notes": "Generada automáticamente por 2 insumos faltantes de Solicitud #125.",
+      "createdAt": "2026-07-29T17:05:21.506Z",
+      "items": [
+        {
+          "id": "ri-1785344721506-0",
+          "productId": "prod-2",
+          "productName": "Bacon",
+          "category": "INGREDIENTS",
+          "unit": "Caja",
+          "currentStockAtRequest": 1,
+          "minThreshold": 2,
+          "requestedQty": 5,
+          "suggestedSupplier": "Restaurant Depot",
+          "purchased": true,
+          "purchasedAt": "2026-07-29T17:27:29.686Z"
+        }
+      ],
+      "assignedBuyerId": "user-2",
+      "assignedBuyerName": "Pete",
+      "assignedAt": "2026-07-29T17:27:20.643Z",
+      "purchasedAt": "2026-07-29T17:28:02.511Z",
+      "deliveredAt": "2026-07-29T22:31:58.170Z",
+      "completedAt": "2026-07-29T22:32:04.952Z"
+    },
+    {
+      "id": "req-1785343773205-gcfs3",
+      "requestNumber": 125,
+      "restaurantId": "rest-1",
+      "restaurantName": "Caddy Shack Grill",
+      "createdByUserId": "user-1",
+      "createdByUserName": "Yaciel",
+      "status": "Completada",
+      "urgent": false,
+      "notes": "Generada automáticamente desde Checklist Diaria. 3 productos bajo mínimo.",
+      "createdAt": "2026-07-29T16:49:33.205Z",
+      "items": [
+        {
+          "id": "ri-1785343773205-prod-1",
+          "productId": "prod-1",
+          "productName": "American Cheese (squares)",
+          "category": "INGREDIENTS",
+          "unit": "Paquete",
+          "currentStockAtRequest": 1,
+          "minThreshold": 2,
+          "requestedQty": 6,
+          "suggestedSupplier": "Sam's Club",
+          "purchased": true,
+          "purchasedAt": "2026-07-29T17:05:10.720Z"
+        }
+      ],
+      "assignedBuyerId": "user-2",
+      "assignedBuyerName": "Pete",
+      "assignedAt": "2026-07-29T17:03:39.583Z",
+      "purchasedAt": "2026-07-29T17:05:21.505Z",
+      "deliveredAt": "2026-07-29T17:27:43.700Z",
+      "completedAt": "2026-07-29T22:32:05.981Z"
+    },
+    {
       "id": "req-101",
       "requestNumber": 124,
       "restaurantId": "rest-1",
@@ -3506,7 +3808,7 @@
       "createdByUserName": "Yaciel",
       "assignedBuyerId": "user-2",
       "assignedBuyerName": "Pete",
-      "status": "En Compra",
+      "status": "Completada",
       "urgent": true,
       "notes": "Requerimos tocino y pan urgente antes de las 11:00 AM para el turno del almuerzo.",
       "createdAt": "2026-07-29T04:50:57.986Z",
@@ -3549,7 +3851,8 @@
           "minThreshold": 2,
           "requestedQty": 5,
           "suggestedSupplier": "Sam's Club",
-          "purchased": false
+          "purchased": true,
+          "purchasedAt": "2026-07-29T16:08:53.284Z"
         },
         {
           "id": "ri-4",
@@ -3561,11 +3864,3472 @@
           "minThreshold": 3,
           "requestedQty": 6,
           "suggestedSupplier": "Sam's Club",
-          "purchased": false
+          "purchased": true,
+          "purchasedAt": "2026-07-29T16:08:53.289Z"
         }
-      ]
+      ],
+      "purchasedAt": "2026-07-29T16:08:53.289Z",
+      "deliveredAt": "2026-07-29T16:09:12.005Z",
+      "completedAt": "2026-07-29T16:11:58.615Z"
     }
   ],
-  "auditLogs": [],
-  "requestCounter": 124
+  "auditLogs": [
+    {
+      "id": "audit-1785343773205-prod-1",
+      "restaurantId": "rest-1",
+      "productId": "prod-1",
+      "productName": "American Cheese (squares)",
+      "recordedQty": 1,
+      "minThreshold": 2,
+      "needsReplenishment": true,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-2",
+      "restaurantId": "rest-1",
+      "productId": "prod-2",
+      "productName": "Bacon",
+      "recordedQty": 1,
+      "minThreshold": 2,
+      "needsReplenishment": true,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-3",
+      "restaurantId": "rest-1",
+      "productId": "prod-3",
+      "productName": "Burger Buns",
+      "recordedQty": 2,
+      "minThreshold": 3,
+      "needsReplenishment": true,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-4",
+      "restaurantId": "rest-1",
+      "productId": "prod-4",
+      "productName": "Burger Patties",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-5",
+      "restaurantId": "rest-1",
+      "productId": "prod-5",
+      "productName": "Butter Blocks",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-6",
+      "restaurantId": "rest-1",
+      "productId": "prod-6",
+      "productName": "Cheese Sticks",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-7",
+      "restaurantId": "rest-1",
+      "productId": "prod-7",
+      "productName": "Cilantro",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-8",
+      "restaurantId": "rest-1",
+      "productId": "prod-8",
+      "productName": "Cilantro Cream Sauce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-9",
+      "restaurantId": "rest-1",
+      "productId": "prod-9",
+      "productName": "Corn Dog",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-10",
+      "restaurantId": "rest-1",
+      "productId": "prod-10",
+      "productName": "Corn Tortillas",
+      "recordedQty": 6,
+      "minThreshold": 4,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-11",
+      "restaurantId": "rest-1",
+      "productId": "prod-11",
+      "productName": "Eggs",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-12",
+      "restaurantId": "rest-1",
+      "productId": "prod-12",
+      "productName": "Fried Burritos",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-13",
+      "restaurantId": "rest-1",
+      "productId": "prod-13",
+      "productName": "Fried Pickles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-14",
+      "restaurantId": "rest-1",
+      "productId": "prod-14",
+      "productName": "Flour Tortillas",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-15",
+      "restaurantId": "rest-1",
+      "productId": "prod-15",
+      "productName": "Fries (Papas Fritas)",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-16",
+      "restaurantId": "rest-1",
+      "productId": "prod-16",
+      "productName": "Ham",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-17",
+      "restaurantId": "rest-1",
+      "productId": "prod-17",
+      "productName": "Hot Dog Buns",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-18",
+      "restaurantId": "rest-1",
+      "productId": "prod-18",
+      "productName": "Hot Dog Weenies (Beef)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-19",
+      "restaurantId": "rest-1",
+      "productId": "prod-19",
+      "productName": "Jalapeño Corn Dogs",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-20",
+      "restaurantId": "rest-1",
+      "productId": "prod-20",
+      "productName": "Jalapeños (pickled)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-21",
+      "restaurantId": "rest-1",
+      "productId": "prod-21",
+      "productName": "Ketchup Bottles",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-22",
+      "restaurantId": "rest-1",
+      "productId": "prod-22",
+      "productName": "Ketchup Packets",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-23",
+      "restaurantId": "rest-1",
+      "productId": "prod-23",
+      "productName": "Lemon Juice Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-24",
+      "restaurantId": "rest-1",
+      "productId": "prod-24",
+      "productName": "Lemons",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-25",
+      "restaurantId": "rest-1",
+      "productId": "prod-25",
+      "productName": "Lettuce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-26",
+      "restaurantId": "rest-1",
+      "productId": "prod-26",
+      "productName": "Lime Juice Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-27",
+      "restaurantId": "rest-1",
+      "productId": "prod-27",
+      "productName": "Limes",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-28",
+      "restaurantId": "rest-1",
+      "productId": "prod-28",
+      "productName": "Mac N Cheese Bites",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-29",
+      "restaurantId": "rest-1",
+      "productId": "prod-29",
+      "productName": "Mayonnaise Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-30",
+      "restaurantId": "rest-1",
+      "productId": "prod-30",
+      "productName": "Mayonnaise Packets",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-31",
+      "restaurantId": "rest-1",
+      "productId": "prod-31",
+      "productName": "Milk",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-32",
+      "restaurantId": "rest-1",
+      "productId": "prod-32",
+      "productName": "Marinara Sauce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-33",
+      "restaurantId": "rest-1",
+      "productId": "prod-33",
+      "productName": "Mozzarella",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-34",
+      "restaurantId": "rest-1",
+      "productId": "prod-34",
+      "productName": "Mustard Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-35",
+      "restaurantId": "rest-1",
+      "productId": "prod-35",
+      "productName": "Mustard Packets",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-36",
+      "restaurantId": "rest-1",
+      "productId": "prod-36",
+      "productName": "Nacho Cheese",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-37",
+      "restaurantId": "rest-1",
+      "productId": "prod-37",
+      "productName": "Onions",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-38",
+      "restaurantId": "rest-1",
+      "productId": "prod-38",
+      "productName": "Pastor Meat",
+      "recordedQty": 12,
+      "minThreshold": 10,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-39",
+      "restaurantId": "rest-1",
+      "productId": "prod-39",
+      "productName": "Pepper",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-40",
+      "restaurantId": "rest-1",
+      "productId": "prod-40",
+      "productName": "Pepperoni",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-41",
+      "restaurantId": "rest-1",
+      "productId": "prod-41",
+      "productName": "Pickles",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-42",
+      "restaurantId": "rest-1",
+      "productId": "prod-42",
+      "productName": "Pineapple",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-43",
+      "restaurantId": "rest-1",
+      "productId": "prod-43",
+      "productName": "Pizza Flat Bread",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-44",
+      "restaurantId": "rest-1",
+      "productId": "prod-44",
+      "productName": "Ranch",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-45",
+      "restaurantId": "rest-1",
+      "productId": "prod-45",
+      "productName": "Remoulad Sauce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-46",
+      "restaurantId": "rest-1",
+      "productId": "prod-46",
+      "productName": "Salt",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-47",
+      "restaurantId": "rest-1",
+      "productId": "prod-47",
+      "productName": "Tomatoes",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-48",
+      "restaurantId": "rest-1",
+      "productId": "prod-48",
+      "productName": "Uncle Chris Gourmet Steak Seasoning",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-49",
+      "restaurantId": "rest-1",
+      "productId": "prod-49",
+      "productName": "Beef Jerky (Jack Links)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-50",
+      "restaurantId": "rest-1",
+      "productId": "prod-50",
+      "productName": "Chex Mix Trail Mix",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-51",
+      "restaurantId": "rest-1",
+      "productId": "prod-51",
+      "productName": "Cheetos",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-52",
+      "restaurantId": "rest-1",
+      "productId": "prod-52",
+      "productName": "Chips (Assorted)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-53",
+      "restaurantId": "rest-1",
+      "productId": "prod-53",
+      "productName": "Cliff Protein Bars",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-54",
+      "restaurantId": "rest-1",
+      "productId": "prod-54",
+      "productName": "Dill Pickles (packaged)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-55",
+      "restaurantId": "rest-1",
+      "productId": "prod-55",
+      "productName": "Doritos Cool Ranch",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-56",
+      "restaurantId": "rest-1",
+      "productId": "prod-56",
+      "productName": "Doritos Nacho Cheese",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-57",
+      "restaurantId": "rest-1",
+      "productId": "prod-57",
+      "productName": "Funyuns",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-58",
+      "restaurantId": "rest-1",
+      "productId": "prod-58",
+      "productName": "Hot Cheetos",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-59",
+      "restaurantId": "rest-1",
+      "productId": "prod-59",
+      "productName": "Hot Cheetos w/Lime",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-60",
+      "restaurantId": "rest-1",
+      "productId": "prod-60",
+      "productName": "Lays BBQ Chips",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-61",
+      "restaurantId": "rest-1",
+      "productId": "prod-61",
+      "productName": "Lays Potato Chips",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-62",
+      "restaurantId": "rest-1",
+      "productId": "prod-62",
+      "productName": "Planters Cashews",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-63",
+      "restaurantId": "rest-1",
+      "productId": "prod-63",
+      "productName": "Planters Honey Roasted",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-64",
+      "restaurantId": "rest-1",
+      "productId": "prod-64",
+      "productName": "Planters Peanuts",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-65",
+      "restaurantId": "rest-1",
+      "productId": "prod-65",
+      "productName": "Pringles (Original)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-66",
+      "restaurantId": "rest-1",
+      "productId": "prod-66",
+      "productName": "Pringles Sour Cream",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-67",
+      "restaurantId": "rest-1",
+      "productId": "prod-67",
+      "productName": "Rold Gold Pretzels",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-68",
+      "restaurantId": "rest-1",
+      "productId": "prod-68",
+      "productName": "Ruffles (Original)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-69",
+      "restaurantId": "rest-1",
+      "productId": "prod-69",
+      "productName": "Tajin Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-70",
+      "restaurantId": "rest-1",
+      "productId": "prod-70",
+      "productName": "Twang Beer Salt Bottles",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-71",
+      "restaurantId": "rest-1",
+      "productId": "prod-71",
+      "productName": "Arnold Palmer",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-72",
+      "restaurantId": "rest-1",
+      "productId": "prod-72",
+      "productName": "Big Red",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-73",
+      "restaurantId": "rest-1",
+      "productId": "prod-73",
+      "productName": "Blue Gatorade",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-74",
+      "restaurantId": "rest-1",
+      "productId": "prod-74",
+      "productName": "Coke",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-75",
+      "restaurantId": "rest-1",
+      "productId": "prod-75",
+      "productName": "Coke Zero",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-76",
+      "restaurantId": "rest-1",
+      "productId": "prod-76",
+      "productName": "Diet Coke",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-77",
+      "restaurantId": "rest-1",
+      "productId": "prod-77",
+      "productName": "Dr Pepper",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-78",
+      "restaurantId": "rest-1",
+      "productId": "prod-78",
+      "productName": "Gatorade (Orange)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-79",
+      "restaurantId": "rest-1",
+      "productId": "prod-79",
+      "productName": "Gatorade (Red)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-80",
+      "restaurantId": "rest-1",
+      "productId": "prod-80",
+      "productName": "Gatorade (White)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-81",
+      "restaurantId": "rest-1",
+      "productId": "prod-81",
+      "productName": "Gatorade (Yellow)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-82",
+      "restaurantId": "rest-1",
+      "productId": "prod-82",
+      "productName": "Lemonade",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-83",
+      "restaurantId": "rest-1",
+      "productId": "prod-83",
+      "productName": "Peach Tea",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-84",
+      "restaurantId": "rest-1",
+      "productId": "prod-84",
+      "productName": "Red Bull",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-85",
+      "restaurantId": "rest-1",
+      "productId": "prod-85",
+      "productName": "Sprite",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-86",
+      "restaurantId": "rest-1",
+      "productId": "prod-86",
+      "productName": "Sweet Tea",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-87",
+      "restaurantId": "rest-1",
+      "productId": "prod-87",
+      "productName": "Unsweet Tea",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-88",
+      "restaurantId": "rest-1",
+      "productId": "prod-88",
+      "productName": "Water Bottles",
+      "recordedQty": 6,
+      "minThreshold": 4,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-89",
+      "restaurantId": "rest-1",
+      "productId": "prod-89",
+      "productName": "Club Soda",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-90",
+      "restaurantId": "rest-1",
+      "productId": "prod-90",
+      "productName": "Cranberry Juice",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-91",
+      "restaurantId": "rest-1",
+      "productId": "prod-91",
+      "productName": "Ginger Ale",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-92",
+      "restaurantId": "rest-1",
+      "productId": "prod-92",
+      "productName": "Grape Juice",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-93",
+      "restaurantId": "rest-1",
+      "productId": "prod-93",
+      "productName": "Grenadine",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-94",
+      "restaurantId": "rest-1",
+      "productId": "prod-94",
+      "productName": "Orange Juice",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-95",
+      "restaurantId": "rest-1",
+      "productId": "prod-95",
+      "productName": "Sweet N Sour",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-96",
+      "restaurantId": "rest-1",
+      "productId": "prod-96",
+      "productName": "Tabasco",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-97",
+      "restaurantId": "rest-1",
+      "productId": "prod-97",
+      "productName": "Tonic Water",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-98",
+      "restaurantId": "rest-1",
+      "productId": "prod-98",
+      "productName": "Worcestershire sauce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-99",
+      "restaurantId": "rest-1",
+      "productId": "prod-99",
+      "productName": "Zing Zang",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-100",
+      "restaurantId": "rest-1",
+      "productId": "prod-100",
+      "productName": "Air Heads",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-101",
+      "restaurantId": "rest-1",
+      "productId": "prod-101",
+      "productName": "Butterfingers",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-102",
+      "restaurantId": "rest-1",
+      "productId": "prod-102",
+      "productName": "Kit Kat",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-103",
+      "restaurantId": "rest-1",
+      "productId": "prod-103",
+      "productName": "M&Ms (Peanut)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-104",
+      "restaurantId": "rest-1",
+      "productId": "prod-104",
+      "productName": "M&Ms (Plain)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-105",
+      "restaurantId": "rest-1",
+      "productId": "prod-105",
+      "productName": "Reeses",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-106",
+      "restaurantId": "rest-1",
+      "productId": "prod-106",
+      "productName": "Skittles",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-107",
+      "restaurantId": "rest-1",
+      "productId": "prod-107",
+      "productName": "Snickers",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-108",
+      "restaurantId": "rest-1",
+      "productId": "prod-108",
+      "productName": "Twix",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-109",
+      "restaurantId": "rest-1",
+      "productId": "prod-109",
+      "productName": "All Purpose Clean Spray",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-110",
+      "restaurantId": "rest-1",
+      "productId": "prod-110",
+      "productName": "Dish Soap",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-111",
+      "restaurantId": "rest-1",
+      "productId": "prod-111",
+      "productName": "Hand Sanitizer",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-112",
+      "restaurantId": "rest-1",
+      "productId": "prod-112",
+      "productName": "16 oz Plastic Cups",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-113",
+      "restaurantId": "rest-1",
+      "productId": "prod-113",
+      "productName": "16 oz Tops (sippy)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-114",
+      "restaurantId": "rest-1",
+      "productId": "prod-114",
+      "productName": "2 oz Cups",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-115",
+      "restaurantId": "rest-1",
+      "productId": "prod-115",
+      "productName": "2 oz Tops",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-116",
+      "restaurantId": "rest-1",
+      "productId": "prod-116",
+      "productName": "Charcoal (Carbón)",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-117",
+      "restaurantId": "rest-1",
+      "productId": "prod-117",
+      "productName": "Checkered Plates",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-118",
+      "restaurantId": "rest-1",
+      "productId": "prod-118",
+      "productName": "Fryer Oil (Aceite de freidora)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-119",
+      "restaurantId": "rest-1",
+      "productId": "prod-119",
+      "productName": "Grill Brick",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-120",
+      "restaurantId": "rest-1",
+      "productId": "prod-120",
+      "productName": "Large Vinyl Gloves",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-121",
+      "restaurantId": "rest-1",
+      "productId": "prod-121",
+      "productName": "Lighter (long)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-122",
+      "restaurantId": "rest-1",
+      "productId": "prod-122",
+      "productName": "Lighter Fluid",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-123",
+      "restaurantId": "rest-1",
+      "productId": "prod-123",
+      "productName": "Medium Nitrile Gloves",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-124",
+      "restaurantId": "rest-1",
+      "productId": "prod-124",
+      "productName": "Napkins",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-125",
+      "restaurantId": "rest-1",
+      "productId": "prod-125",
+      "productName": "Plastic Ware (Cubiertos)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-126",
+      "restaurantId": "rest-1",
+      "productId": "prod-126",
+      "productName": "Propane Tank",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-127",
+      "restaurantId": "rest-1",
+      "productId": "prod-127",
+      "productName": "Straws",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-128",
+      "restaurantId": "rest-1",
+      "productId": "prod-128",
+      "productName": "Towels",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-129",
+      "restaurantId": "rest-1",
+      "productId": "prod-129",
+      "productName": "Trash Bags",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-130",
+      "restaurantId": "rest-1",
+      "productId": "prod-130",
+      "productName": "Wax Paper",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-131",
+      "restaurantId": "rest-1",
+      "productId": "prod-131",
+      "productName": "Fire Wood (Leña)",
+      "recordedQty": 7,
+      "minThreshold": 5,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-132",
+      "restaurantId": "rest-1",
+      "productId": "prod-132",
+      "productName": "Bud Light",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-133",
+      "restaurantId": "rest-1",
+      "productId": "prod-133",
+      "productName": "Coors Light",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-134",
+      "restaurantId": "rest-1",
+      "productId": "prod-134",
+      "productName": "Dos XX",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-135",
+      "restaurantId": "rest-1",
+      "productId": "prod-135",
+      "productName": "Fireball (wine base)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-136",
+      "restaurantId": "rest-1",
+      "productId": "prod-136",
+      "productName": "Good Boys",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-137",
+      "restaurantId": "rest-1",
+      "productId": "prod-137",
+      "productName": "High Noons",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-138",
+      "restaurantId": "rest-1",
+      "productId": "prod-138",
+      "productName": "Michelin Ultra",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-139",
+      "restaurantId": "rest-1",
+      "productId": "prod-139",
+      "productName": "Modelo",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-140",
+      "restaurantId": "rest-1",
+      "productId": "prod-140",
+      "productName": "Parabay (wine base)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-141",
+      "restaurantId": "rest-1",
+      "productId": "prod-141",
+      "productName": "Tequila (wine base)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-142",
+      "restaurantId": "rest-1",
+      "productId": "prod-142",
+      "productName": "Vodka (wine base)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-143",
+      "restaurantId": "rest-1",
+      "productId": "prod-143",
+      "productName": "Whiskey (wine base)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785343773205-prod-144",
+      "restaurantId": "rest-1",
+      "productId": "prod-144",
+      "productName": "Buzzballs",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T16:49:33.205Z"
+    },
+    {
+      "id": "audit-1785364346938-prod-1",
+      "restaurantId": "rest-1",
+      "productId": "prod-1",
+      "productName": "American Cheese (squares)",
+      "recordedQty": 1,
+      "minThreshold": 2,
+      "needsReplenishment": true,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.938Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-2",
+      "restaurantId": "rest-1",
+      "productId": "prod-2",
+      "productName": "Bacon",
+      "recordedQty": 1,
+      "minThreshold": 2,
+      "needsReplenishment": true,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-3",
+      "restaurantId": "rest-1",
+      "productId": "prod-3",
+      "productName": "Burger Buns",
+      "recordedQty": 2,
+      "minThreshold": 3,
+      "needsReplenishment": true,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-4",
+      "restaurantId": "rest-1",
+      "productId": "prod-4",
+      "productName": "Burger Patties",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-5",
+      "restaurantId": "rest-1",
+      "productId": "prod-5",
+      "productName": "Butter Blocks",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-6",
+      "restaurantId": "rest-1",
+      "productId": "prod-6",
+      "productName": "Cheese Sticks",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-7",
+      "restaurantId": "rest-1",
+      "productId": "prod-7",
+      "productName": "Cilantro",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-8",
+      "restaurantId": "rest-1",
+      "productId": "prod-8",
+      "productName": "Cilantro Cream Sauce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-9",
+      "restaurantId": "rest-1",
+      "productId": "prod-9",
+      "productName": "Corn Dog",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-10",
+      "restaurantId": "rest-1",
+      "productId": "prod-10",
+      "productName": "Corn Tortillas",
+      "recordedQty": 6,
+      "minThreshold": 4,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-11",
+      "restaurantId": "rest-1",
+      "productId": "prod-11",
+      "productName": "Eggs",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-12",
+      "restaurantId": "rest-1",
+      "productId": "prod-12",
+      "productName": "Fried Burritos",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-13",
+      "restaurantId": "rest-1",
+      "productId": "prod-13",
+      "productName": "Fried Pickles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-14",
+      "restaurantId": "rest-1",
+      "productId": "prod-14",
+      "productName": "Flour Tortillas",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-15",
+      "restaurantId": "rest-1",
+      "productId": "prod-15",
+      "productName": "Fries (Papas Fritas)",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-16",
+      "restaurantId": "rest-1",
+      "productId": "prod-16",
+      "productName": "Ham",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-17",
+      "restaurantId": "rest-1",
+      "productId": "prod-17",
+      "productName": "Hot Dog Buns",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-18",
+      "restaurantId": "rest-1",
+      "productId": "prod-18",
+      "productName": "Hot Dog Weenies (Beef)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-19",
+      "restaurantId": "rest-1",
+      "productId": "prod-19",
+      "productName": "Jalapeño Corn Dogs",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-20",
+      "restaurantId": "rest-1",
+      "productId": "prod-20",
+      "productName": "Jalapeños (pickled)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-21",
+      "restaurantId": "rest-1",
+      "productId": "prod-21",
+      "productName": "Ketchup Bottles",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-22",
+      "restaurantId": "rest-1",
+      "productId": "prod-22",
+      "productName": "Ketchup Packets",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-23",
+      "restaurantId": "rest-1",
+      "productId": "prod-23",
+      "productName": "Lemon Juice Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-24",
+      "restaurantId": "rest-1",
+      "productId": "prod-24",
+      "productName": "Lemons",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-25",
+      "restaurantId": "rest-1",
+      "productId": "prod-25",
+      "productName": "Lettuce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-26",
+      "restaurantId": "rest-1",
+      "productId": "prod-26",
+      "productName": "Lime Juice Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-27",
+      "restaurantId": "rest-1",
+      "productId": "prod-27",
+      "productName": "Limes",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-28",
+      "restaurantId": "rest-1",
+      "productId": "prod-28",
+      "productName": "Mac N Cheese Bites",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-29",
+      "restaurantId": "rest-1",
+      "productId": "prod-29",
+      "productName": "Mayonnaise Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-30",
+      "restaurantId": "rest-1",
+      "productId": "prod-30",
+      "productName": "Mayonnaise Packets",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-31",
+      "restaurantId": "rest-1",
+      "productId": "prod-31",
+      "productName": "Milk",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-32",
+      "restaurantId": "rest-1",
+      "productId": "prod-32",
+      "productName": "Marinara Sauce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-33",
+      "restaurantId": "rest-1",
+      "productId": "prod-33",
+      "productName": "Mozzarella",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-34",
+      "restaurantId": "rest-1",
+      "productId": "prod-34",
+      "productName": "Mustard Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-35",
+      "restaurantId": "rest-1",
+      "productId": "prod-35",
+      "productName": "Mustard Packets",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-36",
+      "restaurantId": "rest-1",
+      "productId": "prod-36",
+      "productName": "Nacho Cheese",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-37",
+      "restaurantId": "rest-1",
+      "productId": "prod-37",
+      "productName": "Onions",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-38",
+      "restaurantId": "rest-1",
+      "productId": "prod-38",
+      "productName": "Pastor Meat",
+      "recordedQty": 12,
+      "minThreshold": 10,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-39",
+      "restaurantId": "rest-1",
+      "productId": "prod-39",
+      "productName": "Pepper",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-40",
+      "restaurantId": "rest-1",
+      "productId": "prod-40",
+      "productName": "Pepperoni",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-41",
+      "restaurantId": "rest-1",
+      "productId": "prod-41",
+      "productName": "Pickles",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-42",
+      "restaurantId": "rest-1",
+      "productId": "prod-42",
+      "productName": "Pineapple",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.939Z"
+    },
+    {
+      "id": "audit-1785364346939-prod-43",
+      "restaurantId": "rest-1",
+      "productId": "prod-43",
+      "productName": "Pizza Flat Bread",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-44",
+      "restaurantId": "rest-1",
+      "productId": "prod-44",
+      "productName": "Ranch",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-45",
+      "restaurantId": "rest-1",
+      "productId": "prod-45",
+      "productName": "Remoulad Sauce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-46",
+      "restaurantId": "rest-1",
+      "productId": "prod-46",
+      "productName": "Salt",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-47",
+      "restaurantId": "rest-1",
+      "productId": "prod-47",
+      "productName": "Tomatoes",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-48",
+      "restaurantId": "rest-1",
+      "productId": "prod-48",
+      "productName": "Uncle Chris Gourmet Steak Seasoning",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-49",
+      "restaurantId": "rest-1",
+      "productId": "prod-49",
+      "productName": "Beef Jerky (Jack Links)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-50",
+      "restaurantId": "rest-1",
+      "productId": "prod-50",
+      "productName": "Chex Mix Trail Mix",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-51",
+      "restaurantId": "rest-1",
+      "productId": "prod-51",
+      "productName": "Cheetos",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-52",
+      "restaurantId": "rest-1",
+      "productId": "prod-52",
+      "productName": "Chips (Assorted)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-53",
+      "restaurantId": "rest-1",
+      "productId": "prod-53",
+      "productName": "Cliff Protein Bars",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-54",
+      "restaurantId": "rest-1",
+      "productId": "prod-54",
+      "productName": "Dill Pickles (packaged)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-55",
+      "restaurantId": "rest-1",
+      "productId": "prod-55",
+      "productName": "Doritos Cool Ranch",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-56",
+      "restaurantId": "rest-1",
+      "productId": "prod-56",
+      "productName": "Doritos Nacho Cheese",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-57",
+      "restaurantId": "rest-1",
+      "productId": "prod-57",
+      "productName": "Funyuns",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-58",
+      "restaurantId": "rest-1",
+      "productId": "prod-58",
+      "productName": "Hot Cheetos",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-59",
+      "restaurantId": "rest-1",
+      "productId": "prod-59",
+      "productName": "Hot Cheetos w/Lime",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-60",
+      "restaurantId": "rest-1",
+      "productId": "prod-60",
+      "productName": "Lays BBQ Chips",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-61",
+      "restaurantId": "rest-1",
+      "productId": "prod-61",
+      "productName": "Lays Potato Chips",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-62",
+      "restaurantId": "rest-1",
+      "productId": "prod-62",
+      "productName": "Planters Cashews",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-63",
+      "restaurantId": "rest-1",
+      "productId": "prod-63",
+      "productName": "Planters Honey Roasted",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-64",
+      "restaurantId": "rest-1",
+      "productId": "prod-64",
+      "productName": "Planters Peanuts",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-65",
+      "restaurantId": "rest-1",
+      "productId": "prod-65",
+      "productName": "Pringles (Original)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-66",
+      "restaurantId": "rest-1",
+      "productId": "prod-66",
+      "productName": "Pringles Sour Cream",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-67",
+      "restaurantId": "rest-1",
+      "productId": "prod-67",
+      "productName": "Rold Gold Pretzels",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-68",
+      "restaurantId": "rest-1",
+      "productId": "prod-68",
+      "productName": "Ruffles (Original)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346940-prod-69",
+      "restaurantId": "rest-1",
+      "productId": "prod-69",
+      "productName": "Tajin Bottles",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.940Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-70",
+      "restaurantId": "rest-1",
+      "productId": "prod-70",
+      "productName": "Twang Beer Salt Bottles",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-71",
+      "restaurantId": "rest-1",
+      "productId": "prod-71",
+      "productName": "Arnold Palmer",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-72",
+      "restaurantId": "rest-1",
+      "productId": "prod-72",
+      "productName": "Big Red",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-73",
+      "restaurantId": "rest-1",
+      "productId": "prod-73",
+      "productName": "Blue Gatorade",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-74",
+      "restaurantId": "rest-1",
+      "productId": "prod-74",
+      "productName": "Coke",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-75",
+      "restaurantId": "rest-1",
+      "productId": "prod-75",
+      "productName": "Coke Zero",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-76",
+      "restaurantId": "rest-1",
+      "productId": "prod-76",
+      "productName": "Diet Coke",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-77",
+      "restaurantId": "rest-1",
+      "productId": "prod-77",
+      "productName": "Dr Pepper",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-78",
+      "restaurantId": "rest-1",
+      "productId": "prod-78",
+      "productName": "Gatorade (Orange)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-79",
+      "restaurantId": "rest-1",
+      "productId": "prod-79",
+      "productName": "Gatorade (Red)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-80",
+      "restaurantId": "rest-1",
+      "productId": "prod-80",
+      "productName": "Gatorade (White)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-81",
+      "restaurantId": "rest-1",
+      "productId": "prod-81",
+      "productName": "Gatorade (Yellow)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-82",
+      "restaurantId": "rest-1",
+      "productId": "prod-82",
+      "productName": "Lemonade",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-83",
+      "restaurantId": "rest-1",
+      "productId": "prod-83",
+      "productName": "Peach Tea",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-84",
+      "restaurantId": "rest-1",
+      "productId": "prod-84",
+      "productName": "Red Bull",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-85",
+      "restaurantId": "rest-1",
+      "productId": "prod-85",
+      "productName": "Sprite",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-86",
+      "restaurantId": "rest-1",
+      "productId": "prod-86",
+      "productName": "Sweet Tea",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-87",
+      "restaurantId": "rest-1",
+      "productId": "prod-87",
+      "productName": "Unsweet Tea",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-88",
+      "restaurantId": "rest-1",
+      "productId": "prod-88",
+      "productName": "Water Bottles",
+      "recordedQty": 6,
+      "minThreshold": 4,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-89",
+      "restaurantId": "rest-1",
+      "productId": "prod-89",
+      "productName": "Club Soda",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-90",
+      "restaurantId": "rest-1",
+      "productId": "prod-90",
+      "productName": "Cranberry Juice",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-91",
+      "restaurantId": "rest-1",
+      "productId": "prod-91",
+      "productName": "Ginger Ale",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-92",
+      "restaurantId": "rest-1",
+      "productId": "prod-92",
+      "productName": "Grape Juice",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-93",
+      "restaurantId": "rest-1",
+      "productId": "prod-93",
+      "productName": "Grenadine",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-94",
+      "restaurantId": "rest-1",
+      "productId": "prod-94",
+      "productName": "Orange Juice",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-95",
+      "restaurantId": "rest-1",
+      "productId": "prod-95",
+      "productName": "Sweet N Sour",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-96",
+      "restaurantId": "rest-1",
+      "productId": "prod-96",
+      "productName": "Tabasco",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-97",
+      "restaurantId": "rest-1",
+      "productId": "prod-97",
+      "productName": "Tonic Water",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-98",
+      "restaurantId": "rest-1",
+      "productId": "prod-98",
+      "productName": "Worcestershire sauce",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-99",
+      "restaurantId": "rest-1",
+      "productId": "prod-99",
+      "productName": "Zing Zang",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-100",
+      "restaurantId": "rest-1",
+      "productId": "prod-100",
+      "productName": "Air Heads",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-101",
+      "restaurantId": "rest-1",
+      "productId": "prod-101",
+      "productName": "Butterfingers",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-102",
+      "restaurantId": "rest-1",
+      "productId": "prod-102",
+      "productName": "Kit Kat",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-103",
+      "restaurantId": "rest-1",
+      "productId": "prod-103",
+      "productName": "M&Ms (Peanut)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-104",
+      "restaurantId": "rest-1",
+      "productId": "prod-104",
+      "productName": "M&Ms (Plain)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-105",
+      "restaurantId": "rest-1",
+      "productId": "prod-105",
+      "productName": "Reeses",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-106",
+      "restaurantId": "rest-1",
+      "productId": "prod-106",
+      "productName": "Skittles",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-107",
+      "restaurantId": "rest-1",
+      "productId": "prod-107",
+      "productName": "Snickers",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-108",
+      "restaurantId": "rest-1",
+      "productId": "prod-108",
+      "productName": "Twix",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-109",
+      "restaurantId": "rest-1",
+      "productId": "prod-109",
+      "productName": "All Purpose Clean Spray",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346941-prod-110",
+      "restaurantId": "rest-1",
+      "productId": "prod-110",
+      "productName": "Dish Soap",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.941Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-111",
+      "restaurantId": "rest-1",
+      "productId": "prod-111",
+      "productName": "Hand Sanitizer",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-112",
+      "restaurantId": "rest-1",
+      "productId": "prod-112",
+      "productName": "16 oz Plastic Cups",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-113",
+      "restaurantId": "rest-1",
+      "productId": "prod-113",
+      "productName": "16 oz Tops (sippy)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-114",
+      "restaurantId": "rest-1",
+      "productId": "prod-114",
+      "productName": "2 oz Cups",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-115",
+      "restaurantId": "rest-1",
+      "productId": "prod-115",
+      "productName": "2 oz Tops",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-116",
+      "restaurantId": "rest-1",
+      "productId": "prod-116",
+      "productName": "Charcoal (Carbón)",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-117",
+      "restaurantId": "rest-1",
+      "productId": "prod-117",
+      "productName": "Checkered Plates",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-118",
+      "restaurantId": "rest-1",
+      "productId": "prod-118",
+      "productName": "Fryer Oil (Aceite de freidora)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-119",
+      "restaurantId": "rest-1",
+      "productId": "prod-119",
+      "productName": "Grill Brick",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-120",
+      "restaurantId": "rest-1",
+      "productId": "prod-120",
+      "productName": "Large Vinyl Gloves",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-121",
+      "restaurantId": "rest-1",
+      "productId": "prod-121",
+      "productName": "Lighter (long)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-122",
+      "restaurantId": "rest-1",
+      "productId": "prod-122",
+      "productName": "Lighter Fluid",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-123",
+      "restaurantId": "rest-1",
+      "productId": "prod-123",
+      "productName": "Medium Nitrile Gloves",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-124",
+      "restaurantId": "rest-1",
+      "productId": "prod-124",
+      "productName": "Napkins",
+      "recordedQty": 5,
+      "minThreshold": 3,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-125",
+      "restaurantId": "rest-1",
+      "productId": "prod-125",
+      "productName": "Plastic Ware (Cubiertos)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-126",
+      "restaurantId": "rest-1",
+      "productId": "prod-126",
+      "productName": "Propane Tank",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-127",
+      "restaurantId": "rest-1",
+      "productId": "prod-127",
+      "productName": "Straws",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-128",
+      "restaurantId": "rest-1",
+      "productId": "prod-128",
+      "productName": "Towels",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-129",
+      "restaurantId": "rest-1",
+      "productId": "prod-129",
+      "productName": "Trash Bags",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-130",
+      "restaurantId": "rest-1",
+      "productId": "prod-130",
+      "productName": "Wax Paper",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-131",
+      "restaurantId": "rest-1",
+      "productId": "prod-131",
+      "productName": "Fire Wood (Leña)",
+      "recordedQty": 7,
+      "minThreshold": 5,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-132",
+      "restaurantId": "rest-1",
+      "productId": "prod-132",
+      "productName": "Bud Light",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-133",
+      "restaurantId": "rest-1",
+      "productId": "prod-133",
+      "productName": "Coors Light",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-134",
+      "restaurantId": "rest-1",
+      "productId": "prod-134",
+      "productName": "Dos XX",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-135",
+      "restaurantId": "rest-1",
+      "productId": "prod-135",
+      "productName": "Fireball (wine base)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-136",
+      "restaurantId": "rest-1",
+      "productId": "prod-136",
+      "productName": "Good Boys",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-137",
+      "restaurantId": "rest-1",
+      "productId": "prod-137",
+      "productName": "High Noons",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-138",
+      "restaurantId": "rest-1",
+      "productId": "prod-138",
+      "productName": "Michelin Ultra",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-139",
+      "restaurantId": "rest-1",
+      "productId": "prod-139",
+      "productName": "Modelo",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-140",
+      "restaurantId": "rest-1",
+      "productId": "prod-140",
+      "productName": "Parabay (wine base)",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-141",
+      "restaurantId": "rest-1",
+      "productId": "prod-141",
+      "productName": "Tequila (wine base)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-142",
+      "restaurantId": "rest-1",
+      "productId": "prod-142",
+      "productName": "Vodka (wine base)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-143",
+      "restaurantId": "rest-1",
+      "productId": "prod-143",
+      "productName": "Whiskey (wine base)",
+      "recordedQty": 4,
+      "minThreshold": 2,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    },
+    {
+      "id": "audit-1785364346942-prod-144",
+      "restaurantId": "rest-1",
+      "productId": "prod-144",
+      "productName": "Buzzballs",
+      "recordedQty": 3,
+      "minThreshold": 1,
+      "needsReplenishment": false,
+      "recordedByUserId": "user-1",
+      "recordedByUserName": "Yaciel",
+      "timestamp": "2026-07-29T22:32:26.942Z"
+    }
+  ],
+  "requestCounter": 128
 }

@@ -1,14 +1,134 @@
 @import "tailwindcss";
 
+/* ────────────────────────────────────────────────────────────────────────────
+   SupplyFlow — Design tokens (2026 refresh)
+   One set of semantic variables, themed for light & dark. New shell components
+   (Header, BottomNav, Dashboard, Settings) read from these so both themes stay
+   clean and consistent without per-element conditional classes.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+html.dark {
+  color-scheme: dark;
+  --sf-bg: #070b14;
+  --sf-surface: #0f1626;
+  --sf-surface-2: #0b1120;
+  --sf-surface-hover: #16203a;
+  --sf-border: #1e293b;
+  --sf-border-strong: #334155;
+  --sf-text: #f1f5f9;
+  --sf-text-muted: #94a3b8;
+  --sf-text-subtle: #64748b;
+  --sf-accent: #10b981;
+  --sf-accent-strong: #34d399;
+  --sf-accent-soft: rgba(16, 185, 129, 0.14);
+  --sf-accent-contrast: #04120c;
+  --sf-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.75);
+  --sf-shadow-sm: 0 8px 20px -14px rgba(0, 0, 0, 0.7);
+}
+
+html.light {
+  color-scheme: light;
+  --sf-bg: #f3f5f9;
+  --sf-surface: #ffffff;
+  --sf-surface-2: #f7f9fc;
+  --sf-surface-hover: #eef2f7;
+  --sf-border: #e6e9ef;
+  --sf-border-strong: #d4dae4;
+  --sf-text: #0f172a;
+  --sf-text-muted: #64748b;
+  --sf-text-subtle: #94a3b8;
+  --sf-accent: #059669;
+  --sf-accent-strong: #047857;
+  --sf-accent-soft: rgba(5, 150, 105, 0.12);
+  --sf-accent-contrast: #ffffff;
+  --sf-shadow: 0 20px 40px -22px rgba(15, 23, 42, 0.28);
+  --sf-shadow-sm: 0 10px 24px -16px rgba(15, 23, 42, 0.22);
+}
+
+html.light body,
+html.light {
+  background-color: var(--sf-bg);
+  color: var(--sf-text);
+}
+html.dark body,
+html.dark {
+  background-color: var(--sf-bg);
+  color: var(--sf-text);
+}
+
+/* Secondary accent palette — shared across themes for dashboard tiles/chips */
+:root {
+  --sf-violet: #8b5cf6;
+  --sf-amber: #f59e0b;
+  --sf-sky: #0ea5e9;
+  --sf-rose: #f43f5e;
+}
+
+/* ── Semantic helper classes ──────────────────────────────────────────────── */
+@layer components {
+  .sf-page {
+    background: var(--sf-bg);
+    color: var(--sf-text);
+  }
+  .sf-card {
+    background: var(--sf-surface);
+    border: 1px solid var(--sf-border);
+    border-radius: 26px;
+    box-shadow: var(--sf-shadow);
+  }
+  .sf-inset {
+    background: var(--sf-surface-2);
+    border: 1px solid var(--sf-border);
+    border-radius: 20px;
+  }
+  .sf-pill {
+    background: var(--sf-surface-2);
+    border: 1px solid var(--sf-border);
+    color: var(--sf-text);
+  }
+  .sf-muted {
+    color: var(--sf-text-muted);
+  }
+  .sf-subtle {
+    color: var(--sf-text-subtle);
+  }
+  .sf-accent {
+    color: var(--sf-accent);
+  }
+  .sf-btn-accent {
+    background: var(--sf-accent);
+    color: var(--sf-accent-contrast);
+    border: 1px solid transparent;
+  }
+  .sf-btn-accent:hover {
+    background: var(--sf-accent-strong);
+  }
+  .sf-btn-ghost {
+    background: var(--sf-surface-2);
+    border: 1px solid var(--sf-border);
+    color: var(--sf-text);
+  }
+  .sf-btn-ghost:hover {
+    background: var(--sf-surface-hover);
+  }
+  .sf-divide {
+    border-color: var(--sf-border);
+  }
+}
+
 @layer utilities {
-  /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-  /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
@@ -16,21 +136,25 @@
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out forwards;
 }
 
-/* Global Theme Root Configuration */
+@keyframes sfPop {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.sf-pop {
+  animation: sfPop 0.22s ease-out;
+}
+
+/* Global Theme Root Configuration (legacy screens still read these) */
 html.light {
-  color-scheme: light;
-  background-color: #f1f5f9;
+  background-color: #f3f5f9;
   color: #0f172a;
 }
-
 html.dark {
-  color-scheme: dark;
-  background-color: #020617;
+  background-color: #070b14;
   color: #f8fafc;
 }
-

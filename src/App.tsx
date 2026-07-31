@@ -27,23 +27,26 @@ import {
 import { supabase, rowToRequest } from './lib/supabase';
 import { INITIAL_SUPPLIERS } from './data/caddyShackData';
 import { Header } from './components/Header';
+import { BottomNav, BottomNavTab } from './components/BottomNav';
+import { Dashboard } from './components/Dashboard';
+import { AccountView } from './components/AccountView';
+import { NotificationsView } from './components/NotificationsView';
 import { DailyChecklist } from './components/DailyChecklist';
 import { RequestsList } from './components/RequestsList';
-import { ShoppingModeModal } from './components/ShoppingModeModal';
+import { ShoppingView } from './components/ShoppingView';
 import { AdminCatalog, OverdueSettings } from './components/AdminCatalog';
-import { AnalyticsDashboard } from './components/AnalyticsDashboard';
-import { NotificationCenter } from './components/NotificationCenter';
-import { ProfileSettingsModal } from './components/ProfileSettingsModal';
-import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { LoginScreen } from './components/LoginScreen';
 import { showLocalNotification, playAlertSound, setAppBadge } from './lib/notifications';
 import { getTranslation } from './lib/translations';
 import {
+  LayoutDashboard,
   ClipboardList,
   ShoppingBag,
   SlidersHorizontal,
-  BarChart3,
 } from 'lucide-react';
+
+type TabId = 'DASHBOARD' | 'REQUESTS' | 'CHECKLIST' | 'ADMIN';
+type Screen = 'NONE' | 'NOTIFICATIONS' | 'ACCOUNT';
 
 export default function App() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -57,7 +60,8 @@ export default function App() {
   const [supplyRequests, setSupplyRequests] = useState<SupplyRequest[]>([]);
   const [sseConnected, setSseConnected] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'CHECKLIST' | 'REQUESTS' | 'ADMIN' | 'ANALYTICS'>('REQUESTS');
+  const [activeTab, setActiveTab] = useState<TabId>('DASHBOARD');
+  const [screen, setScreen] = useState<Screen>('NONE');
 
   const [shoppingModalRequest, setShoppingModalRequest] = useState<SupplyRequest | null>(null);
   // Ref to avoid stale closure in SSE handler
@@ -66,9 +70,6 @@ export default function App() {
     shoppingModalRequestRef.current = shoppingModalRequest;
   }, [shoppingModalRequest]);
 
-  const [showNotificationCenter, setShowNotificationCenter] = useState(false);
-  const [showProfileSettingsModal, setShowProfileSettingsModal] = useState(false);
-  const [showPWAInstallModal, setShowPWAInstallModal] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [highlightedRequestId, setHighlightedRequestId] = useState<string | null>(null);
 
@@ -94,8 +95,8 @@ export default function App() {
       setSelectedRestaurantId(req.restaurantId);
     }
     setActiveTab('REQUESTS');
+    setScreen('NONE');
     setHighlightedRequestId(requestId);
-    setShowNotificationCenter(false);
     setTimeout(() => {
       setHighlightedRequestId(null);
     }, 5000);
@@ -482,13 +483,9 @@ export default function App() {
 
   const handleSelectUser = (u: UserProfile) => {
     setCurrentUser(u);
-    if (u.role === 'cocinero') {
-      setActiveTab('REQUESTS');
-    } else if (u.role === 'comprador') {
-      setActiveTab('REQUESTS');
-    } else if (u.role === 'admin') {
-      setActiveTab('ANALYTICS');
-    }
+    setAppLanguage(u.language || 'es');
+    setActiveTab('DASHBOARD');
+    setScreen('NONE');
   };
 
   // Show login screen when no user is selected
@@ -499,8 +496,7 @@ export default function App() {
         onSelectUser={(u) => {
           setCurrentUser(u);
           setAppLanguage(u.language || 'es');
-          if (u.role === 'admin') setActiveTab('ANALYTICS');
-          else setActiveTab('REQUESTS');
+          setActiveTab('DASHBOARD');
         }}
         language={appLanguage}
         onChangeLanguage={setAppLanguage}
@@ -527,97 +523,111 @@ export default function App() {
     document.documentElement.classList.remove('light');
   }
 
-  const getNavTabs = () => {
+  const getNavTabs = (): BottomNavTab[] => {
+    const dashboard: BottomNavTab = { id: 'DASHBOARD', label: t.tabDashboard, icon: LayoutDashboard };
     switch (currentUser.role) {
       case 'cocinero':
         return [
-          { id: 'REQUESTS' as const, label: t.navRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
-          { id: 'CHECKLIST' as const, label: t.navChecklist, icon: ClipboardList },
+          dashboard,
+          { id: 'REQUESTS', label: t.tabRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
+          { id: 'CHECKLIST', label: t.tabChecklist, icon: ClipboardList },
         ];
       case 'comprador':
         return [
-          { id: 'REQUESTS' as const, label: t.navPurchaseRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
+          dashboard,
+          { id: 'REQUESTS', label: t.tabRequestsBuyer, icon: ShoppingBag, badge: activePendingRequestsCount },
         ];
       case 'admin':
         return [
-          { id: 'ANALYTICS' as const, label: t.navAnalytics, icon: BarChart3 },
-          { id: 'REQUESTS' as const, label: t.navRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
-          { id: 'ADMIN' as const, label: t.navAdmin, icon: SlidersHorizontal },
-          { id: 'CHECKLIST' as const, label: t.navChecklist, icon: ClipboardList },
+          dashboard,
+          { id: 'REQUESTS', label: t.tabRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
+          { id: 'ADMIN', label: t.tabCatalog, icon: SlidersHorizontal },
+          { id: 'CHECKLIST', label: t.tabChecklist, icon: ClipboardList },
         ];
+      default:
+        return [dashboard];
     }
   };
 
   const currentNavTabs = getNavTabs();
 
+  // Shopping mode is a full-screen view (no modal), takes priority when active
+  if (shoppingModalRequest) {
+    return (
+      <ShoppingView
+        request={shoppingModalRequest}
+        currentUser={currentUser}
+        onClose={() => setShoppingModalRequest(null)}
+        onToggleItem={handleToggleItem}
+        onCompleteShopping={handleFinishShopping}
+      />
+    );
+  }
+
+  // Drill-in full-screen views (no modals): notifications & account
+  if (screen === 'NOTIFICATIONS') {
+    return (
+      <NotificationsView
+        onBack={() => setScreen('NONE')}
+        sseConnected={sseConnected}
+        currentUserPhone={currentUser.phone}
+        currentUserRole={currentUser.role}
+        currentUserLanguage={currentUser.language}
+        requests={supplyRequests}
+        onSelectRequest={handleSelectRequestFromNotification}
+      />
+    );
+  }
+
+  if (screen === 'ACCOUNT') {
+    return (
+      <AccountView
+        currentUser={currentUser}
+        users={users}
+        onBack={() => setScreen('NONE')}
+        onSaveProfile={handleSaveProfile}
+        onSelectUser={handleSelectUser}
+        isPWAInstallable={!!deferredPrompt || isIOS}
+        isIOS={isIOS}
+        onInstallDirect={() => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
+          }
+        }}
+        onLogout={() => setCurrentUser(null)}
+      />
+    );
+  }
+
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
-      isLight
-        ? 'bg-slate-100 text-slate-900 selection:bg-emerald-500 selection:text-white'
-        : 'bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-slate-950'
-    }`}>
+    <div className="min-h-screen flex flex-col font-sans sf-page selection:bg-emerald-500 selection:text-white">
       <Header
         restaurants={restaurants}
         selectedRestaurantId={selectedRestaurantId}
         onSelectRestaurant={(id) => setSelectedRestaurantId(id)}
         currentUser={currentUser}
-        users={users}
-        onSelectUser={handleSelectUser}
         sseConnected={sseConnected}
         activeRequestsCount={activePendingRequestsCount}
-        onOpenNotifications={() => setShowNotificationCenter(true)}
-        onOpenProfileSettings={() => setShowProfileSettingsModal(true)}
-        isPWAInstallable={!!deferredPrompt || isIOS}
-        onInstallPWA={() => setShowPWAInstallModal(true)}
-        onLogout={() => setCurrentUser(null)}
+        onOpenNotifications={() => setScreen('NOTIFICATIONS')}
+        onOpenProfile={() => setScreen('ACCOUNT')}
       />
 
-      <nav
-        className={`border-b sticky z-30 backdrop-blur-md ${
-          isLight ? 'bg-white/90 border-slate-200' : 'bg-slate-900/90 border-slate-800'
-        }`}
-        style={{ top: 'calc(52px + env(safe-area-inset-top))' }}
+      <main
+        className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full"
+        style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-1 sm:space-x-3 py-1.5 overflow-x-auto no-scrollbar">
-            {currentNavTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+        {activeTab === 'DASHBOARD' && (
+          <Dashboard
+            currentUser={currentUser}
+            requests={supplyRequests}
+            products={products}
+            selectedRestaurantId={selectedRestaurantId}
+            onGoToRequests={() => setActiveTab('REQUESTS')}
+            onOpenRequest={handleSelectRequestFromNotification}
+          />
+        )}
 
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    playAlertSound('click');
-                  }}
-                  className={`relative flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-                    isActive
-                      ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
-                      : isLight
-                      ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span>{tab.label}</span>
-                  {tab.badge !== undefined && tab.badge > 0 && (
-                    <span
-                      className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                        isActive ? 'bg-slate-950 text-emerald-400' : 'bg-rose-500 text-white animate-pulse'
-                      }`}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </nav>
-
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 w-full">
         {activeTab === 'CHECKLIST' && (
           <DailyChecklist
             products={currentRestaurantProducts}
@@ -656,51 +666,13 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'ANALYTICS' && <AnalyticsDashboard currentUser={currentUser} />}
       </main>
 
-      {shoppingModalRequest && (
-        <ShoppingModeModal
-          request={shoppingModalRequest}
-          currentUser={currentUser}
-          onClose={() => setShoppingModalRequest(null)}
-          onToggleItem={handleToggleItem}
-          onCompleteShopping={handleFinishShopping}
-        />
-      )}
-
-      {showNotificationCenter && (
-        <NotificationCenter
-          onClose={() => setShowNotificationCenter(false)}
-          sseConnected={sseConnected}
-          currentUserPhone={currentUser.phone}
-          currentUserRole={currentUser.role}
-          currentUserLanguage={currentUser.language}
-          requests={supplyRequests}
-          onSelectRequest={handleSelectRequestFromNotification}
-        />
-      )}
-
-      {showProfileSettingsModal && (
-        <ProfileSettingsModal
-          currentUser={currentUser}
-          onClose={() => setShowProfileSettingsModal(false)}
-          onSaveProfile={handleSaveProfile}
-        />
-      )}
-
-      {showPWAInstallModal && (
-        <PWAInstallPrompt
-          onClose={() => setShowPWAInstallModal(false)}
-          isIOS={isIOS}
-          onInstall={() => {
-            if (deferredPrompt) {
-              deferredPrompt.prompt();
-              deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
-            }
-          }}
-        />
-      )}
+      <BottomNav
+        tabs={currentNavTabs}
+        activeTab={activeTab}
+        onChange={(id) => setActiveTab(id as TabId)}
+      />
     </div>
   );
 }

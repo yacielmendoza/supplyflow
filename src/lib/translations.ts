@@ -29,6 +29,38 @@ export const translations = {
     navAnalytics: 'Métricas & Control',
     navPurchaseRequests: 'Solicitudes de Compra',
 
+    // ── Bottom Nav (short labels) ────────────────────────────────────────────
+    tabDashboard: 'Resumen',
+    tabRequests: 'Pedidos',
+    tabRequestsBuyer: 'Solicitudes',
+    tabChecklist: 'Stock',
+    tabCatalog: 'Catálogo',
+    tabSettings: 'Ajustes',
+
+    // ── Dashboard / Resumen ──────────────────────────────────────────────────
+    dashHello: 'Hola',
+    dashCookSummary: 'Tu cocina de un vistazo',
+    dashBuyerSummary: 'Tus compras de un vistazo',
+    dashAdminSummary: 'Operación de un vistazo',
+    dashLowStock: 'Stock bajo',
+    dashMyActive: 'Mis activos',
+    dashPendingPickup: 'Por tomar',
+    dashInShopping: 'En compra',
+    dashCompletedToday: 'Completadas hoy',
+    dashUrgent: 'Urgentes',
+    dashTotal: 'Total',
+    dashRecent: 'Actividad reciente',
+    dashViewAll: 'Ver todo',
+    dashEmpty: 'Nada por aquí todavía',
+    dashGoRequests: 'Ir a pedidos',
+
+    // ── Settings screen ──────────────────────────────────────────────────────
+    setAccount: 'Cuenta',
+    setEditProfile: 'Editar perfil',
+    setAppearance: 'Apariencia',
+    setPreferences: 'Preferencias',
+    accountTitle: 'Cuenta',
+
     // ── Roles ──────────────────────────────────────────────────────────────────
     roleCook: 'Cocina',
     roleBuyer: 'Runner / Comprador',
@@ -342,6 +374,38 @@ export const translations = {
     navAdmin: 'Catalog & Thresholds',
     navAnalytics: 'Metrics & Control',
     navPurchaseRequests: 'Purchase Requests',
+
+    // ── Bottom Nav (short labels) ────────────────────────────────────────────
+    tabDashboard: 'Summary',
+    tabRequests: 'Orders',
+    tabRequestsBuyer: 'Requests',
+    tabChecklist: 'Stock',
+    tabCatalog: 'Catalog',
+    tabSettings: 'Settings',
+
+    // ── Dashboard / Resumen ──────────────────────────────────────────────────
+    dashHello: 'Hi',
+    dashCookSummary: 'Your kitchen at a glance',
+    dashBuyerSummary: 'Your purchasing at a glance',
+    dashAdminSummary: 'Operations at a glance',
+    dashLowStock: 'Low stock',
+    dashMyActive: 'My active',
+    dashPendingPickup: 'To pick up',
+    dashInShopping: 'In shopping',
+    dashCompletedToday: 'Completed today',
+    dashUrgent: 'Urgent',
+    dashTotal: 'Total',
+    dashRecent: 'Recent activity',
+    dashViewAll: 'View all',
+    dashEmpty: 'Nothing here yet',
+    dashGoRequests: 'Go to orders',
+
+    // ── Settings screen ──────────────────────────────────────────────────────
+    setAccount: 'Account',
+    setEditProfile: 'Edit profile',
+    setAppearance: 'Appearance',
+    setPreferences: 'Preferences',
+    accountTitle: 'Account',
 
     // ── Roles ──────────────────────────────────────────────────────────────────
     roleCook: 'Kitchen',
