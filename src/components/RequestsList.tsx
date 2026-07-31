@@ -146,6 +146,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
             <button
               key={f.key}
               onClick={() => setFilterTab(f.key)}
+              aria-pressed={active}
               className="py-2.5 px-1 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition"
               style={{
                 background: active ? tint(f.color, 16) : 'transparent',

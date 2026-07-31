@@ -156,6 +156,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             {([['ALL', t.checklistFilterAll, activeProducts.length, 'var(--sf-text-muted)'], ['UNREVIEWED', t.checklistFilterUnreviewed, activeProducts.length - totalReviewedCount, 'var(--sf-amber)'], ['REVIEWED', t.checklistFilterReviewed, totalReviewedCount, 'var(--sf-accent)']] as const).map(
               ([key, label, count, color]) => (
                 <button key={key} onClick={() => setReviewFilter(key)}
+                  aria-pressed={reviewFilter === key}
                   className="px-2.5 py-1.5 rounded-xl font-bold text-[11px] transition whitespace-nowrap"
                   style={filterPill(reviewFilter === key, color)}>
                   {label} ({count})
@@ -172,6 +173,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             const label = cat === 'TODAS' ? t.checklistFilterAll : formatCategoryName(cat, t);
             return (
               <button key={cat} onClick={() => setSelectedCategory(cat as any)}
+                aria-pressed={active}
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition"
                 style={active ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
                 {label}
@@ -204,6 +206,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <button type="button" onClick={() => toggleReviewed(p.id)}
+                    aria-pressed={isReviewed}
                     className="px-2.5 py-1 rounded-full text-xs font-extrabold uppercase flex items-center gap-1 transition"
                     style={isReviewed ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -221,6 +224,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   {([['out', '0', 'var(--sf-rose)', currentVal === 0], ['low', t.stockLow, 'var(--sf-amber)', isBelowThreshold && currentVal > 0], ['ok', t.stockSufficient, 'var(--sf-accent)', !isBelowThreshold]] as const).map(
                     ([status, label, color, active]) => (
                       <button key={status} type="button" onClick={() => handleQuickSet(p.id, status)}
+                        aria-pressed={active}
                         className="px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition"
                         style={active ? { background: color, color: '#fff' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
                         {label}

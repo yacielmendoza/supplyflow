@@ -122,6 +122,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
             </span>
             <button
               onClick={() => setSelectedSupplierFilter('TODOS')}
+              aria-pressed={selectedSupplierFilter === 'TODOS'}
               className="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition"
               style={filterBtn(selectedSupplierFilter === 'TODOS')}
             >
@@ -133,6 +134,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                 <button
                   key={sup}
                   onClick={() => setSelectedSupplierFilter(sup)}
+                  aria-pressed={selectedSupplierFilter === sup}
                   className="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition"
                   style={filterBtn(selectedSupplierFilter === sup)}
                 >

@@ -303,6 +303,7 @@ const ToggleBtn: React.FC<{ active: boolean; icon: React.ElementType; label: str
 }) => (
   <button
     onClick={onClick}
+    aria-pressed={active}
     className="flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-sm transition"
     style={{
       background: active ? 'var(--sf-accent-soft)' : 'var(--sf-surface-2)',
