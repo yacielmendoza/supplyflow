@@ -502,7 +502,7 @@ function OverdueSettingsPanel({
         </div>
 
         <button type="submit" className="w-full py-2.5 rounded-xl font-black text-sm transition flex items-center justify-center gap-2"
-          style={saved ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' } : { background: 'var(--sf-amber)', color: '#1a1206' }}>
+          style={saved ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' } : { background: 'var(--sf-amber)', color: 'var(--sf-amber-contrast)' }}>
           {saved && <Save className="w-4 h-4" />}
           {saved ? t.adminOverdueSavedBtn : t.adminOverdueSaveBtn}
         </button>

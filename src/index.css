@@ -17,7 +17,7 @@ html.dark {
   --sf-border-strong: #334155;
   --sf-text: #f1f5f9;
   --sf-text-muted: #94a3b8;
-  --sf-text-subtle: #64748b;
+  --sf-text-subtle: #8a97a9;
   --sf-accent: #10b981;
   --sf-accent-strong: #34d399;
   --sf-accent-soft: rgba(16, 185, 129, 0.14);
@@ -35,10 +35,10 @@ html.light {
   --sf-border: #e6e9ef;
   --sf-border-strong: #d4dae4;
   --sf-text: #0f172a;
-  --sf-text-muted: #64748b;
-  --sf-text-subtle: #94a3b8;
-  --sf-accent: #059669;
-  --sf-accent-strong: #047857;
+  --sf-text-muted: #5b6573;
+  --sf-text-subtle: #667085;
+  --sf-accent: #047857;
+  --sf-accent-strong: #065f46;
   --sf-accent-soft: rgba(5, 150, 105, 0.12);
   --sf-accent-contrast: #ffffff;
   --sf-shadow: 0 20px 40px -22px rgba(15, 23, 42, 0.28);
@@ -56,12 +56,23 @@ html.dark {
   color: var(--sf-text);
 }
 
-/* Secondary accent palette — shared across themes for dashboard tiles/chips */
-:root {
-  --sf-violet: #8b5cf6;
+/* Secondary hue palette — tuned PER THEME so each hue is legible as TEXT on its
+   own surface (WCAG AA ≥ 4.5:1 at small sizes) while still working as fills,
+   dots and borders. Light theme darkens the hues; dark theme keeps/lightens
+   them. --sf-*-contrast is the text color to place on a solid fill of that hue. */
+html.dark {
+  --sf-violet: #a78bfa;
   --sf-amber: #f59e0b;
+  --sf-amber-contrast: #1c1204;
   --sf-sky: #0ea5e9;
   --sf-rose: #f43f5e;
+}
+html.light {
+  --sf-violet: #6d28d9;
+  --sf-amber: #b45309;
+  --sf-amber-contrast: #ffffff;
+  --sf-sky: #0369a1;
+  --sf-rose: #be123c;
 }
 
 /* ── Semantic helper classes ──────────────────────────────────────────────── */

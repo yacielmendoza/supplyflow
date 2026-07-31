@@ -382,7 +382,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                         <>
                           {req.status === 'Pendiente' && (
                             <button onClick={() => { playAlertSound('success'); onClaimRequest(req.id); }}
-                              className={chipBtn} style={{ background: 'var(--sf-amber)', color: '#1a1206' }}>
+                              className={chipBtn} style={{ background: 'var(--sf-amber)', color: 'var(--sf-amber-contrast)' }}>
                               <User className="w-4 h-4 mr-1" />
                               {t.btnTakeOrder}
                             </button>
