@@ -55,7 +55,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ tabs, activeTab, onChange 
                 >
                   <Icon className="w-6 h-6" strokeWidth={isActive ? 2.6 : 2} />
                   {tab.badge !== undefined && tab.badge > 0 && (
-                    <span className="absolute -top-1.5 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow">
+                    <span
+                      className="absolute -top-1.5 right-1 min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-black flex items-center justify-center shadow"
+                      style={{ background: 'var(--sf-rose)' }}
+                    >
                       {tab.badge > 99 ? '99+' : tab.badge}
                     </span>
                   )}

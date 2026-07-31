@@ -21,6 +21,7 @@ export const translations = {
     installApp: 'Instalar App',
     headerTestChime: 'Probar alerta de cocina',
     headerNotifications: 'Alertas & Notificaciones',
+    headerRestaurantSelector: 'Restaurante',
     headerRolePrefix: 'Rol',
 
     // ── Navigation Tabs ────────────────────────────────────────────────────────
@@ -393,6 +394,7 @@ export const translations = {
     installApp: 'Install App',
     headerTestChime: 'Test kitchen chime',
     headerNotifications: 'Alerts & Notifications',
+    headerRestaurantSelector: 'Restaurant',
     headerRolePrefix: 'Role',
 
     // ── Navigation Tabs ────────────────────────────────────────────────────────

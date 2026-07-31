@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onSelectRestaurant(e.target.value);
                   playAlertSound('click');
                 }}
-                aria-label="Restaurante"
+                aria-label={t.headerRestaurantSelector}
                 className="appearance-none bg-transparent font-bold focus:outline-none cursor-pointer pr-5 text-sm max-w-[42vw] sm:max-w-[240px] truncate"
                 style={{ color: 'var(--sf-text)' }}
               >
@@ -83,7 +83,10 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Bell className="w-5 h-5" />
               {activeRequestsCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-rose-500 text-white text-[11px] font-black flex items-center justify-center shadow-md sf-pop">
+                <span
+                  className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full text-white text-[11px] font-black flex items-center justify-center shadow-md sf-pop"
+                  style={{ background: 'var(--sf-rose)' }}
+                >
                   {activeRequestsCount > 99 ? '99+' : activeRequestsCount}
                 </span>
               )}
