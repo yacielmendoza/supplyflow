@@ -178,4 +178,115 @@ intactos, fallback público de Supabase sin tocar).
   chunk preexistente B7, no bloqueante, sin cambio de alcance).
 - i18n: `translations.ts` pasa de 346 a 370 claves en **ambos** idiomas
   (ES/EN), sin huecos.
+
+## Ciclo de corrección (2026-07-31, sobre `0b509d9`)
+
+`AUDITORIA_RESULTADOS.md` seguía mostrando el estado de `7cd65cd` (previo a
+los cuatro ciclos de corrección anteriores). Dos commits de este mismo
+agente corrector habían quedado sin documentar en este archivo:
+
+- `b302d99` — P0 de accesibilidad: la auditoría *renderizada* (no solo
+  estática) encontró que `--sf-violet/amber/sky/text-subtle/text-muted/accent`
+  no llegaban a 4.5:1 en varios pares texto/fondo, peor en tema claro (sky
+  2.77, amber 2.15, accent 3.77, subtle 2.56). Se retonó la paleta de hues
+  **por tema** (más oscura en claro, igual/más clara en oscuro) y se añadió
+  `--sf-amber-contrast` para texto sobre relleno sólido de amber.
+- `0b509d9` — pulido visual reportado por el usuario: selector de local del
+  Header pasa de `<select>` nativo a popover con tokens propios; el punto de
+  presencia del avatar ya no queda cortado por el `overflow-hidden` circular;
+  cabecera de progreso de `ShoppingView` rediseñada (sin emoji duplicado);
+  steppers de `DailyChecklist` a pastilla circular; se quitó el pill de local
+  redundante en las tarjetas de `RequestsList` (el header ya lo muestra).
+
+Antes de aceptar el ciclo como cerrado se hizo una auditoría fresca dirigida
+(delegada a un agente de investigación) sobre los 9 criterios + posibles
+regresiones de esos dos commits, comparando contra el código actual y no
+contra el diff. Encontró 8 hallazgos reales nuevos, cerrados en este ciclo:
+
+### Alto
+
+1. **Regresión de objetivo táctil.** `0b509d9` había reducido los steppers
+   de stock de `DailyChecklist.tsx` de `w-11 h-11` (44px) a `w-10 h-10`
+   (40px) al convertirlos en pastilla circular, revirtiendo sin querer una
+   corrección de un ciclo anterior. Restaurado a `w-11 h-11` (44px).
+2. **Foco perdido al cerrar el popover del selector de local.** El nuevo
+   popover de `Header.tsx` (de `0b509d9`) no devolvía el foco al botón
+   disparador al cerrarse con `Escape` o al elegir una opción — el elemento
+   enfocado se desmontaba y el navegador soltaba el foco a `<body>`,
+   dejando a un usuario de teclado sin referencia. Se añadió `triggerRef` +
+   `closePopover(returnFocus)` que llama `.focus()` sobre el botón disparador
+   en ambos casos.
+
+### Medio
+
+3. **Patrón ARIA incorrecto en el mismo popover.** Usaba `role="listbox"` +
+   `role="option"` pero cada opción era su propio *tab stop* en vez de un
+   único listbox con `roving tabindex` + navegación por flechas (lo que
+   exige ese rol). Implementar el patrón completo era desproporcionado para
+   un selector de ≤10 locales; se optó por quitar `role="listbox"`/`"option"`
+   (queda como un grupo de botones, patrón válido) y usar `aria-current`
+   en vez de `aria-selected` para marcar el local activo.
+4. **Contraste insuficiente en botones activos de "ajuste rápido" de stock.**
+   Los estados `ok`/`out` de `DailyChecklist.tsx` usaban `color: '#fff'`
+   fijo; en tema oscuro eso da ~2.5:1 (accent) y ~3.7:1 (rose) sobre texto
+   `text-xs` en negrita — ambos por debajo de 4.5:1 AA. Se cambió a
+   `var(--sf-accent-contrast)` (ya usado por el estado `low`), que da ≥5:1
+   en ambos temas para accent y rose (verificado calculando la razón real).
+5. **Cero regiones `aria-live` en toda la app.** Los mensajes de éxito
+   transitorios (checklist enviado, perfil guardado, notificación de prueba
+   enviada) sólo cambiaban visualmente — un usuario de lector de pantalla no
+   recibía confirmación. Se añadió `role="status" aria-live="polite"` a los
+   tres contenedores (`DailyChecklist.tsx`, `NotificationsView.tsx`) y
+   `aria-live="polite"` al botón de guardar de `AccountView.tsx` (su label
+   cambia de texto al confirmar).
+6. **Lógica de presentación de estado triplicada/cuadruplicada.** El helper
+   `tint()` estaba copiado literalmente en 4 archivos (con un valor por
+   defecto distinto en `LoginScreen.tsx`, un riesgo latente de deriva), y el
+   mapa color-por-estado (`STATUS_COLOR(S)`) + el mapa de etiquetas
+   traducidas estaban duplicados en `Dashboard.tsx`, `RequestsList.tsx`
+   (dos veces, una de ellas como función local) y `NotificationsView.tsx`.
+   Extraído a `src/lib/colors.ts` (`tint`, `STATUS_COLORS`,
+   `getStatusLabels(t)`) — un solo origen de verdad, importado por los 4
+   componentes.
+
+### Bajo
+
+7. **Segundo color del degradado de progreso hardcodeado.** Las 3 barras de
+   progreso (`ShoppingView`, `DailyChecklist`, `RequestsList`) usaban
+   `linear-gradient(90deg, var(--sf-accent), #2dd4bf)` con un hex fijo sin
+   tokenizar. Añadido `--sf-accent-2` (mismo valor, en `html.light` y
+   `html.dark`) y actualizadas las 3 referencias.
+8. **Campos de búsqueda sin `aria-label` de respaldo.** `DailyChecklist.tsx`
+   y `AdminCatalog.tsx` dependían solo de `placeholder` (desaparece al
+   escribir). Añadido `aria-label` con la misma cadena traducida.
+
+No se encontraron más defectos reales (sin modales nuevos, tokens/fallback
+de Supabase intactos, 370/370 claves i18n sin huecos, sin strings nuevos
+hardcodeados).
+
+### Skills y subagentes creados este ciclo
+
+No existía ningún skill ni subagente propio del proyecto (`.claude/` sólo
+tenía `launch.json`). Se crearon 8 pares skill+subagente para las
+especializaciones de diseño/UX/frontend pedidas: `mobile-ux-review`,
+`design-system-guardian`, `wcag-audit`, `motion-microinteractions`,
+`design-token-architect`, `typography-color-system`, `visual-qa`,
+`frontend-architecture-review` — cada uno con su `SKILL.md`
+(`.claude/skills/<kebab>/SKILL.md`) y su subagente correspondiente
+(`.claude/agents/<name>.md`, `tools` acotados a solo-lectura salvo
+`design-token-architect`, el único con `Edit`). Detalle completo y
+justificación de cada uno en `HERRAMIENTAS_IA.md`, junto con 3 MCP
+recomendados (no instalados por requerir auth interactiva): Figma, Chrome
+DevTools/Playwright, Vercel.
+
+### Verificación
+
+- `npx tsc --noEmit`: **sin errores**.
+- `npm run build`: **build limpio** (614.16 kB / 160.88 kB gzip — aviso de
+  chunk preexistente B7, no bloqueante, sin cambio de alcance).
+- i18n: `translations.ts` se mantiene en 370/370 claves en ambos idiomas
+  (este ciclo no añadió strings nuevos, sólo `aria-label`s que reusan claves
+  existentes).
+- Cero modales, cero cambios al fallback público de Supabase en
+  `src/lib/supabase.ts`.
 - Cero modales, cero cambios al fallback público de Supabase.
