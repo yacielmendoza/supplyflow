@@ -1,28 +1,30 @@
+import type { Translations } from './translations';
+
 export function formatCleanName(name?: string | null): string {
   if (!name) return '';
   return name.replace(/\s*\([^)]*\)/g, '').trim();
 }
 
-export function formatCategoryName(category: string): string {
+export function formatCategoryName(category: string, t: Translations): string {
   switch (category) {
     case 'INGREDIENTS':
-      return 'Ingredientes';
+      return t.categoryIngredients;
     case 'SNACKS':
-      return 'Snacks & Botanas';
+      return t.categorySnacks;
     case 'BEVERAGES':
-      return 'Bebidas';
+      return t.categoryBeverages;
     case 'MIXERS':
-      return 'Mezcladores';
+      return t.categoryMixers;
     case 'CANDY':
-      return 'Dulces & Confitería';
+      return t.categoryCandy;
     case 'CHEMICALS':
-      return 'Limpieza & Químicos';
+      return t.categoryChemicals;
     case 'PAPER / DISPOSABLES':
-      return 'Desechables';
+      return t.categoryPaperDisposables;
     case 'ALCOHOL':
-      return 'Licores & Cervezas';
+      return t.categoryAlcohol;
     case 'SUPPLIES':
-      return 'Insumos Generales';
+      return t.categorySupplies;
     default:
       return category;
   }

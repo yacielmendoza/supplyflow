@@ -169,7 +169,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
           {(['TODAS', 'INGREDIENTS', 'SNACKS', 'BEVERAGES', 'MIXERS', 'CANDY', 'CHEMICALS', 'PAPER / DISPOSABLES', 'ALCOHOL'] as const).map((cat) => {
             const active = selectedCategory === cat;
-            const label = cat === 'TODAS' ? t.checklistFilterAll : formatCategoryName(cat);
+            const label = cat === 'TODAS' ? t.checklistFilterAll : formatCategoryName(cat, t);
             return (
               <button key={cat} onClick={() => setSelectedCategory(cat as any)}
                 className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition"
@@ -197,7 +197,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                 <div className="min-w-0 flex-1">
                   <span className="font-extrabold text-base sm:text-lg truncate block" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
                   <div className="text-xs mt-0.5 flex items-center gap-2">
-                    <span className="font-bold sf-accent">{formatCategoryName(p.category)}</span>
+                    <span className="font-bold sf-accent">{formatCategoryName(p.category, t)}</span>
                     <span className="sf-subtle">•</span>
                     <span className="sf-muted">{t.minimum} <strong style={{ color: 'var(--sf-text)' }}>{p.minThreshold} {p.unit}s</strong></span>
                   </div>
