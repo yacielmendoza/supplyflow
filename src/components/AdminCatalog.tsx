@@ -107,7 +107,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
     { key: 'PRODUCTS' as const, label: t.adminTabProducts },
     { key: 'RESTAURANTS' as const, label: `${t.adminTabLocals} (${restaurants.length})` },
     { key: 'SUPPLIERS' as const, label: `${t.adminTabSuppliers} (${suppliers.length})` },
-    { key: 'TIEMPOS' as const, label: 'Tiempos' },
+    { key: 'TIEMPOS' as const, label: t.adminTabOverdue },
   ];
 
   return (
@@ -367,7 +367,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                   <span className="sf-inset px-2 py-0.5 rounded text-[10px] font-mono sf-accent">{r.type}</span>
                 </div>
                 <p className="text-xs sf-muted mt-1">{r.address}</p>
-                <p className="text-xs sf-subtle">Tel: {r.phone}</p>
+                <p className="text-xs sf-subtle">{t.adminPhoneLabel} {r.phone}</p>
               </div>
             ))}
           </div>
@@ -381,14 +381,14 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             <div key={s.id} className="sf-card p-4">
               <div className="font-bold text-sm" style={{ color: 'var(--sf-text)' }}>{s.name}</div>
               <p className="text-xs sf-accent mt-1">{s.categorySpecialty}</p>
-              <p className="text-xs sf-subtle mt-0.5">Tel: {s.phone}</p>
+              <p className="text-xs sf-subtle mt-0.5">{t.adminPhoneLabel} {s.phone}</p>
             </div>
           ))}
         </div>
       )}
 
       {/* TIEMPOS */}
-      {activeTab === 'TIEMPOS' && <OverdueSettingsPanel settings={overdueSettings} onSave={onSaveOverdueSettings} />}
+      {activeTab === 'TIEMPOS' && <OverdueSettingsPanel settings={overdueSettings} onSave={onSaveOverdueSettings} t={t} />}
     </div>
   );
 };
@@ -446,7 +446,15 @@ const EditCard: React.FC<{
   </div>
 );
 
-function OverdueSettingsPanel({ settings, onSave }: { settings: OverdueSettings; onSave: (s: OverdueSettings) => void }) {
+function OverdueSettingsPanel({
+  settings,
+  onSave,
+  t,
+}: {
+  settings: OverdueSettings;
+  onSave: (s: OverdueSettings) => void;
+  t: ReturnType<typeof getTranslation>;
+}) {
   const [normal, setNormal] = useState(String(settings.normalMinutes));
   const [urgent, setUrgent] = useState(String(settings.urgentMinutes));
   const [saved, setSaved] = useState(false);
@@ -468,9 +476,9 @@ function OverdueSettingsPanel({ settings, onSave }: { settings: OverdueSettings;
       <div className="flex items-center gap-2">
         <Clock className="w-5 h-5" style={{ color: 'var(--sf-amber)' }} />
         <div>
-          <h3 className="font-black text-base" style={{ color: 'var(--sf-text)' }}>Tiempos de Espera Máximos</h3>
+          <h3 className="font-black text-base" style={{ color: 'var(--sf-text)' }}>{t.adminOverdueTitle}</h3>
           <p className="text-xs sf-muted mt-0.5">
-            Si un pedido sin asignar supera este tiempo, se marcará como <span className="font-bold" style={{ color: 'var(--sf-rose)' }}>ATRASADO</span> y se notificará a compradores y administradores.
+            {t.adminOverdueDesc} <span className="font-bold" style={{ color: 'var(--sf-rose)' }}>{t.tagOverdue}</span> {t.adminOverdueDescSuffix}
           </p>
         </div>
       </div>
@@ -478,30 +486,31 @@ function OverdueSettingsPanel({ settings, onSave }: { settings: OverdueSettings;
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="block sf-muted font-bold text-xs uppercase tracking-wider">Pedido Normal (min)</label>
+            <label className="block sf-muted font-bold text-xs uppercase tracking-wider">{t.adminOverdueNormalLabel}</label>
             <input type="number" min={1} max={240} value={normal} onChange={(e) => setNormal(e.target.value)} className="w-full sf-inset px-3 py-2.5 text-sm font-bold text-center focus:outline-none" style={inputStyle} />
-            <p className="text-xs sf-subtle">Umbral para pedidos estándar</p>
+            <p className="text-xs sf-subtle">{t.adminOverdueNormalHint}</p>
           </div>
           <div className="space-y-1.5">
             <label className="font-bold text-xs uppercase tracking-wider flex items-center gap-1" style={{ color: 'var(--sf-rose)' }}>
               <Flame className="w-3.5 h-3.5" />
-              Urgente (min)
+              {t.adminOverdueUrgentLabel}
             </label>
             <input type="number" min={1} max={60} value={urgent} onChange={(e) => setUrgent(e.target.value)} className="w-full sf-inset px-3 py-2.5 text-sm font-bold text-center focus:outline-none" style={{ ...inputStyle, borderColor: tint('var(--sf-rose)', 40) }} />
-            <p className="text-xs sf-subtle">Umbral para pedidos urgentes</p>
+            <p className="text-xs sf-subtle">{t.adminOverdueUrgentHint}</p>
           </div>
         </div>
 
-        <button type="submit" className="w-full py-2.5 rounded-xl font-black text-sm transition"
+        <button type="submit" className="w-full py-2.5 rounded-xl font-black text-sm transition flex items-center justify-center gap-2"
           style={saved ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' } : { background: 'var(--sf-amber)', color: '#1a1206' }}>
-          {saved ? '✓ Guardado' : 'Guardar Tiempos'}
+          {saved && <Save className="w-4 h-4" />}
+          {saved ? t.adminOverdueSavedBtn : t.adminOverdueSaveBtn}
         </button>
       </form>
 
       <div className="sf-inset p-3 text-xs sf-muted space-y-1">
-        <div className="font-bold" style={{ color: 'var(--sf-text)' }}>Configuración actual:</div>
-        <div>• Normal: <span className="font-bold" style={{ color: 'var(--sf-amber)' }}>{settings.normalMinutes} minutos</span></div>
-        <div>• Urgente: <span className="font-bold" style={{ color: 'var(--sf-rose)' }}>{settings.urgentMinutes} minutos</span></div>
+        <div className="font-bold" style={{ color: 'var(--sf-text)' }}>{t.adminOverdueCurrentConfig}</div>
+        <div>• {t.adminOverdueNormalSummary} <span className="font-bold" style={{ color: 'var(--sf-amber)' }}>{settings.normalMinutes} {t.adminOverdueMinutesUnit}</span></div>
+        <div>• {t.adminOverdueUrgentSummary} <span className="font-bold" style={{ color: 'var(--sf-rose)' }}>{settings.urgentMinutes} {t.adminOverdueMinutesUnit}</span></div>
       </div>
     </div>
   );

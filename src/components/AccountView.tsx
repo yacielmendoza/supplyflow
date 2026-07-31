@@ -98,7 +98,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
 
   return (
     <div className="min-h-screen sf-page">
-      <ViewHeader title={t.accountTitle} onBack={onBack} />
+      <ViewHeader title={t.accountTitle} onBack={onBack} backLabel={t.back} />
 
       <div className="max-w-2xl mx-auto px-4 pb-16 pt-4 space-y-5">
         {/* Profile — inline editable */}

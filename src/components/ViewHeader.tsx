@@ -6,13 +6,14 @@ interface ViewHeaderProps {
   title: string;
   onBack: () => void;
   right?: React.ReactNode;
+  backLabel?: string;
 }
 
 /**
  * Sticky top bar for drill-in views (Account, Notifications). A back affordance
  * instead of a modal close — the screen is a real view, not an overlay.
  */
-export const ViewHeader: React.FC<ViewHeaderProps> = ({ title, onBack, right }) => {
+export const ViewHeader: React.FC<ViewHeaderProps> = ({ title, onBack, right, backLabel = 'Back' }) => {
   return (
     <div
       className="sticky top-0 z-40 safe-top"
@@ -29,7 +30,7 @@ export const ViewHeader: React.FC<ViewHeaderProps> = ({ title, onBack, right }) 
               onBack();
               playAlertSound('click');
             }}
-            aria-label="Atrás"
+            aria-label={backLabel}
             className="w-11 h-11 rounded-2xl sf-btn-ghost flex items-center justify-center flex-shrink-0 transition"
           >
             <ArrowLeft className="w-5 h-5" />

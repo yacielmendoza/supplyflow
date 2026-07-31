@@ -4,6 +4,7 @@ export const translations = {
   es: {
     // ── App / Brand ────────────────────────────────────────────────────────────
     appName: 'RestoSupply',
+    back: 'Atrás',
 
     // ── Login Screen ───────────────────────────────────────────────────────────
     loginSelectProfile: 'Selecciona tu perfil para continuar',
@@ -112,6 +113,7 @@ export const translations = {
     noRequests: 'No hay solicitudes en este grupo',
     selectTabHint: 'Selecciona otra pestaña o cambia el restaurante activo.',
     tagUrgent: 'URGENTE',
+    tagOverdue: 'ATRASADO',
     timeJustNow: 'Hace un momento',
     timePrefix: 'Hace ',
     timeSuffix: '',
@@ -229,6 +231,21 @@ export const translations = {
     adminProductNamePlaceholder: 'Ej: Carne Molida Angus',
     adminRestNamePlaceholder: 'Ej: Taquería El Caporal',
     adminUnitLabel: 'Unidad:',
+    adminPhoneLabel: 'Tel:',
+    adminTabOverdue: 'Tiempos',
+    adminOverdueTitle: 'Tiempos de Espera Máximos',
+    adminOverdueDesc: 'Si un pedido sin asignar supera este tiempo, se marcará como',
+    adminOverdueDescSuffix: 'y se notificará a compradores y administradores.',
+    adminOverdueNormalLabel: 'Pedido Normal (min)',
+    adminOverdueNormalHint: 'Umbral para pedidos estándar',
+    adminOverdueUrgentLabel: 'Urgente (min)',
+    adminOverdueUrgentHint: 'Umbral para pedidos urgentes',
+    adminOverdueSaveBtn: 'Guardar Tiempos',
+    adminOverdueSavedBtn: 'Guardado',
+    adminOverdueCurrentConfig: 'Configuración actual:',
+    adminOverdueNormalSummary: 'Normal:',
+    adminOverdueUrgentSummary: 'Urgente:',
+    adminOverdueMinutesUnit: 'minutos',
 
     // ── Analytics Dashboard ────────────────────────────────────────────────────
     analyticsTitle: 'Métricas & Control',
@@ -350,6 +367,7 @@ export const translations = {
   en: {
     // ── App / Brand ────────────────────────────────────────────────────────────
     appName: 'RestoSupply',
+    back: 'Back',
 
     // ── Login Screen ───────────────────────────────────────────────────────────
     loginSelectProfile: 'Select your profile to continue',
@@ -458,6 +476,7 @@ export const translations = {
     noRequests: 'No requests in this group',
     selectTabHint: 'Select another tab or change the active restaurant.',
     tagUrgent: 'URGENT',
+    tagOverdue: 'OVERDUE',
     timeJustNow: 'Just now',
     timePrefix: '',
     timeSuffix: ' ago',
@@ -575,6 +594,21 @@ export const translations = {
     adminProductNamePlaceholder: 'E.g.: Angus Ground Beef',
     adminRestNamePlaceholder: 'E.g.: El Caporal Taqueria',
     adminUnitLabel: 'Unit:',
+    adminPhoneLabel: 'Phone:',
+    adminTabOverdue: 'Timing',
+    adminOverdueTitle: 'Maximum Wait Times',
+    adminOverdueDesc: 'If an unassigned request exceeds this time, it will be marked as',
+    adminOverdueDescSuffix: 'and buyers and admins will be notified.',
+    adminOverdueNormalLabel: 'Normal Request (min)',
+    adminOverdueNormalHint: 'Threshold for standard requests',
+    adminOverdueUrgentLabel: 'Urgent (min)',
+    adminOverdueUrgentHint: 'Threshold for urgent requests',
+    adminOverdueSaveBtn: 'Save Timing',
+    adminOverdueSavedBtn: 'Saved',
+    adminOverdueCurrentConfig: 'Current configuration:',
+    adminOverdueNormalSummary: 'Normal:',
+    adminOverdueUrgentSummary: 'Urgent:',
+    adminOverdueMinutesUnit: 'minutes',
 
     // ── Analytics Dashboard ────────────────────────────────────────────────────
     analyticsTitle: 'Metrics & Control',

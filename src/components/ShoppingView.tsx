@@ -86,6 +86,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
       <ViewHeader
         title={`${t.shopModeTitle}${request.requestNumber}`}
         onBack={onClose}
+        backLabel={t.back}
         right={
           <span className="text-xs font-black sf-accent">{progressPct}%</span>
         }

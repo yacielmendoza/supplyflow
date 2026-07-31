@@ -117,6 +117,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
+  const statusLabels: Record<string, string> = {
+    Pendiente: t.pending,
+    Asignada: t.assigned,
+    'En Compra': t.inProgress,
+    Comprada: t.purchased,
+    Entregada: t.delivered,
+    Completada: t.completed,
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Greeting */}
@@ -202,7 +211,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       border: '1px solid var(--sf-border)',
                     }}
                   >
-                    {r.status}
+                    {statusLabels[r.status] ?? r.status}
                   </span>
                 </button>
               </li>

@@ -128,11 +128,21 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
     Completada: 'var(--sf-text-subtle)',
   };
 
+  const statusLabels: Record<string, string> = {
+    Pendiente: t.pending,
+    Asignada: t.assigned,
+    'En Compra': t.inProgress,
+    Comprada: t.purchased,
+    Entregada: t.delivered,
+    Completada: t.completed,
+  };
+
   return (
     <div className="min-h-screen sf-page">
       <ViewHeader
         title={t.notifBandejaTitle}
         onBack={onBack}
+        backLabel={t.back}
         right={
           segment === 'FEED' && visibleRequests.length > 0 ? (
             <button onClick={handleDismissAll} className="text-xs font-bold sf-accent">
@@ -238,7 +248,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase"
                             style={{ background: 'var(--sf-surface-2)', color: statusColors[req.status], border: '1px solid var(--sf-border)' }}>
-                            {req.status}
+                            {statusLabels[req.status] ?? req.status}
                           </span>
                           <button
                             onClick={(e) => handleDismiss(req.id, e)}

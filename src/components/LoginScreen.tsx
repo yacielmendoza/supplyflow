@@ -24,6 +24,9 @@ function getInitials(name: string): string {
   return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
 }
 
+const roleLabel = (role: Role, t: ReturnType<typeof getTranslation>) =>
+  role === 'cocinero' ? t.roleCook : role === 'comprador' ? t.roleBuyer : t.roleAdmin;
+
 export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }: LoginScreenProps) {
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -121,7 +124,7 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
                         <div className="flex-1 min-w-0">
                           <div className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{user.name}</div>
                           <div className="text-xs mt-0.5" style={{ color: config.color }}>
-                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                            {roleLabel(user.role, t)}
                           </div>
                         </div>
                         {isLoading ? (

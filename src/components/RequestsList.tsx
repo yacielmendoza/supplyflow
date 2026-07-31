@@ -231,7 +231,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       <span className="px-2.5 py-1 rounded-lg text-white font-black text-xs uppercase flex items-center gap-1 animate-pulse"
                         style={{ background: 'var(--sf-rose)' }}>
                         <AlertCircle className="w-3.5 h-3.5" />
-                        ATRASADO
+                        {t.tagOverdue}
                       </span>
                     )}
                   </div>
@@ -351,6 +351,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       rel="noopener noreferrer"
                       className="sf-btn-ghost p-2 rounded-xl sf-accent transition flex items-center"
                       title={t.labelShareWhatsApp}
+                      aria-label={t.labelShareWhatsApp}
                     >
                       <Share2 className="w-4 h-4" />
                     </a>
