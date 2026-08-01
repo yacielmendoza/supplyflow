@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { UserProfile, SupplyRequest, Product } from '../types';
 import { getTranslation } from '../lib/translations';
 import { formatCleanName } from '../lib/formatters';
@@ -53,61 +53,72 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const role = currentUser.role;
 
   // Scope to the active restaurant so the summary matches the header selector.
-  const scoped = requests.filter((r) => r.restaurantId === selectedRestaurantId);
+  const scoped = useMemo(
+    () => requests.filter((r) => r.restaurantId === selectedRestaurantId),
+    [requests, selectedRestaurantId]
+  );
 
   // Role-specific stat cards
-  let stats: Stat[] = [];
-  let subtitle = t.dashAdminSummary;
+  const { stats, subtitle } = useMemo(() => {
+    let stats: Stat[] = [];
+    let subtitle = t.dashAdminSummary;
 
-  if (role === 'cocinero') {
-    subtitle = t.dashCookSummary;
-    const lowStock = products.filter(
-      (p) => p.restaurantId === selectedRestaurantId && p.active && (p.currentStock ?? p.minThreshold + 1) < p.minThreshold
-    ).length;
-    const mine = scoped.filter(
-      (r) => r.createdByUserId === currentUser.id && r.status !== 'Completada'
-    ).length;
-    const pending = scoped.filter((r) => r.status === 'Pendiente').length;
-    const done = scoped.filter((r) => r.status === 'Completada' && isToday(r.completedAt)).length;
-    stats = [
-      { label: t.dashLowStock, value: lowStock, icon: AlertTriangle, color: 'var(--sf-rose)' },
-      { label: t.dashMyActive, value: mine, icon: Boxes, color: 'var(--sf-sky)' },
-      { label: t.dashPendingPickup, value: pending, icon: Clock, color: 'var(--sf-amber)' },
-      { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
-    ];
-  } else if (role === 'comprador') {
-    subtitle = t.dashBuyerSummary;
-    const pending = scoped.filter((r) => r.status === 'Pendiente' && !r.assignedBuyerId).length;
-    const shopping = scoped.filter(
-      (r) => (r.status === 'Asignada' || r.status === 'En Compra') && r.assignedBuyerId === currentUser.id
-    ).length;
-    const urgent = scoped.filter((r) => r.urgent && r.status === 'Pendiente').length;
-    const done = scoped.filter(
-      (r) => r.assignedBuyerId === currentUser.id && (r.status === 'Comprada' || r.status === 'Completada') && isToday(r.purchasedAt)
-    ).length;
-    stats = [
-      { label: t.dashPendingPickup, value: pending, icon: ShoppingCart, color: 'var(--sf-amber)' },
-      { label: t.dashInShopping, value: shopping, icon: PackageCheck, color: 'var(--sf-violet)' },
-      { label: t.dashUrgent, value: urgent, icon: Flame, color: 'var(--sf-rose)' },
-      { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
-    ];
-  } else {
-    subtitle = t.dashAdminSummary;
-    const total = scoped.length;
-    const pending = scoped.filter((r) => r.status === 'Pendiente').length;
-    const inProgress = scoped.filter((r) => ['Asignada', 'En Compra'].includes(r.status)).length;
-    const done = scoped.filter((r) => ['Comprada', 'Entregada', 'Completada'].includes(r.status)).length;
-    stats = [
-      { label: t.dashTotal, value: total, icon: Boxes, color: 'var(--sf-sky)' },
-      { label: t.dashPendingPickup, value: pending, icon: Clock, color: 'var(--sf-amber)' },
-      { label: t.dashInShopping, value: inProgress, icon: PackageCheck, color: 'var(--sf-violet)' },
-      { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
-    ];
-  }
+    if (role === 'cocinero') {
+      subtitle = t.dashCookSummary;
+      const lowStock = products.filter(
+        (p) => p.restaurantId === selectedRestaurantId && p.active && (p.currentStock ?? p.minThreshold + 1) < p.minThreshold
+      ).length;
+      const mine = scoped.filter(
+        (r) => r.createdByUserId === currentUser.id && r.status !== 'Completada'
+      ).length;
+      const pending = scoped.filter((r) => r.status === 'Pendiente').length;
+      const done = scoped.filter((r) => r.status === 'Completada' && isToday(r.completedAt)).length;
+      stats = [
+        { label: t.dashLowStock, value: lowStock, icon: AlertTriangle, color: 'var(--sf-rose)' },
+        { label: t.dashMyActive, value: mine, icon: Boxes, color: 'var(--sf-sky)' },
+        { label: t.dashPendingPickup, value: pending, icon: Clock, color: 'var(--sf-amber)' },
+        { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
+      ];
+    } else if (role === 'comprador') {
+      subtitle = t.dashBuyerSummary;
+      const pending = scoped.filter((r) => r.status === 'Pendiente' && !r.assignedBuyerId).length;
+      const shopping = scoped.filter(
+        (r) => (r.status === 'Asignada' || r.status === 'En Compra') && r.assignedBuyerId === currentUser.id
+      ).length;
+      const urgent = scoped.filter((r) => r.urgent && r.status === 'Pendiente').length;
+      const done = scoped.filter(
+        (r) => r.assignedBuyerId === currentUser.id && (r.status === 'Comprada' || r.status === 'Completada') && isToday(r.purchasedAt)
+      ).length;
+      stats = [
+        { label: t.dashPendingPickup, value: pending, icon: ShoppingCart, color: 'var(--sf-amber)' },
+        { label: t.dashInShopping, value: shopping, icon: PackageCheck, color: 'var(--sf-violet)' },
+        { label: t.dashUrgent, value: urgent, icon: Flame, color: 'var(--sf-rose)' },
+        { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
+      ];
+    } else {
+      subtitle = t.dashAdminSummary;
+      const total = scoped.length;
+      const pending = scoped.filter((r) => r.status === 'Pendiente').length;
+      const inProgress = scoped.filter((r) => ['Asignada', 'En Compra'].includes(r.status)).length;
+      const done = scoped.filter((r) => ['Comprada', 'Entregada', 'Completada'].includes(r.status)).length;
+      stats = [
+        { label: t.dashTotal, value: total, icon: Boxes, color: 'var(--sf-sky)' },
+        { label: t.dashPendingPickup, value: pending, icon: Clock, color: 'var(--sf-amber)' },
+        { label: t.dashInShopping, value: inProgress, icon: PackageCheck, color: 'var(--sf-violet)' },
+        { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
+      ];
+    }
 
-  const recent = [...scoped]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
+    return { stats, subtitle };
+  }, [role, scoped, products, selectedRestaurantId, currentUser.id, t]);
+
+  const recent = useMemo(
+    () =>
+      [...scoped]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5),
+    [scoped]
+  );
 
   const statusLabels = getStatusLabels(t);
 
@@ -154,7 +165,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </h2>
           <button
             onClick={onGoToRequests}
-            className="flex items-center gap-0.5 text-xs font-bold sf-accent"
+            className="flex items-center gap-0.5 px-2.5 min-h-11 -mr-2.5 rounded-xl text-xs font-bold sf-accent transition active:scale-95"
           >
             {t.dashViewAll}
             <ChevronRight className="w-4 h-4" />
