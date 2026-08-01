@@ -104,7 +104,6 @@ export const Header: React.FC<HeaderProps> = ({
               {open && (
                 <div
                   className="sf-card absolute left-0 top-full mt-2 min-w-[220px] max-h-72 overflow-y-auto p-1.5 z-50 animate-fadeIn"
-                  style={{ borderRadius: '20px' }}
                 >
                   {restaurants.map((r) => {
                     const active = r.id === selectedRestaurantId;

@@ -153,7 +153,13 @@ export const AccountView: React.FC<AccountViewProps> = ({
                     className="w-11 h-11 rounded-xl overflow-hidden transition"
                     style={{ outline: active ? '2px solid var(--sf-accent)' : '1px solid var(--sf-border)', outlineOffset: '1px' }}
                   >
-                    <img src={p.url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <img
+                      src={p.url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                    />
                   </button>
                 );
               })}

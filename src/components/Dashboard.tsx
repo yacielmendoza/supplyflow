@@ -24,6 +24,7 @@ interface DashboardProps {
 }
 
 interface Stat {
+  id: string; // stable, untranslated identifier — safe as a React key even if a locale ever produces duplicate labels
   label: string;
   value: number;
   icon: React.ElementType;
@@ -74,10 +75,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       const pending = scoped.filter((r) => r.status === 'Pendiente').length;
       const done = scoped.filter((r) => r.status === 'Completada' && isToday(r.completedAt)).length;
       stats = [
-        { label: t.dashLowStock, value: lowStock, icon: AlertTriangle, color: 'var(--sf-rose)' },
-        { label: t.dashMyActive, value: mine, icon: Boxes, color: 'var(--sf-sky)' },
-        { label: t.dashPendingPickup, value: pending, icon: Clock, color: 'var(--sf-amber)' },
-        { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
+        { id: 'lowStock', label: t.dashLowStock, value: lowStock, icon: AlertTriangle, color: 'var(--sf-rose)' },
+        { id: 'myActive', label: t.dashMyActive, value: mine, icon: Boxes, color: 'var(--sf-sky)' },
+        { id: 'pendingPickup', label: t.dashPendingPickup, value: pending, icon: Clock, color: 'var(--sf-amber)' },
+        { id: 'completedToday', label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
       ];
     } else if (role === 'comprador') {
       subtitle = t.dashBuyerSummary;
@@ -90,10 +91,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
         (r) => r.assignedBuyerId === currentUser.id && (r.status === 'Comprada' || r.status === 'Completada') && isToday(r.purchasedAt)
       ).length;
       stats = [
-        { label: t.dashPendingPickup, value: pending, icon: ShoppingCart, color: 'var(--sf-amber)' },
-        { label: t.dashInShopping, value: shopping, icon: PackageCheck, color: 'var(--sf-violet)' },
-        { label: t.dashUrgent, value: urgent, icon: Flame, color: 'var(--sf-rose)' },
-        { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
+        { id: 'pendingPickup', label: t.dashPendingPickup, value: pending, icon: ShoppingCart, color: 'var(--sf-amber)' },
+        { id: 'inShopping', label: t.dashInShopping, value: shopping, icon: PackageCheck, color: 'var(--sf-violet)' },
+        { id: 'urgent', label: t.dashUrgent, value: urgent, icon: Flame, color: 'var(--sf-rose)' },
+        { id: 'completedToday', label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
       ];
     } else {
       subtitle = t.dashAdminSummary;
@@ -102,10 +103,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       const inProgress = scoped.filter((r) => ['Asignada', 'En Compra'].includes(r.status)).length;
       const done = scoped.filter((r) => ['Comprada', 'Entregada', 'Completada'].includes(r.status)).length;
       stats = [
-        { label: t.dashTotal, value: total, icon: Boxes, color: 'var(--sf-sky)' },
-        { label: t.dashPendingPickup, value: pending, icon: Clock, color: 'var(--sf-amber)' },
-        { label: t.dashInShopping, value: inProgress, icon: PackageCheck, color: 'var(--sf-violet)' },
-        { label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
+        { id: 'total', label: t.dashTotal, value: total, icon: Boxes, color: 'var(--sf-sky)' },
+        { id: 'pendingPickup', label: t.dashPendingPickup, value: pending, icon: Clock, color: 'var(--sf-amber)' },
+        { id: 'inShopping', label: t.dashInShopping, value: inProgress, icon: PackageCheck, color: 'var(--sf-violet)' },
+        { id: 'completedToday', label: t.dashCompletedToday, value: done, icon: CheckCircle2, color: 'var(--sf-accent)' },
       ];
     }
 
@@ -139,7 +140,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="sf-card p-4 flex flex-col gap-3">
+            <div key={s.id} className="sf-card p-4 flex flex-col gap-3">
               <div
                 className="w-11 h-11 rounded-2xl flex items-center justify-center"
                 style={{ background: 'var(--sf-surface-2)', color: s.color }}
