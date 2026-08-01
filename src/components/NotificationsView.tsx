@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SupplyRequest } from '../types';
 import { getTranslation } from '../lib/translations';
 import { formatCleanName } from '../lib/formatters';
@@ -72,6 +72,21 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
       /* ignore */
     }
   };
+
+  // Another tab/device dismissing a notification should reflect here too —
+  // without this, `dismissedIds` only ever reads localStorage once at mount.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== 'restosupply_read_notifications') return;
+      try {
+        setDismissedIds(e.newValue ? new Set<string>(JSON.parse(e.newValue)) : new Set<string>());
+      } catch {
+        /* ignore malformed cross-tab payload */
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const handleDismiss = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();

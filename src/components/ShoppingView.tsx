@@ -137,7 +137,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
             <button
               onClick={() => setSelectedSupplierFilter('TODOS')}
               aria-pressed={selectedSupplierFilter === 'TODOS'}
-              className="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition"
+              className="px-3 min-h-11 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center"
               style={filterBtn(selectedSupplierFilter === 'TODOS')}
             >
               {t.storeAll} ({request.items.length})
@@ -149,7 +149,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                   key={sup}
                   onClick={() => setSelectedSupplierFilter(sup)}
                   aria-pressed={selectedSupplierFilter === sup}
-                  className="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition"
+                  className="px-3 min-h-11 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center"
                   style={filterBtn(selectedSupplierFilter === sup)}
                 >
                   {sup} ({count})
@@ -245,7 +245,12 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                   </div>
                 ) : (
                   <button
-                    onClick={() => setEditingNoteItemId(item.id)}
+                    onClick={() => {
+                      // Re-seed from the authoritative server value before editing —
+                      // a Realtime update after mount could have changed it elsewhere.
+                      setItemNotes((prev) => ({ ...prev, [item.id]: item.itemNote || '' }));
+                      setEditingNoteItemId(item.id);
+                    }}
                     className="px-2 min-h-11 -mx-2 rounded-lg text-[11px] sf-muted flex items-center gap-1 hover:brightness-125 transition active:scale-95"
                   >
                     <MessageSquare className="w-3 h-3" />
