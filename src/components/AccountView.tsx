@@ -86,6 +86,14 @@ export const AccountView: React.FC<AccountViewProps> = ({
     setTimeout(() => setSavedFlash(false), 1600);
   };
 
+  // Theme/language apply instantly, so users reasonably expect the rest of the
+  // form to behave the same way — auto-save any unsaved edits before leaving
+  // instead of discarding them silently.
+  const handleBack = () => {
+    if (dirty) onSaveProfile({ ...currentUser, name, email, phone, avatarUrl });
+    onBack();
+  };
+
   const setTheme = (next: 'dark' | 'light') => {
     if (next === theme) return;
     onSaveProfile({ ...currentUser, theme: next });
@@ -101,7 +109,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
 
   return (
     <div className="min-h-screen sf-page">
-      <ViewHeader title={t.accountTitle} onBack={onBack} backLabel={t.back} />
+      <ViewHeader title={t.accountTitle} onBack={handleBack} backLabel={t.back} />
 
       <div className="max-w-2xl mx-auto px-4 pb-16 pt-4 space-y-5 safe-bottom">
         {/* Profile — inline editable */}
@@ -202,7 +210,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
                 <div className="sf-inset p-4 space-y-2 animate-fadeIn">
                   {isIOS ? (
                     <>
-                      <p className="text-xs font-black" style={{ color: 'var(--sf-amber)' }}>iPhone / iPad (Safari)</p>
+                      <p className="text-xs font-black" style={{ color: 'var(--sf-amber)' }}>{t.pwaIosTitle}</p>
                       <ol className="space-y-1.5 text-xs sf-muted">
                         <li className="flex items-center gap-1.5">
                           <span>1. {t.pwaIosStep1}</span>
