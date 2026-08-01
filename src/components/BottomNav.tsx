@@ -19,7 +19,7 @@ interface BottomNavProps {
  * Native-style bottom tab bar. Big touch targets, single active accent pill,
  * safe-area aware. Themed entirely through design tokens.
  */
-export const BottomNav: React.FC<BottomNavProps> = ({ tabs, activeTab, onChange }) => {
+const BottomNavComponent: React.FC<BottomNavProps> = ({ tabs, activeTab, onChange }) => {
   return (
     <nav
       className="fixed bottom-0 inset-x-0 z-40 safe-bottom"
@@ -44,13 +44,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({ tabs, activeTab, onChange 
                     playAlertSound('click');
                   }
                 }}
-                aria-label={tab.label}
+                aria-label={
+                  tab.badge !== undefined && tab.badge > 0
+                    ? `${tab.label} (${tab.badge})`
+                    : tab.label
+                }
                 aria-current={isActive ? 'page' : undefined}
-                className="relative flex-1 flex flex-col items-center justify-center gap-1 py-1.5 rounded-2xl transition"
+                className="relative flex-1 flex flex-col items-center justify-center gap-1 py-1.5 rounded-2xl transition active:scale-95"
                 style={{ color: isActive ? 'var(--sf-accent)' : 'var(--sf-text-subtle)' }}
               >
                 <span
-                  className="relative flex items-center justify-center w-14 h-9 rounded-2xl transition"
+                  className={`relative flex items-center justify-center w-14 h-9 rounded-2xl transition ${isActive ? 'sf-pop' : ''}`}
                   style={{ background: isActive ? 'var(--sf-accent-soft)' : 'transparent' }}
                 >
                   <Icon className="w-6 h-6" strokeWidth={isActive ? 2.6 : 2} />
@@ -74,3 +78,5 @@ export const BottomNav: React.FC<BottomNavProps> = ({ tabs, activeTab, onChange 
     </nav>
   );
 };
+
+export const BottomNav = React.memo(BottomNavComponent);

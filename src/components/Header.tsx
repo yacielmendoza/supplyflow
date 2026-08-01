@@ -22,7 +22,7 @@ interface HeaderProps {
  * is a custom popover (not a native <select>) so the picker matches the app's
  * design language instead of the OS control.
  */
-export const Header: React.FC<HeaderProps> = ({
+const HeaderComponent: React.FC<HeaderProps> = ({
   restaurants,
   selectedRestaurantId,
   onSelectRestaurant,
@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
               style={{ background: 'var(--sf-brand-gradient)', boxShadow: 'var(--sf-brand-shadow)' }}
             >
-              <Flame className="w-5 h-5 stroke-[2.5]" style={{ color: '#ffffff' }} />
+              <Flame className="w-5 h-5 stroke-[2.5]" style={{ color: 'var(--sf-brand-fg)' }} />
             </div>
 
             <div className="relative min-w-0" ref={selectorRef}>
@@ -138,7 +138,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onOpenNotifications}
               className="relative w-11 h-11 rounded-2xl sf-btn-ghost flex items-center justify-center transition"
               title={t.headerNotifications}
-              aria-label={t.headerNotifications}
+              aria-label={
+                activeRequestsCount > 0
+                  ? `${t.headerNotifications} (${activeRequestsCount})`
+                  : t.headerNotifications
+              }
             >
               <Bell className="w-5 h-5" />
               {activeRequestsCount > 0 && (
@@ -158,8 +162,8 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className="relative w-11 h-11 rounded-full flex-shrink-0 transition ring-2"
               style={{ ['--tw-ring-color' as string]: 'var(--sf-accent)' }}
-              title={formatCleanName(currentUser.name)}
-              aria-label={`${t.tabSettings} — ${sseConnected ? t.online : t.reconnecting}`}
+              title={`${formatCleanName(currentUser.name)} — ${sseConnected ? t.online : t.reconnecting}`}
+              aria-label={`${t.tabSettings}: ${formatCleanName(currentUser.name)} — ${sseConnected ? t.online : t.reconnecting}`}
             >
               <span className="block w-full h-full rounded-full overflow-hidden">
                 {currentUser.avatarUrl ? (
@@ -194,3 +198,5 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+
+export const Header = React.memo(HeaderComponent);
