@@ -131,7 +131,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
         backLabel={t.back}
         right={
           segment === 'FEED' && visibleRequests.length > 0 ? (
-            <button onClick={handleDismissAll} className="text-xs font-bold sf-accent">
+            <button onClick={handleDismissAll} className="px-2.5 min-h-11 -mr-2.5 rounded-xl text-xs font-bold sf-accent transition active:scale-95">
               {t.notifMarkAllRead}
             </button>
           ) : undefined
@@ -149,7 +149,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                   key={key}
                   onClick={() => setSegment(key)}
                   aria-pressed={active}
-                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-2xl font-black text-sm transition"
+                  className="flex items-center justify-center gap-1.5 min-h-11 rounded-2xl font-black text-sm transition"
                   style={{
                     background: active ? 'var(--sf-surface)' : 'transparent',
                     color: active ? 'var(--sf-accent)' : 'var(--sf-text-muted)',
@@ -198,7 +198,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
               <div className="text-base font-black" style={{ color: 'var(--sf-text)' }}>{t.notifInboxEmpty}</div>
               <p className="sf-muted text-sm max-w-xs mx-auto">{t.notifInboxEmptyText}</p>
               {dismissedIds.size > 0 && (
-                <button onClick={handleClearDismissedHistory} className="text-sm sf-accent font-bold pt-1">
+                <button onClick={handleClearDismissedHistory} className="px-3 min-h-11 rounded-xl text-sm sf-accent font-bold transition active:scale-95">
                   {t.notifShowReadCount} ({dismissedIds.size})
                 </button>
               )}
@@ -312,7 +312,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                   </div>
                 )}
               </div>
-              <button onClick={handleEnablePush} className="px-4 py-2 rounded-2xl font-black text-xs sf-btn-accent flex-shrink-0 whitespace-nowrap">
+              <button onClick={handleEnablePush} className="px-4 min-h-11 rounded-2xl font-black text-xs sf-btn-accent flex-shrink-0 whitespace-nowrap transition active:scale-95">
                 {t.notifPushActivate}
               </button>
             </div>
@@ -321,12 +321,12 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
               <label className="text-xs font-black uppercase tracking-wider sf-muted">{t.notifSoundTestLabel}</label>
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => playAlertSound('urgent')}
-                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-xs font-bold sf-btn-ghost">
+                  className="flex items-center justify-center gap-1.5 min-h-11 rounded-2xl text-xs font-bold sf-btn-ghost transition active:scale-95">
                   <Volume2 className="w-4 h-4" style={{ color: 'var(--sf-rose)' }} />
                   {t.notifChimeUrgent}
                 </button>
                 <button onClick={() => playAlertSound('success')}
-                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-xs font-bold sf-btn-ghost">
+                  className="flex items-center justify-center gap-1.5 min-h-11 rounded-2xl text-xs font-bold sf-btn-ghost transition active:scale-95">
                   <CheckCircle2 className="w-4 h-4 sf-accent" />
                   {t.notifChimeSuccess}
                 </button>
@@ -357,12 +357,12 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                   href={generateWhatsAppLink(currentUserPhone, sampleWhatsAppText)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-2 rounded-2xl font-bold text-xs sf-btn-ghost flex items-center gap-1.5"
+                  className="px-3 min-h-11 rounded-2xl font-bold text-xs sf-btn-ghost flex items-center gap-1.5 transition active:scale-95"
                 >
                   <Share2 className="w-4 h-4" />
                   {t.notifWhatsAppLink}
                 </a>
-                <button onClick={handleSendTestPush} className="px-4 py-2 rounded-2xl font-black text-xs sf-btn-accent flex items-center gap-1.5">
+                <button onClick={handleSendTestPush} className="px-4 min-h-11 rounded-2xl font-black text-xs sf-btn-accent flex items-center gap-1.5 transition active:scale-95">
                   <Send className="w-4 h-4" />
                   {t.notifLaunchAlert}
                 </button>
