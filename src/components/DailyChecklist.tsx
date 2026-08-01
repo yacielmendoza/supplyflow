@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useLayoutEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Product, Category, Restaurant, UserProfile } from '../types';
 import { formatCategoryName, PRODUCT_CATEGORIES } from '../lib/formatters';
@@ -186,6 +187,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
       : { background: 'transparent', color: 'var(--sf-text-muted)', border: '1px solid transparent' };
 
   return (
+    <>
     <div className="space-y-3.5 animate-fadeIn" style={{ paddingBottom: `calc(${summaryBarH}px + env(safe-area-inset-bottom) + 16px)` }}>
       {/* Banner + progress */}
       <div className="sf-card p-4 space-y-3">
@@ -343,8 +345,11 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
         })}
         </AnimatePresence>
       </div>
+    </div>
 
-      {/* Summary bar — fixed, anchored flush above the BottomNav, tap to preview the order */}
+      {/* Summary bar — rendered via portal to document.body so no ancestor's
+          transform/filter can break position:fixed; anchored flush above BottomNav. */}
+      {createPortal(
       <div
         ref={summaryBarRef}
         className="fixed inset-x-0 z-30"
@@ -475,7 +480,9 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div>,
+        document.body
+      )}
+    </>
   );
 };

@@ -10,6 +10,13 @@ export default defineConfig(() => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
+      // Force a single copy of React / ReactDOM so createPortal (react-dom) and
+      // createRoot (react-dom/client) share one renderer instance — prevents the
+      // "more than one copy of React" invalid-hook-call crash in dev.
+      dedupe: ['react', 'react-dom'],
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom', 'react-dom/client'],
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
