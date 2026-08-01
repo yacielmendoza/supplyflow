@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { SupplyRequest, RequestStatus, UserProfile } from '../types';
 import { formatCleanName } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
@@ -44,6 +45,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   overdueRequestIds,
 }) => {
   const t = getTranslation(currentUser.language ?? 'es');
+  const shouldReduceMotion = useReducedMotion();
 
   const [filterTab, setFilterTab] = useState<'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ALL'>('ALL');
   const [expandedRequestIds, setExpandedRequestIds] = useState<Set<string>>(new Set());
@@ -105,7 +107,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   ];
 
   const chipBtn =
-    'px-4 py-2 rounded-xl text-sm font-black flex items-center justify-center transition disabled:opacity-60';
+    'px-4 min-h-11 rounded-xl text-sm font-black flex items-center justify-center transition disabled:opacity-60 active:scale-95';
 
   return (
     <div className="space-y-4 animate-fadeIn">
@@ -207,8 +209,8 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       </span>
                     )}
                     {isOverdue && (
-                      <span className="px-2.5 py-1 rounded-lg text-white font-black text-xs uppercase flex items-center gap-1 animate-pulse"
-                        style={{ background: 'var(--sf-rose)' }}>
+                      <span className="px-2.5 py-1 rounded-lg font-black text-xs uppercase flex items-center gap-1 animate-pulse"
+                        style={{ background: 'var(--sf-rose)', color: 'var(--sf-accent-contrast)' }}>
                         <AlertCircle className="w-3.5 h-3.5" />
                         {t.tagOverdue}
                       </span>
@@ -280,41 +282,52 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                 )}
 
                 {/* Expanded */}
-                {isExpanded && (
-                  <div className="mt-3 pt-3 space-y-3 animate-fadeIn" style={{ borderTop: '1px solid var(--sf-border)' }}>
-                    {req.notes && (
-                      <div className="sf-inset px-3.5 py-2 text-xs sm:text-sm italic flex items-start gap-2" style={{ color: 'var(--sf-text)' }}>
-                        <FileText className="w-4 h-4 sf-accent flex-shrink-0 mt-0.5" />
-                        <span>&ldquo;{req.notes}&rdquo;</span>
-                      </div>
-                    )}
-                    <div className="space-y-2">
-                      <div className="text-xs font-black uppercase tracking-wider sf-muted">
-                        {t.labelRequiredItems} ({totalItems}):
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {req.items.map((item) => (
-                          <div key={item.id} className="sf-inset px-3 py-2 text-xs sm:text-sm flex items-center justify-between gap-2"
-                            style={item.purchased ? { background: tint('var(--sf-accent)', 12) } : undefined}>
-                            <div className="flex items-center gap-2 min-w-0 truncate">
-                              {item.purchased ? (
-                                <Check className="w-4 h-4 sf-accent flex-shrink-0" />
-                              ) : (
-                                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--sf-amber)' }} />
-                              )}
-                              <span className="truncate font-bold" style={{ color: item.purchased ? 'var(--sf-accent)' : 'var(--sf-text)', textDecoration: item.purchased ? 'line-through' : 'none' }}>
-                                {item.productName}
-                              </span>
-                            </div>
-                            <span className="sf-pill font-black px-2 py-0.5 rounded-lg text-xs flex-shrink-0" style={{ color: 'var(--sf-text)' }}>
-                              {item.requestedQty} {item.unit}
-                            </span>
+                <AnimatePresence initial={false}>
+                  {isExpanded && (
+                    <motion.div
+                      key="expanded"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: 'easeOut' }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div className="mt-3 pt-3 space-y-3" style={{ borderTop: '1px solid var(--sf-border)' }}>
+                        {req.notes && (
+                          <div className="sf-inset px-3.5 py-2 text-xs sm:text-sm italic flex items-start gap-2" style={{ color: 'var(--sf-text)' }}>
+                            <FileText className="w-4 h-4 sf-accent flex-shrink-0 mt-0.5" />
+                            <span>&ldquo;{req.notes}&rdquo;</span>
                           </div>
-                        ))}
+                        )}
+                        <div className="space-y-2">
+                          <div className="text-xs font-black uppercase tracking-wider sf-muted">
+                            {t.labelRequiredItems} ({totalItems}):
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {req.items.map((item) => (
+                              <div key={item.id} className="sf-inset px-3 py-2 text-xs sm:text-sm flex items-center justify-between gap-2"
+                                style={item.purchased ? { background: tint('var(--sf-accent)', 12) } : undefined}>
+                                <div className="flex items-center gap-2 min-w-0 truncate">
+                                  {item.purchased ? (
+                                    <Check className="w-4 h-4 sf-accent flex-shrink-0" />
+                                  ) : (
+                                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--sf-amber)' }} />
+                                  )}
+                                  <span className="truncate font-bold" style={{ color: item.purchased ? 'var(--sf-accent)' : 'var(--sf-text)', textDecoration: item.purchased ? 'line-through' : 'none' }}>
+                                    {item.productName}
+                                  </span>
+                                </div>
+                                <span className="sf-pill font-black px-2 py-0.5 rounded-lg text-xs flex-shrink-0" style={{ color: 'var(--sf-text)' }}>
+                                  {item.requestedQty} {item.unit}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Footer actions */}
                 <div className="mt-3 pt-2.5 flex items-center justify-between gap-2" style={{ borderTop: '1px solid var(--sf-border)' }}>
