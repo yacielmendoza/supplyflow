@@ -51,6 +51,8 @@ html.light {
 :root {
   --sf-brand-gradient: linear-gradient(to top right, #059669, #14b8a6, #fbbf24);
   --sf-brand-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);
+  /* Darkened, not pure white: the gradient's amber stop only clears WCAG AA (≥4.5:1) against a dimmed mark. */
+  --sf-brand-fg: #0c1a12;
 }
 
 html.light body,
@@ -182,4 +184,17 @@ a:focus-visible,
 }
 .sf-pop {
   animation: sfPop 0.22s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .sf-pop,
+  .animate-pulse {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+  }
 }
