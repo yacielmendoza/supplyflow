@@ -317,13 +317,13 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                 )}
 
                 {/* Footer actions */}
-                <div className="mt-3 pt-2.5 flex items-center justify-between gap-2 flex-wrap" style={{ borderTop: '1px solid var(--sf-border)' }}>
-                  <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition">
+                <div className="mt-3 pt-2.5 flex items-center justify-between gap-2" style={{ borderTop: '1px solid var(--sf-border)' }}>
+                  <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0">
                     <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 sf-muted" /> : <ChevronDown className="w-4 h-4 sf-muted" />}
                   </button>
 
-                  <div className="flex items-center gap-2 ml-auto">
+                  <div className="flex items-center gap-2 min-w-0 justify-end">
                     <a
                       href={generateWhatsAppLink(currentUser.phone, generateRequestWhatsAppSummary(req, currentUser.language ?? 'es'))}
                       target="_blank"
@@ -419,9 +419,9 @@ export const RequestsList: React.FC<RequestsListProps> = ({
 };
 
 const StatusPill: React.FC<{ color: string; icon: React.ElementType; label: string }> = ({ color, icon: Icon, label }) => (
-  <div className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5"
+  <div className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 min-w-0"
     style={{ background: tint(color, 14), color, border: `1px solid ${tint(color, 30)}` }}>
-    <Icon className="w-4 h-4" />
-    <span>{label}</span>
+    <Icon className="w-4 h-4 flex-shrink-0" />
+    <span className="truncate">{label}</span>
   </div>
 );
