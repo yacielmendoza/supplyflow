@@ -330,7 +330,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                 </AnimatePresence>
 
                 {/* Footer actions */}
-                <div className="mt-3 pt-2.5 flex items-center justify-between gap-2" style={{ borderTop: '1px solid var(--sf-border)' }}>
+                <div className="mt-3 pt-2.5 flex items-center justify-between gap-2 flex-wrap" style={{ borderTop: '1px solid var(--sf-border)' }}>
                   <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0">
                     <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 sf-muted" /> : <ChevronDown className="w-4 h-4 sf-muted" />}
