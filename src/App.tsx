@@ -83,6 +83,14 @@ function persistJSON(key: string, value: unknown) {
   }
 }
 
+function safeSetItem(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* storage unavailable — in-memory state still works for this session */
+  }
+}
+
 export default function App() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -133,7 +141,7 @@ export default function App() {
       prev.map((u) => (u.id === updatedProfile.id ? updatedProfile : u))
     );
     persistJSON(SESSION_KEY, updatedProfile);
-    if (updatedProfile.language) localStorage.setItem(LANGUAGE_KEY, updatedProfile.language);
+    if (updatedProfile.language) safeSetItem(LANGUAGE_KEY, updatedProfile.language);
   };
 
   const handleSelectRequestFromNotification = (requestId: string) => {
@@ -555,7 +563,7 @@ export default function App() {
 
   const handleSaveOverdueSettings = (settings: OverdueSettings) => {
     setOverdueSettings(settings);
-    localStorage.setItem('restosupply_overdue_settings', JSON.stringify(settings));
+    persistJSON('restosupply_overdue_settings', settings);
     notifiedOverdueIds.current.clear();
   };
 
@@ -565,13 +573,19 @@ export default function App() {
     setActiveTab('DASHBOARD');
     setScreen('NONE');
     persistJSON(SESSION_KEY, u);
-    if (u.language) localStorage.setItem(LANGUAGE_KEY, u.language);
+    if (u.language) safeSetItem(LANGUAGE_KEY, u.language);
   };
 
   const handleChangeLanguage = (lang: 'es' | 'en') => {
     setAppLanguage(lang);
-    localStorage.setItem(LANGUAGE_KEY, lang);
+    safeSetItem(LANGUAGE_KEY, lang);
   };
+
+  // Stable identities so React.memo on Header/BottomNav actually skips re-renders.
+  const handleSelectRestaurant = useCallback((id: string) => setSelectedRestaurantId(id), []);
+  const handleOpenNotifications = useCallback(() => setScreen('NOTIFICATIONS'), []);
+  const handleOpenProfile = useCallback(() => setScreen('ACCOUNT'), []);
+  const handleChangeTab = useCallback((id: string) => setActiveTab(id as TabId), []);
 
   const handleLogout = () => {
     setCurrentUser(null);
@@ -582,45 +596,15 @@ export default function App() {
     }
   };
 
-  // Show login screen when no user is selected
-  if (!currentUser) {
-    return (
-      <LoginScreen
-        users={users}
-        onSelectUser={handleSelectUser}
-        language={appLanguage}
-        onChangeLanguage={handleChangeLanguage}
-      />
-    );
-  }
-
   const activePendingRequestsCount = supplyRequests.filter(
     (r) => r.status === 'Pendiente'
   ).length;
 
-  const isIOS =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-
-  const isLight = currentUser.theme === 'light';
-
-  // Sync html root class for theme
-  if (isLight) {
-    document.documentElement.classList.add('light');
-    document.documentElement.classList.remove('dark');
-  } else {
-    document.documentElement.classList.add('dark');
-    document.documentElement.classList.remove('light');
-  }
-
-  // Keep the PWA/browser chrome (status bar, task switcher) color matching the active theme
-  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeColorMeta) {
-    themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
-  }
-
+  // Hooks must run unconditionally on every render, so this is computed
+  // before the early "no session" return below (Rules of Hooks).
   const currentNavTabs = useMemo((): BottomNavTab[] => {
     const dashboard: BottomNavTab = { id: 'DASHBOARD', label: t.tabDashboard, icon: LayoutDashboard };
-    switch (currentUser.role) {
+    switch (currentUser?.role) {
       case 'cocinero':
         return [
           dashboard,
@@ -642,7 +626,39 @@ export default function App() {
       default:
         return [dashboard];
     }
-  }, [currentUser.role, t, activePendingRequestsCount]);
+  }, [currentUser?.role, t, activePendingRequestsCount]);
+
+  // Show login screen when no user is selected
+  if (!currentUser) {
+    return (
+      <LoginScreen
+        users={users}
+        onSelectUser={handleSelectUser}
+        language={appLanguage}
+        onChangeLanguage={handleChangeLanguage}
+      />
+    );
+  }
+
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+
+  const isLight = currentUser.theme === 'light';
+
+  // Sync html root class for theme
+  if (isLight) {
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+  } else {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+  }
+
+  // Keep the PWA/browser chrome (status bar, task switcher) color matching the active theme
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
+  }
 
   // Shopping mode is a full-screen view (no modal), takes priority when active
   if (shoppingModalRequest) {
@@ -704,12 +720,12 @@ export default function App() {
       <Header
         restaurants={restaurants}
         selectedRestaurantId={selectedRestaurantId}
-        onSelectRestaurant={(id) => setSelectedRestaurantId(id)}
+        onSelectRestaurant={handleSelectRestaurant}
         currentUser={currentUser}
         sseConnected={sseConnected}
         activeRequestsCount={activePendingRequestsCount}
-        onOpenNotifications={() => setScreen('NOTIFICATIONS')}
-        onOpenProfile={() => setScreen('ACCOUNT')}
+        onOpenNotifications={handleOpenNotifications}
+        onOpenProfile={handleOpenProfile}
       />
 
       <main
@@ -730,6 +746,7 @@ export default function App() {
         {activeTab === 'CHECKLIST' && (
           <Suspense fallback={<ViewFallback />}>
             <DailyChecklist
+              key={selectedRestaurant.id}
               products={currentRestaurantProducts}
               selectedRestaurant={selectedRestaurant}
               currentUser={currentUser}
@@ -776,7 +793,7 @@ export default function App() {
       <BottomNav
         tabs={currentNavTabs}
         activeTab={activeTab}
-        onChange={(id) => setActiveTab(id as TabId)}
+        onChange={handleChangeTab}
       />
     </div>
   );
