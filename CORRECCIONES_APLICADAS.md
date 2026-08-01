@@ -483,3 +483,77 @@ Detalle completo en `HERRAMIENTAS_IA.md`.
   persistido, campana→Notificaciones, avatar→Cuenta, Modo Compra, alta/
   edición de productos/locales, checklist con envío (ahora persistente),
   badges.
+
+## Ciclo de corrección (2026-08-01, continuación — sobre auditoría refrescada en `8915532`)
+
+Durante el rebase de este mismo ciclo aterrizó en remoto una auditoría más
+reciente (`8915532`, sobre `5f8f719` — el commit exacto que sirvió de base
+a este ciclo), que confirmó cerrados todos los hallazgos de arriba y
+añadió 1 regresión nueva (A7) + 2 grupos de hallazgos no cubiertos por el
+informe original (M14, M15) + 3 Bajos nuevos (B1 reclasificado a activo,
+B11, B12). Se implementaron todos antes de dar el ciclo por cerrado:
+
+### 🟠 Alto
+
+19. **A7 — Regresión de `5f8f719`: el footer de `RequestsList` perdió
+    `flex-wrap`.** En viewports angostos con 2+ CTAs simultáneos (p. ej.
+    comprador en "Pendiente": Tomar Pedido + Modo Compra) el texto de los
+    botones podía partirse o el footer desbordar. Restaurado `flex-wrap`.
+
+### 🟡 Medio
+
+20. **M14 — Patrón recurrente de operaciones async sin manejo de error que
+    dejaban la UI atascada sin salida, en 3 pantallas independientes.**
+    `ShoppingView.handleFinish` (la acción principal de la pantalla),
+    `AdminCatalog.handleSaveEdit`/`handleCreateProductSubmit`/
+    `handleCreateRestaurantSubmit`, y `LoginScreen.handleSelect` ahora
+    envuelven su `await` en `try/catch/finally`: el estado de
+    carga/envío siempre se revierte y se muestra un banner de error
+    inline (`aria-live="polite"`, mismo tratamiento visual que las
+    confirmaciones de éxito) en vez de dejar un botón girando o un
+    formulario abierto sin explicación. 2 claves nuevas ES/EN
+    (`shopFinishError`, `adminSaveError`).
+21. **M15 — La barra fija de `DailyChecklist` (introducida por `5f8f719`)
+    traía su propia familia de defectos.** `paddingBottom` pasó de una
+    constante estática (96px) a medirse en vivo con `ResizeObserver` sobre
+    la barra real (incluye el alto de cualquier drawer abierto), evitando
+    que el último producto de la lista quede oculto. La medición de altura
+    de `BottomNav` pasó de `useEffect` a `useLayoutEffect` para eliminar
+    el salto visible de la barra en cada montaje (recurrente por el
+    remontaje de pestaña). Los 2 desplegables ahora comparten el mismo
+    patrón de accesibilidad que el popover de `Header`: `aria-expanded` en
+    ambos (antes solo uno lo tenía), `aria-controls` apuntando a un `id`
+    en cada panel, y cierre compartido por `Escape`.
+
+### 🟢 Bajo
+
+22. **B1 — Radio del popover de `Header` (20px) sobreescribía activamente
+    el de `.sf-card` (26px) vía `style` inline.** Quitado el override.
+23. **B11 — Avatares preestablecidos de `AccountView` sin `onError`.**
+    Añadido (oculta la imagen en vez de mostrar un icono roto), igual que
+    ya tenía el avatar personalizado.
+24. **B12 — `Dashboard` usaba `key={s.label}` (texto traducido) en vez de
+    un `id` estable.** Añadido `id` no traducido a cada `Stat`.
+
+### Skill adicional creada
+
+- **`async-error-handling-guardian`** — el 4º gap identificado por esta
+  auditoría: M14 se repitió en 3 pantallas sin que ninguna de las 9 skills
+  existentes (las 8 originales + `performance-budget-auditor` de este
+  ciclo) lo cubriera como responsabilidad propia. Detalle en
+  `HERRAMIENTAS_IA.md`.
+
+### Verificación (tras esta continuación)
+
+- `npx tsc --noEmit`: **sin errores**.
+- `npm run build`: **build limpio**, chunk principal ~309 kB / 86.1 kB gzip
+  (sin cambio material respecto a la verificación anterior de este mismo
+  ciclo).
+- i18n: **380/380 claves** en ambos idiomas (2 nuevas en esta
+  continuación), verificado por extracción programática, sin huecos.
+- Diferido explícitamente (no regresión, defecto preexistente de menor
+  riesgo/impacto): el orden de tabulación invertido de los 2 desplegables
+  de `DailyChecklist` (el contenido precede al disparador en el DOM) —
+  corregirlo requeriría reordenar el layout visual de la barra
+  (`flex-direction: column-reverse` o equivalente), un cambio de mayor
+  riesgo que se deja para un ciclo dedicado en vez de apresurarlo aquí.

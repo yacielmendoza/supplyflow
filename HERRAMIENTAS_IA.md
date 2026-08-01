@@ -32,6 +32,7 @@ siguiendo la especificación oficial.
 | `i18n-parity-guardian` | Cualquier cambio de copy / string nuevo en UI | Ninguna de las 8 skills anteriores cubre i18n; una auditoría (2026-08-01) encontró 3 strings sin traducir (M13) que una revisión de diseño/WCAG no detecta por diseño |
 | `supabase-persistence-guardian` | Cambios a `src/lib/supabase.ts`/`api.ts` o a cualquier uso de `localStorage` | El proyecto tiene una regla dura ("nunca romper el fallback público de Supabase") y un patrón establecido de overrides en `localStorage` que ninguna skill verificaba explícitamente antes de esta |
 | `performance-budget-auditor` | Tras `npm run build`, al añadir una pestaña/pantalla o dependencia nueva | El bundle sin code-splitting (M12) llevaba 5+ ciclos documentado sin dueño porque ninguna skill lo poseía como responsabilidad propia; ahora tiene un presupuesto explícito (≤500 kB) y quien lo audite |
+| `async-error-handling-guardian` | Al añadir/editar un handler `async` conectado a un botón o `onSubmit` | Una auditoría (2026-08-01) encontró el mismo patrón —operación async sin `try/catch`, estado de carga que nunca se revierte, UI "atascada"— repetido en 3 pantallas independientes (M14); ninguna skill existente lo cubría |
 
 ## Subagentes creados (`.claude/agents/<name>.md`)
 
@@ -54,6 +55,7 @@ especificación oficial de subagentes.
 | `i18n-parity-guardian` | Glob, Grep, Read, Bash | Paridad de claves ES/EN + literales fuera de `t.xxx` |
 | `supabase-persistence-guardian` | Glob, Grep, Read, Bash | Verifica que el fallback público de Supabase y el patrón de overrides de `localStorage` no se rompan |
 | `performance-budget-auditor` | Glob, Grep, Read, Bash | Presupuesto de tamaño de bundle, code-splitting y memoización en rutas con Realtime |
+| `async-error-handling-guardian` | Glob, Grep, Read, Bash | Verifica que toda operación async con estado de carga la revierta y muestre error en el `catch` |
 
 Todos son de solo-lectura salvo `design-token-architect` (alcance
 deliberadamente angosto: solo puede tocar el archivo de tokens, no
