@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useLayoutEffect, useRef } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Product, Category, Restaurant, UserProfile } from '../types';
 import { formatCategoryName, PRODUCT_CATEGORIES } from '../lib/formatters';
@@ -91,13 +91,43 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   }, [selectedRestaurant.id, readings, reviewedIds, notes, isUrgent]);
 
   // Anchor the summary bar flush above the app's fixed BottomNav by measuring it.
+  // useLayoutEffect (not useEffect) so the correct height is applied before
+  // paint, avoiding a visible jump on every mount (this component remounts on
+  // every tab switch, so a post-paint correction would flicker constantly).
   const [navH, setNavH] = useState(76);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const measure = () => setNavH((document.querySelector('nav') as HTMLElement | null)?.offsetHeight || 76);
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, []);
+
+  // Measure the summary bar's real rendered height (it grows when a drawer is
+  // open) so the scrollable content's bottom padding never lets the fixed bar
+  // occlude the last product card — a static padding guess can't account for
+  // that.
+  const summaryBarRef = useRef<HTMLDivElement>(null);
+  const [summaryBarH, setSummaryBarH] = useState(96);
+  useLayoutEffect(() => {
+    const el = summaryBarRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setSummaryBarH(entry.contentRect.height));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Escape closes whichever drawer is open, matching the Header popover's pattern.
+  useEffect(() => {
+    if (!showOrderPreview && !showNoteInput) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowOrderPreview(false);
+        setShowNoteInput(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showOrderPreview, showNoteInput]);
 
   const activeProducts = useMemo(() => products.filter((p) => p.active), [products]);
   const totalReviewedCount = useMemo(
@@ -156,7 +186,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
       : { background: 'transparent', color: 'var(--sf-text-muted)', border: '1px solid transparent' };
 
   return (
-    <div className="space-y-3.5 animate-fadeIn" style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
+    <div className="space-y-3.5 animate-fadeIn" style={{ paddingBottom: `calc(${summaryBarH}px + env(safe-area-inset-bottom) + 16px)` }}>
       {/* Banner + progress */}
       <div className="sf-card p-4 space-y-3">
         <div className="flex items-center justify-between gap-3">
@@ -316,6 +346,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
       {/* Summary bar — fixed, anchored flush above the BottomNav, tap to preview the order */}
       <div
+        ref={summaryBarRef}
         className="fixed inset-x-0 z-30"
         style={{
           bottom: `${navH}px`,
@@ -332,6 +363,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             {showOrderPreview && (
               <motion.div
                 key="order-preview"
+                id="checklist-order-preview"
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -366,6 +398,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
             {showNoteInput && (
               <motion.div
                 key="note-drawer"
+                id="checklist-note-drawer"
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -399,6 +432,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               type="button"
               onClick={() => setShowOrderPreview((v) => !v)}
               aria-expanded={showOrderPreview}
+              aria-controls="checklist-order-preview"
               aria-label={t.checklistOrderPreviewTitle}
               className="flex items-center gap-2.5 min-w-0 flex-1 text-left rounded-2xl px-1 py-1 transition"
             >
@@ -420,6 +454,8 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
             <div className="flex items-center gap-2 flex-shrink-0">
               <button type="button" onClick={() => setShowNoteInput((prev) => !prev)}
+                aria-expanded={showNoteInput}
+                aria-controls="checklist-note-drawer"
                 aria-label={notes.trim() ? t.noteActive : showNoteInput ? t.closeNote : t.noteAddBtn}
                 className="flex items-center justify-center w-11 h-11 rounded-xl transition flex-shrink-0"
                 style={notes.trim() ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' } : { background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', border: '1px solid var(--sf-border)' }}>
