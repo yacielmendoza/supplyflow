@@ -1,4 +1,17 @@
 import type { Translations } from './translations';
+import type { Category } from '../types';
+
+export const PRODUCT_CATEGORIES: Category[] = [
+  'INGREDIENTS',
+  'SNACKS',
+  'BEVERAGES',
+  'MIXERS',
+  'CANDY',
+  'CHEMICALS',
+  'PAPER / DISPOSABLES',
+  'ALCOHOL',
+  'SUPPLIES',
+];
 
 export function formatCleanName(name?: string | null): string {
   if (!name) return '';

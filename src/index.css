@@ -47,6 +47,12 @@ html.light {
   --sf-shadow-sm: 0 10px 24px -16px rgba(15, 23, 42, 0.22);
 }
 
+/* Brand mark gradient — fixed identity, independent of theme. */
+:root {
+  --sf-brand-gradient: linear-gradient(to top right, #059669, #14b8a6, #fbbf24);
+  --sf-brand-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);
+}
+
 html.light body,
 html.light {
   background-color: var(--sf-bg);
