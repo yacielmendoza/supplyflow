@@ -71,8 +71,11 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between gap-3 h-16">
           {/* Left: brand mark + restaurant selector */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-amber-400 flex items-center justify-center shadow-lg shadow-emerald-900/30 flex-shrink-0">
-              <Flame className="w-5 h-5 text-white stroke-[2.5]" />
+            <div
+              className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'var(--sf-brand-gradient)', boxShadow: 'var(--sf-brand-shadow)' }}
+            >
+              <Flame className="w-5 h-5 stroke-[2.5]" style={{ color: '#ffffff' }} />
             </div>
 
             <div className="relative min-w-0" ref={selectorRef}>
@@ -141,8 +144,8 @@ export const Header: React.FC<HeaderProps> = ({
               <Bell className="w-5 h-5" />
               {activeRequestsCount > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full text-white text-[11px] font-black flex items-center justify-center shadow-md sf-pop"
-                  style={{ background: 'var(--sf-rose)' }}
+                  className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full text-[11px] font-black flex items-center justify-center shadow-md sf-pop"
+                  style={{ background: 'var(--sf-rose)', color: 'var(--sf-accent-contrast)' }}
                 >
                   {activeRequestsCount > 99 ? '99+' : activeRequestsCount}
                 </span>
