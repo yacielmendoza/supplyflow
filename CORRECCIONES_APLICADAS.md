@@ -557,3 +557,77 @@ B11, B12). Se implementaron todos antes de dar el ciclo por cerrado:
   corregirlo requeriría reordenar el layout visual de la barra
   (`flex-direction: column-reverse` o equivalente), un cambio de mayor
   riesgo que se deja para un ciclo dedicado en vez de apresurarlo aquí.
+
+## Ciclo de corrección (2026-08-01, autónomo — sobre `e6d32f5`)
+
+`AUDITORIA_RESULTADOS.md` en el árbol seguía describiendo el estado de
+`5f8f719` (**VEREDICTO: CON HALLAZGOS**), pero ese archivo quedó
+desactualizado: entre ese commit y `e6d32f5` (HEAD al iniciar este ciclo)
+aterrizaron ~15 commits correctores adicionales (`19c845f`…`3ac2c4f`) que
+ya habían cerrado, uno por uno y verificados con `tsc`/`build`, el
+Crítico (C1) y los 7 grupos Altos completos de esa auditoría, además de la
+mayoría de los Medios (M1, M3, M4, M7, M9, M11–M15) y varios Bajos (B1,
+B2, B11, B12). Antes de dar por buena esa conclusión se releyó el código
+real (no solo los mensajes de commit) de cada hallazgo marcado como
+resuelto — sin discrepancias encontradas.
+
+Lo que sí seguía abierto en el código, tal como el propio archivo
+documenta explícitamente como "Diferido" en ciclos anteriores, y que este
+ciclo cerró por ser de bajo riesgo y alto beneficio (rendimiento +
+accesibilidad, sin tocar layout ni arquitectura):
+
+- **M10 (resto)** — `RequestsList.tsx`: `filteredRequests` + los 4
+  contadores de estado hacían 5 pasadas de `.filter()` en cada render,
+  incluido cada evento de Supabase Realtime. Unificados en un único
+  `useMemo` (un solo `scope` filtrado, reutilizado por los 4 contadores y
+  la lista visible).
+- **B10** — `getTimeAgo` de `RequestsList.tsx` no se refrescaba solo (sin
+  `setInterval`, "hace 5 min" quedaba congelado hasta el siguiente render
+  por otro motivo). Añadido un tick de 60s (`nowTick` en `useState`) que
+  hace avanzar la etiqueta en vivo.
+- **M10 (instancia de NotificationsView, ya identificada por la
+  auditoría de `8915532` pero no cerrada)** — `visibleRequests`/
+  `urgentCount` de `NotificationsView.tsx` tenían el mismo patrón sin
+  memoizar; corregido igual que `RequestsList`.
+- **B4** — `getNavTabs()` en `App.tsx` reconstruía un array nuevo de tabs
+  en cada render del componente raíz, forzando a `BottomNav` a
+  re-renderizar aunque nada relevante hubiera cambiado. Envuelto en
+  `useMemo` (deps: `currentUser.role`, `t`, `activePendingRequestsCount`).
+- **B3** — El punto de estado de conexión del avatar en `Header.tsx`
+  comunicaba "en línea"/"reconectando" solo por color + `title` (hover de
+  mouse, no descubrible por gesto táctil ni lector de pantalla). El
+  estado ahora forma parte del `aria-label` del botón de avatar.
+- **B9** — `triggerNotification` era un *no-op* explícito (`src/lib/
+  api.ts`) que `NotificationsView.tsx` seguía `await`-eando como si
+  hiciera algo real. Eliminada la función y su único call site/import
+  (código muerto y engañoso, sin cambio de comportamiento real ya que no
+  hacía nada).
+
+No se tocó `src/lib/supabase.ts`, no se introdujo ningún modal, no se
+tocaron claves de i18n (permanece en paridad, sin huecos), y no se creó
+ninguna skill/subagente nueva porque los 4 gaps identificados por la
+última auditoría (`i18n-parity-guardian`, `supabase-persistence-guardian`,
+`performance-budget-auditor`, `async-error-handling-guardian`) ya existían
+en `.claude/skills/` y `.claude/agents/` desde el ciclo anterior — no se
+detectó ningún gap nuevo esta pasada.
+
+Quedan diferidos, sin cambios respecto a lo ya documentado (mismo motivo:
+mayor riesgo/alcance que el presupuesto de un ciclo incremental): el
+refactor completo de M2 (formulario de producto triplicado en
+`AdminCatalog.tsx`), M6 (virtualización de `NotificationsView`), y el
+resto de hallazgos Bajos de arquitectura/naming (`B5`, `B6`, `B8`,
+asimetría CRUD de Restaurantes/Proveedores, números mágicos).
+
+### Verificación
+
+- `npx tsc --noEmit`: **sin errores**.
+- `npm run build`: **build limpio**, chunk principal 308.95 kB / 86.16 kB
+  gzip (sin cambio material — este ciclo no tocó nada que afecte al
+  bundle).
+- i18n: **379/379 claves** en ambos idiomas (verificado por extracción
+  programática), sin huecos — este ciclo no añadió ni quitó ninguna
+  clave.
+- Cero modales nuevos, fallback público de Supabase sin tocar,
+  funcionalidad existente sin regresión (tabs, tema/idioma, campana→
+  Notificaciones, avatar→Cuenta, Modo Compra, CRUD de catálogo, checklist
+  con envío, badges).
