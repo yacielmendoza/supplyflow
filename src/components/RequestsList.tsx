@@ -110,15 +110,18 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   const title = isCook ? t.requestsTitleCook : isBuyer ? t.requestsTitleBuyer : t.requestsTitleAdmin;
   const subtitle = isCook ? t.requestsSubCook : isBuyer ? t.requestsSubBuyer : t.requestsSubAdmin;
 
-  const FILTERS = [
-    { key: 'ALL' as const, label: t.filterAll, count: countAll, color: 'var(--sf-text-muted)' },
-    { key: 'PENDING' as const, label: t.filterPending, count: countPending, color: 'var(--sf-amber)' },
-    { key: 'IN_PROGRESS' as const, label: t.filterInProgress, count: countInProgress, color: 'var(--sf-violet)' },
-    { key: 'COMPLETED' as const, label: t.filterCompleted, count: countCompleted, color: 'var(--sf-accent)' },
-  ];
+  const FILTERS = useMemo(
+    () => [
+      { key: 'ALL' as const, label: t.filterAll, count: countAll, color: 'var(--sf-text-muted)' },
+      { key: 'PENDING' as const, label: t.filterPending, count: countPending, color: 'var(--sf-amber)' },
+      { key: 'IN_PROGRESS' as const, label: t.filterInProgress, count: countInProgress, color: 'var(--sf-violet)' },
+      { key: 'COMPLETED' as const, label: t.filterCompleted, count: countCompleted, color: 'var(--sf-accent)' },
+    ],
+    [t, countAll, countPending, countInProgress, countCompleted]
+  );
 
   const chipBtn =
-    'px-4 min-h-11 rounded-xl text-sm font-black flex items-center justify-center transition disabled:opacity-60 active:scale-95';
+    'px-4 min-h-11 rounded-xl text-sm font-black flex items-center justify-center transition disabled:opacity-60 active:scale-95 whitespace-nowrap';
 
   return (
     <div className="space-y-4 animate-fadeIn">
@@ -214,7 +217,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     </span>
                     {req.urgent && !isCompleted && (
                       <span className="px-2 py-0.5 rounded-lg text-xs font-black uppercase flex items-center gap-1"
-                        style={{ background: tint('var(--sf-rose)', 16), color: 'var(--sf-rose)' }}>
+                        style={{ background: 'var(--sf-rose)', color: 'var(--sf-accent-contrast)' }}>
                         <Flame className="w-3.5 h-3.5" />
                         {t.tagUrgent}
                       </span>
@@ -285,7 +288,8 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       </span>
                     ))}
                     {req.items.length > 3 && (
-                      <button onClick={() => toggleExpand(req.id)} className="text-xs sf-accent font-extrabold px-2 py-1">
+                      <button onClick={() => toggleExpand(req.id)} className="text-xs sf-accent font-extrabold px-2 py-1"
+                        aria-expanded={isExpanded} aria-controls={`request-details-${req.id}`}>
                         +{req.items.length - 3} {t.labelMore}...
                       </button>
                     )}
@@ -297,6 +301,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                   {isExpanded && (
                     <motion.div
                       key="expanded"
+                      id={`request-details-${req.id}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
@@ -342,12 +347,13 @@ export const RequestsList: React.FC<RequestsListProps> = ({
 
                 {/* Footer actions */}
                 <div className="mt-3 pt-2.5 flex items-center justify-between gap-2 flex-wrap" style={{ borderTop: '1px solid var(--sf-border)' }}>
-                  <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0">
+                  <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0"
+                    aria-expanded={isExpanded} aria-controls={`request-details-${req.id}`}>
                     <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 sf-muted" /> : <ChevronDown className="w-4 h-4 sf-muted" />}
                   </button>
 
-                  <div className="flex items-center gap-2 min-w-0 justify-end">
+                  <div className="flex items-center gap-2 min-w-0 justify-end flex-wrap">
                     <a
                       href={generateWhatsAppLink(currentUser.phone, generateRequestWhatsAppSummary(req, currentUser.language ?? 'es'))}
                       target="_blank"
