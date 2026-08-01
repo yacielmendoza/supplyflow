@@ -29,12 +29,22 @@ const roleLabel = (role: Role, t: ReturnType<typeof getTranslation>) =>
 export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }: LoginScreenProps) {
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
   const t = getTranslation(language);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(id);
   }, []);
+
+  useEffect(() => {
+    if (users.length > 0) {
+      setLoadTimedOut(false);
+      return;
+    }
+    const id = setTimeout(() => setLoadTimedOut(true), 8000);
+    return () => clearTimeout(id);
+  }, [users.length]);
 
   const cooks = users.filter((u) => u.role === 'cocinero');
   const buyers = users.filter((u) => u.role === 'comprador');
@@ -66,7 +76,7 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
           onClick={() => onChangeLanguage(language === 'es' ? 'en' : 'es')}
           aria-pressed={language === 'en'}
           aria-label={t.languagePreference}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl sf-btn-ghost text-xs font-bold transition"
+          className="flex items-center gap-1.5 px-3 min-h-11 rounded-xl sf-btn-ghost text-xs font-bold transition active:scale-95"
         >
           <Globe className="w-3.5 h-3.5" />
           {language === 'es' ? 'EN' : 'ES'}
@@ -78,8 +88,11 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
         className="flex flex-col items-center mb-10 transition-all duration-700"
         style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(-16px)' }}
       >
-        <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-amber-400 flex items-center justify-center mb-4 shadow-lg shadow-emerald-900/30">
-          <Flame className="w-9 h-9 text-white" />
+        <div
+          className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
+          style={{ background: 'var(--sf-brand-gradient)', boxShadow: 'var(--sf-brand-shadow)' }}
+        >
+          <Flame className="w-9 h-9" style={{ color: '#ffffff' }} />
         </div>
         <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--sf-text)' }}>SupplyFlow</h1>
         <p className="sf-muted text-sm mt-1">{t.loginSelectProfile}</p>
@@ -87,9 +100,23 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
 
       {/* User sections */}
       {users.length === 0 ? (
-        <div className="flex items-center gap-2 sf-subtle text-sm">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span>{t.loginLoading}</span>
+        <div className="flex flex-col items-center gap-3 text-sm" role="status" aria-live="polite">
+          <div className="flex items-center gap-2 sf-subtle">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>{t.loginLoading}</span>
+          </div>
+          {loadTimedOut && (
+            <div className="flex flex-col items-center gap-2 animate-fadeIn">
+              <span className="sf-subtle text-xs">{t.loginLoadError}</span>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="px-4 min-h-11 rounded-xl sf-btn-ghost text-xs font-bold transition active:scale-95"
+              >
+                {t.loginRetry}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="w-full max-w-md space-y-6">
