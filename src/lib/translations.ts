@@ -14,6 +14,7 @@ export const translations = {
     loginSectionCooks: 'Cocina',
     loginSectionBuyers: 'Compradores',
     loginSectionAdmins: 'Administración',
+    loginFooter: 'SupplyFlow V2 · Demo',
 
     // ── Header ─────────────────────────────────────────────────────────────────
     profileSettings: 'Configuración de Perfil',
@@ -431,6 +432,7 @@ export const translations = {
     loginLoadError: 'This is taking longer than expected.',
     loginRetry: 'Retry',
     loginSectionCooks: 'Kitchen',
+    loginFooter: 'SupplyFlow V2 · Demo',
     loginSectionBuyers: 'Buyers',
     loginSectionAdmins: 'Administration',
 

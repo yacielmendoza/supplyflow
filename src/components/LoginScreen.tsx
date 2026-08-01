@@ -3,6 +3,7 @@ import { Flame, ChefHat, ShoppingCart, BarChart3, Globe, ChevronRight, Loader2 }
 import { UserProfile, Role } from '../types';
 import { getTranslation } from '../lib/translations';
 import { tint } from '../lib/colors';
+import { playAlertSound } from '../lib/notifications';
 
 type Language = 'es' | 'en';
 
@@ -52,10 +53,13 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
 
   const handleSelect = (user: UserProfile) => {
     if (loadingUserId) return;
+    playAlertSound('click');
     setLoadingUserId(user.id);
     setTimeout(() => {
       try {
         onSelectUser(user);
+      } catch {
+        /* onSelectUser only persists local session state; nothing to surface to the user */
       } finally {
         setLoadingUserId(null);
       }
@@ -98,7 +102,7 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
           className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
           style={{ background: 'var(--sf-brand-gradient)', boxShadow: 'var(--sf-brand-shadow)' }}
         >
-          <Flame className="w-9 h-9" style={{ color: '#ffffff' }} />
+          <Flame className="w-9 h-9" style={{ color: 'var(--sf-brand-fg)' }} />
         </div>
         <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--sf-text)' }}>SupplyFlow</h1>
         <p className="sf-muted text-sm mt-1">{t.loginSelectProfile}</p>
@@ -152,12 +156,12 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
                         style={{ background: tint(config.color, 10), border: `1px solid ${tint(config.color, 28)}` }}
                       >
                         <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-sm font-black flex-shrink-0"
-                          style={{ background: tint(config.color, 16), color: config.color, border: `1px solid ${tint(config.color, 30)}` }}>
+                          style={{ background: tint(config.color, 16), color: 'var(--sf-text)', border: `1px solid ${tint(config.color, 30)}` }}>
                           {getInitials(user.name)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{user.name}</div>
-                          <div className="text-xs mt-0.5" style={{ color: config.color }}>
+                          <div className="text-xs mt-0.5 font-bold" style={{ color: 'var(--sf-text-muted)' }}>
                             {roleLabel(user.role, t)}
                           </div>
                         </div>
@@ -177,7 +181,7 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
       )}
 
       <p className="absolute bottom-6 sf-subtle text-xs transition-opacity duration-700 safe-bottom" style={{ opacity: mounted ? 1 : 0, transitionDelay: '500ms' }}>
-        SupplyFlow V2 · Demo
+        {t.loginFooter}
       </p>
     </div>
   );
