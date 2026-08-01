@@ -29,6 +29,9 @@ siguiendo la especificación oficial.
 | `typography-color-system` | Auditoría de consistencia visual | Los 3 roles de color de texto (`--sf-text`/`-muted`/`-subtle`) y el uso de `tabular-nums` no estaban documentados en ningún sitio |
 | `visual-qa` | Antes de cerrar un cambio de UI | El repo pide "prueba la funcionalidad en un navegador antes de reportar completo"; esto lo convierte en una rutina repetible con pasos concretos (ambos temas, ambos idiomas, viewport móvil) |
 | `frontend-architecture-review` | Cambios estructurales / revisión de mantenibilidad | Este mismo ciclo encontró 3 patrones duplicados (`tint()` en 4 archivos, mapas de estado en 3 archivos) que una checklist de arquitectura habría detectado antes |
+| `i18n-parity-guardian` | Cualquier cambio de copy / string nuevo en UI | Ninguna de las 8 skills anteriores cubre i18n; una auditoría (2026-08-01) encontró 3 strings sin traducir (M13) que una revisión de diseño/WCAG no detecta por diseño |
+| `supabase-persistence-guardian` | Cambios a `src/lib/supabase.ts`/`api.ts` o a cualquier uso de `localStorage` | El proyecto tiene una regla dura ("nunca romper el fallback público de Supabase") y un patrón establecido de overrides en `localStorage` que ninguna skill verificaba explícitamente antes de esta |
+| `performance-budget-auditor` | Tras `npm run build`, al añadir una pestaña/pantalla o dependencia nueva | El bundle sin code-splitting (M12) llevaba 5+ ciclos documentado sin dueño porque ninguna skill lo poseía como responsabilidad propia; ahora tiene un presupuesto explícito (≤500 kB) y quien lo audite |
 
 ## Subagentes creados (`.claude/agents/<name>.md`)
 
@@ -48,6 +51,9 @@ especificación oficial de subagentes.
 | `typography-color-reviewer` | Glob, Grep, Read | Consistencia tipográfica y de roles de color |
 | `visual-qa` | Glob, Grep, Read, Bash | QA visual real (dev server + navegador) en ambos temas/idiomas |
 | `frontend-architecture-reviewer` | Glob, Grep, Read, Bash | Arquitectura de componentes, duplicación, rendimiento |
+| `i18n-parity-guardian` | Glob, Grep, Read, Bash | Paridad de claves ES/EN + literales fuera de `t.xxx` |
+| `supabase-persistence-guardian` | Glob, Grep, Read, Bash | Verifica que el fallback público de Supabase y el patrón de overrides de `localStorage` no se rompan |
+| `performance-budget-auditor` | Glob, Grep, Read, Bash | Presupuesto de tamaño de bundle, code-splitting y memoización en rutas con Realtime |
 
 Todos son de solo-lectura salvo `design-token-architect` (alcance
 deliberadamente angosto: solo puede tocar el archivo de tokens, no

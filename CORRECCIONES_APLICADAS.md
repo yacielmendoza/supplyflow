@@ -290,3 +290,196 @@ DevTools/Playwright, Vercel.
 - Cero modales, cero cambios al fallback público de Supabase en
   `src/lib/supabase.ts`.
 - Cero modales, cero cambios al fallback público de Supabase.
+
+## Ciclo de corrección (2026-08-01, sobre `5f8f719`)
+
+`AUDITORIA_RESULTADOS.md` (auditoría sobre `2299ec7`, un commit por detrás
+de `5f8f719` al momento de esta pasada) reportó **VEREDICTO: CON
+HALLAZGOS**: 1 Crítico (C1), 6 grupos Altos (A1–A6), 13 Medios (M1–M13) y
+10 Bajos (B1–B10). Este ciclo implementó, en orden de prioridad, el
+Crítico, los 6 Altos completos, y una parte alta de los Medios (los de
+mayor impacto de percepción "premium" y los de menor riesgo/mayor
+beneficio), dejando documentados como deuda explícita los que requieren un
+refactor mayor (ver "Diferido" al final).
+
+### 🔴 Crítico
+
+1. **C1 — Progreso del Checklist Diario se perdía al cambiar de pestaña.**
+   `DailyChecklist.tsx` ahora persiste `readings`/`reviewedIds`/`notes`/
+   `isUrgent` en `localStorage` con clave por restaurante+día
+   (`restosupply_checklist_draft_<restaurantId>_<YYYY-MM-DD>`), restaurado
+   al montar y **borrado tras un envío exitoso** — mismo patrón ya usado
+   para `restosupply_products_override`. Cambiar de pestaña y volver ya no
+   descarta el trabajo en curso.
+
+### 🟠 Alto
+
+2. **A1 — Familia de badges `text-white`/`color:'#fff'` que fallaba
+   contraste AA en tema oscuro (3.67:1 / 2.54:1, muy por debajo de 4.5:1).**
+   Reemplazado por `var(--sf-accent-contrast)` (≥5:1 en ambos temas, ya
+   validado por un ciclo anterior) en las 4 ubicaciones: `RequestsList.tsx`
+   (badge OVERDUE), `Header.tsx` (badge de notificaciones), `BottomNav.tsx`
+   (badge de conteo), `DailyChecklist.tsx` (badge contador del resumen).
+3. **A5 — Objetivos táctiles bajo 44px en los controles más usados de 5
+   pantallas.** Subidos a `min-h-11` (+ `active:scale-95` para feedback
+   táctil): selector de idioma de `LoginScreen`, botón "Ver todas" de
+   `Dashboard`, "Marcar todo leído" de `NotificationsView`, botón de
+   nota de `ShoppingView`, y el helper `chipBtn` compartido de
+   `RequestsList` (CTAs "Tomar pedido"/"Modo compra"/"Confirmar
+   recepción"...). De paso se subieron a 44px varios controles hermanos de
+   la pestaña Ajustes de `NotificationsView` (segmented control, "Activar"
+   push, botones de sonido, enlace de WhatsApp, "Enviar", "Ver leídas") —
+   mismo hallazgo (M5), misma causa raíz.
+4. **A3 — Contraste real (~4.0:1) en el badge de umbral mínimo de la tabla
+   de escritorio de AdminCatalog (tema claro).** Igualado al tratamiento
+   plano `sf-inset` que ya usa la tarjeta móvil equivalente (≈4.76:1) —
+   resuelve el contraste y la inconsistencia visual con la tarjeta móvil en
+   el mismo cambio (cierra A3 y parte de M1 a la vez).
+5. **A2 — Cambios de perfil sin guardar se perdían en silencio al pulsar
+   "atrás" en Cuenta.** `AccountView.tsx` ahora auto-guarda el formulario
+   (`dirty === true`) antes de navegar atrás, coherente con que
+   tema/idioma ya se aplican al instante en la misma pantalla.
+6. **A6 — Categoría `SUPPLIES` inalcanzable desde el filtro (hueco
+   funcional).** Extraído `PRODUCT_CATEGORIES` (derivado de `Category`,
+   incluye `SUPPLIES`) en `src/lib/formatters.ts`, consumido por
+   `DailyChecklist.tsx` y `AdminCatalog.tsx` en vez de dos listas
+   hardcodeadas duplicadas que omitían la categoría.
+7. **A4 — Colores hardcodeados fuera del sistema de tokens.** Añadidos
+   `--sf-brand-gradient`/`--sf-brand-shadow` en `src/index.css` (degradado
+   de marca, antes duplicado en `LoginScreen.tsx` y `Header.tsx` como
+   clases Tailwind crudas). `Restaurant.colorBadge` pasó de `string`
+   (`'bg-emerald-600'`, ...) a una unión semántica
+   `RestaurantColorKey = 'emerald'|'amber'|'indigo'|'rose'`, resuelta a
+   `var(--sf-*)` vía `RESTAURANT_COLOR_TOKENS` (nuevo, en
+   `src/lib/colors.ts`) en `AdminCatalog.tsx` — cero clases Tailwind de
+   color en datos.
+
+### 🟡 Medio
+
+8. **M11 — `motion` (instalado pero sin usar en todo `src/`) adoptado para
+   3 microinteracciones clave:** expand/collapse de tarjetas de
+   `RequestsList` (altura animada vía `AnimatePresence`/`motion.div` en vez
+   del salto instantáneo anterior), los 2 drawers expandibles de
+   `DailyChecklist` (vista previa de pedido + nota), y entrada/salida de
+   tarjetas de producto al filtrar en `DailyChecklist`. Las 3 respetan
+   `prefers-reduced-motion` vía el hook `useReducedMotion()` de la propia
+   librería (duración `0` si está activo), siguiendo la skill
+   `motion-microinteractions` ya existente.
+9. **M12 — Bundle sin code-splitting, documentado sin resolver en 5+
+   ciclos (614 kB → 748 kB tras adoptar `motion`).** `AccountView`,
+   `NotificationsView`, `DailyChecklist`, `RequestsList`, `ShoppingView` y
+   `AdminCatalog` (todo lo que no es la vista de aterrizaje ni la pantalla
+   de login) ahora se cargan con `React.lazy`/`Suspense` en `App.tsx`.
+   Además, `vite.config.ts` separa `react`/`react-dom`, `@supabase/
+   supabase-js` y `motion` en `manualChunks` propios para que el navegador
+   los cachee entre despliegues. Resultado: chunk principal **308 kB**
+   (antes 614–748 kB), sin aviso de Vite por tamaño.
+10. **M1 — Radios inconsistentes en AdminCatalog** (`sf-inset` de 20px
+    peleando con la utilidad `rounded` de 4px en Tailwind v4). Quitada la
+    utilidad `rounded` sobrante de los 4 inputs de edición inline de tabla
+    y unificados los 4 botones de acción de esa misma tabla a
+    `rounded-lg` (igual que su variante móvil).
+11. **M2 (bug puntual, sin el refactor completo) — `EditCard` de
+    AdminCatalog etiquetaba el nombre de producto con la clave
+    `t.adminRestaurantName`** en vez de `t.adminProductName` — corregido.
+    La extracción completa del formulario triplicado a un componente
+    compartido queda diferida (ver "Diferido").
+12. **M3 — AdminCatalog sin estado vacío al filtrar/buscar sin
+    resultados.** Añadido mensaje `t.adminNoResults` (nueva clave ES/EN)
+    cuando `filteredProducts.length === 0`, visible tanto en la vista móvil
+    como en la de escritorio.
+13. **M4 — Confirmaciones de guardado sin `aria-live`.** Añadido
+    `aria-live="polite"` al botón de `OverdueSettingsPanel` (AdminCatalog)
+    y al botón "Confirmar y Notificar Entrega" de `ShoppingView` (ya tenían
+    el patrón `AccountView`/`DailyChecklist`/`NotificationsView`).
+14. **M7 — Nota de ShoppingView se perdía si el usuario navegaba sin
+    pulsar "Guardar".** Añadido `onKeyDown` para Enter y `onBlur` que
+    autoguarda la nota al perder foco.
+15. **M9 — Spinner infinito sin estado de error en LoginScreen.** Tras 8s
+    sin usuarios cargados se muestra un mensaje (`t.loginLoadError`) y un
+    botón de reintento (`t.loginRetry`, recarga la página) en vez de dejar
+    el spinner girando indefinidamente.
+16. **M10 (parcial, Dashboard) — Recalculo sin memoizar en cada evento
+    Realtime.** `scoped`/`stats`/`subtitle`/`recent` de `Dashboard.tsx`
+    ahora usan `useMemo` con las dependencias correctas, igual que ya
+    hacía `DailyChecklist` para cálculos análogos. `RequestsList` queda
+    pendiente (ver "Diferido").
+17. **M13 — 3 strings sin traducir.** `"iPhone / iPad (Safari)"` en
+    `AccountView.tsx` → `t.pwaIosTitle`; `"Food Truck"`/`"Restaurante"`/
+    `"Bistro"` del selector de tipo de local en `AdminCatalog.tsx` →
+    `t.adminTypeFoodTruck`/`t.adminTypeRestaurant`/`t.adminTypeBistro`
+    (ya existía `t.adminTypeCafe` para la 4ª opción, ahora las 4 son
+    consistentes); `ViewHeader`'s `backLabel` pasó de opcional con default
+    `'Back'` a **prop requerida** (elimina la trampa latente en vez de
+    traducirla, ya que el componente no tiene acceso a `t`). 6 claves
+    nuevas añadidas en paridad ES/EN (`loginLoadError`, `loginRetry`,
+    `pwaIosTitle`, `adminTypeFoodTruck`, `adminTypeRestaurant`,
+    `adminTypeBistro`, `adminNoResults` — 7 en total).
+
+### 🟢 Bajo
+
+18. **B2 — `<th>` de la tabla de AdminCatalog sin `scope="col"`.** Añadido
+    a las 7 columnas.
+
+### Diferido (documentado, no implementado este ciclo)
+
+- **M2 (refactor completo)** — extraer el formulario de producto
+  (nombre/categoría/unidad/mínimo/cantidad/proveedor), hoy implementado 3
+  veces en `AdminCatalog.tsx` (alta inline, `EditCard` móvil, edición
+  inline de tabla), a un único componente compartido. Se corrigió el bug
+  de copy puntual que causaba (M2 arriba) pero el refactor de arquitectura
+  en sí queda para un ciclo dedicado por su alcance y riesgo de regresión.
+- **M6** — virtualización/paginación de la lista de `NotificationsView`.
+  No implementado: añadir una librería de virtualización es una decisión
+  de arquitectura mayor que no se justifica con el volumen de datos actual
+  de la demo; queda como hallazgo vigente para cuando el histórico crezca.
+- **M10 (resto)** — memoizar `filteredRequests` y los 4 contadores de
+  `RequestsList.tsx` (mismo patrón que se aplicó a `Dashboard.tsx` en este
+  ciclo).
+- **B1, B3–B10** — limpieza de radios residuales, `title`/nombre accesible
+  del estado de conexión del Header, memoización fina (`getNavTabs`),
+  doble render móvil/escritorio de AdminCatalog, asimetría CRUD de
+  Restaurantes/Proveedores, objetos de estilo inline repetidos, números
+  mágicos, código muerto (`triggerNotification` no-op), reloj de
+  `getTimeAgo` sin auto-refresco. Ninguno es un defecto funcional o de
+  accesibilidad real; quedan para cuando el ciclo tenga presupuesto para
+  hallazgos Bajos.
+
+### Skills y subagentes creados este ciclo
+
+La auditoría identificó 3 gaps reales no cubiertos por los 8 pares
+existentes. Creados con la misma convención (`SKILL.md` con frontmatter
+`name`+`description`; agente con `name`+`description`+`tools` acotado a
+solo-lectura `Glob, Grep, Read, Bash`):
+
+- **`i18n-parity-guardian`** — paridad de claves ES/EN + grep de literales
+  fuera de `t.xxx`. Ninguna de las 8 skills existentes cubre i18n; esta
+  pasada encontró 3 huecos (M13) que una revisión de diseño/WCAG no
+  detecta por diseño.
+- **`supabase-persistence-guardian`** — verifica que el fallback público de
+  `src/lib/supabase.ts` nunca se rompa y que el patrón de overrides de
+  `localStorage` (catálogo, sesión, ahora también drafts de checklist) se
+  siga correctamente en cambios futuros.
+- **`performance-budget-auditor`** — presupuesto explícito de tamaño de
+  bundle (≤500 kB) y memoización en rutas con Realtime. M12 llevaba 5
+  ciclos documentado sin dueño; esta skill le da uno.
+
+Detalle completo en `HERRAMIENTAS_IA.md`.
+
+### Verificación
+
+- `npx tsc --noEmit`: **sin errores**.
+- `npm run build`: **build limpio**, chunk principal **308.41 kB / 86.00 kB
+  gzip** (antes 614–748 kB) — sin aviso de Vite por tamaño de chunk;
+  vistas por pestaña/pantalla en chunks separados de 7–23 kB cada uno,
+  vendors (`react`, `@supabase/supabase-js`, `motion`) en chunks propios.
+- i18n: `translations.ts` en **377/377 claves** en ambos idiomas (7 nuevas
+  este ciclo, verificado por extracción programática de ambos bloques, no
+  por conteo de líneas — sin huecos en ninguna dirección).
+- Cero modales nuevos, cero clases dark-only nuevas, fallback público de
+  Supabase (`src/lib/supabase.ts`) sin tocar, `BottomNav` sin solapar
+  contenido (sin cambios en ese subsistema).
+- Funcionalidad existente verificada sin regresión: tabs, tema/idioma
+  persistido, campana→Notificaciones, avatar→Cuenta, Modo Compra, alta/
+  edición de productos/locales, checklist con envío (ahora persistente),
+  badges.
