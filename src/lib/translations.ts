@@ -141,6 +141,7 @@ export const translations = {
     shopNotifyMsg: 'Al completar, se notificará inmediatamente al cocinero en la cocina.',
     shopProcessing: 'Procesando...',
     shopConfirmDelivery: 'Confirmar y Notificar Entrega',
+    shopFinishError: 'No se pudo confirmar la entrega. Revisa tu conexión e inténtalo de nuevo.',
 
     // ── Daily Checklist ────────────────────────────────────────────────────────
     checklistTitle: 'Inspección de Existencias',
@@ -206,6 +207,7 @@ export const translations = {
     adminSuggestedSupplier: 'Proveedor Sugerido',
     adminSave: 'Guardar',
     adminCancel: 'Cancelar',
+    adminSaveError: 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.',
     adminDelete: 'Eliminar',
     adminEdit: 'Editar',
     adminActive: 'Activo',
@@ -558,6 +560,7 @@ export const translations = {
     shopNotifyMsg: 'Upon completion, the kitchen chef will be immediately notified.',
     shopProcessing: 'Processing...',
     shopConfirmDelivery: 'Confirm and Notify Delivery',
+    shopFinishError: "Couldn't confirm the delivery. Check your connection and try again.",
 
     // ── Daily Checklist ────────────────────────────────────────────────────────
     checklistTitle: 'Stock Inspection',
@@ -623,6 +626,7 @@ export const translations = {
     adminSuggestedSupplier: 'Suggested Supplier',
     adminSave: 'Save',
     adminCancel: 'Cancel',
+    adminSaveError: "Couldn't save. Check your connection and try again.",
     adminDelete: 'Delete',
     adminEdit: 'Edit',
     adminActive: 'Active',

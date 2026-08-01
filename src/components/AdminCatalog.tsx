@@ -74,33 +74,50 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
     setEditForm({ name: p.name, category: p.category, unit: p.unit, minThreshold: p.minThreshold, suggestedQuantity: p.suggestedQuantity, suggestedSupplier: p.suggestedSupplier });
   };
 
+  const [saveError, setSaveError] = useState(false);
+
   const handleSaveEdit = async (id: string) => {
-    playAlertSound('success');
-    await onUpdateProduct(id, editForm);
-    setEditingProdId(null);
+    setSaveError(false);
+    try {
+      await onUpdateProduct(id, editForm);
+      playAlertSound('success');
+      setEditingProdId(null);
+    } catch {
+      setSaveError(true);
+    }
   };
 
   const handleCreateProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProdName.trim()) return;
-    playAlertSound('success');
-    await onAddProduct({
-      restaurantId: selectedRestFilter || 'rest-1',
-      name: newProdName, category: newProdCategory, unit: newProdUnit,
-      minThreshold: Number(newProdMin), suggestedQuantity: Number(newProdSuggested),
-      suggestedSupplier: newProdSupplier, active: true,
-    });
-    setNewProdName('');
-    setShowAddForm(false);
+    setSaveError(false);
+    try {
+      await onAddProduct({
+        restaurantId: selectedRestFilter || 'rest-1',
+        name: newProdName, category: newProdCategory, unit: newProdUnit,
+        minThreshold: Number(newProdMin), suggestedQuantity: Number(newProdSuggested),
+        suggestedSupplier: newProdSupplier, active: true,
+      });
+      playAlertSound('success');
+      setNewProdName('');
+      setShowAddForm(false);
+    } catch {
+      setSaveError(true);
+    }
   };
 
   const handleCreateRestaurantSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRestName.trim()) return;
-    playAlertSound('success');
-    await onAddRestaurant({ name: newRestName, type: newRestType, address: newRestAddress, phone: '(432) 555-0000' });
-    setNewRestName('');
-    setShowAddRestForm(false);
+    setSaveError(false);
+    try {
+      await onAddRestaurant({ name: newRestName, type: newRestType, address: newRestAddress, phone: '(432) 555-0000' });
+      playAlertSound('success');
+      setNewRestName('');
+      setShowAddRestForm(false);
+    } catch {
+      setSaveError(true);
+    }
   };
 
   const TABS = [
@@ -120,6 +137,12 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
         </h1>
         <p className="sf-muted text-sm mt-0.5">{t.adminConfigSubtitle}</p>
       </div>
+
+      {saveError && (
+        <div role="status" aria-live="polite" className="text-xs font-bold px-3 py-2.5 rounded-xl" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
+          {t.adminSaveError}
+        </div>
+      )}
 
       {/* Tab switcher */}
       <div className="sf-inset p-1 flex items-center gap-1 overflow-x-auto no-scrollbar">

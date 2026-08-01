@@ -9,6 +9,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
+import { tint } from '../lib/colors';
 import { ViewHeader } from './ViewHeader';
 
 interface ShoppingViewProps {
@@ -43,6 +44,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
     return initial;
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [finishError, setFinishError] = useState(false);
 
   const supplierFallback = t.storeGeneral;
   const suppliers = Array.from(new Set(request.items.map((i) => i.suggestedSupplier || supplierFallback)));
@@ -70,10 +72,16 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
 
   const handleFinish = async () => {
     setIsSubmitting(true);
+    setFinishError(false);
     playAlertSound('success');
-    await onCompleteShopping();
-    setIsSubmitting(false);
-    onClose();
+    try {
+      await onCompleteShopping();
+      onClose();
+    } catch {
+      setFinishError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filterBtn = (active: boolean): React.CSSProperties =>
@@ -259,6 +267,13 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
           backdropFilter: 'blur(16px)',
         }}
       >
+        {finishError && (
+          <div className="max-w-3xl mx-auto px-4 pt-2" role="status" aria-live="polite">
+            <div className="text-xs font-bold px-3 py-2 rounded-xl" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
+              {t.shopFinishError}
+            </div>
+          </div>
+        )}
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 text-xs sf-muted flex-1 min-w-0">
             <CheckCircle2 className="w-5 h-5 sf-accent flex-shrink-0" />

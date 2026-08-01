@@ -53,7 +53,13 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
   const handleSelect = (user: UserProfile) => {
     if (loadingUserId) return;
     setLoadingUserId(user.id);
-    setTimeout(() => onSelectUser(user), 500);
+    setTimeout(() => {
+      try {
+        onSelectUser(user);
+      } finally {
+        setLoadingUserId(null);
+      }
+    }, 500);
   };
 
   const sections: Array<{ key: Role; label: string; users: UserProfile[] }> = [
