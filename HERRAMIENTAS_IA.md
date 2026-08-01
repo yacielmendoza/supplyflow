@@ -33,6 +33,8 @@ siguiendo la especificación oficial.
 | `supabase-persistence-guardian` | Cambios a `src/lib/supabase.ts`/`api.ts` o a cualquier uso de `localStorage` | El proyecto tiene una regla dura ("nunca romper el fallback público de Supabase") y un patrón establecido de overrides en `localStorage` que ninguna skill verificaba explícitamente antes de esta |
 | `performance-budget-auditor` | Tras `npm run build`, al añadir una pestaña/pantalla o dependencia nueva | El bundle sin code-splitting (M12) llevaba 5+ ciclos documentado sin dueño porque ninguna skill lo poseía como responsabilidad propia; ahora tiene un presupuesto explícito (≤500 kB) y quien lo audite |
 | `async-error-handling-guardian` | Al añadir/editar un handler `async` conectado a un botón o `onSubmit` | Una auditoría (2026-08-01) encontró el mismo patrón —operación async sin `try/catch`, estado de carga que nunca se revierte, UI "atascada"— repetido en 3 pantallas independientes (M14); ninguna skill existente lo cubría |
+| `react-hooks-invariant-guardian` | Al añadir/editar un hook en un componente que tiene un `return` condicional temprano | La auditoría de `cfdd27d` encontró un crash real de producción (Rules of Hooks violadas en `App.tsx:621`, un `useMemo` colocado después del `return` de `LoginScreen`) invisible tanto para `tsc` como para `npm run build` — ninguna skill existente revisaba la posición de los hooks respecto a returns condicionales |
+| `stateful-prop-transition-guardian` | Al crear/tocar un componente con estado persistido (`localStorage`) inicializado desde un prop identificador (id de restaurante/usuario/fecha) | Misma auditoría: `DailyChecklist` perdía datos al cambiar de restaurante sin cambiar de pestaña (el componente no se remonta, sus `useState` no releen el draft nuevo, el efecto de persistencia sobrescribe el draft del restaurante nuevo con estado viejo) — la segunda vez en 2 ciclos que esta clase de bug reaparece por una puerta distinta; ninguna skill existente audita transiciones de props identificadores sin desmontaje |
 
 ## Subagentes creados (`.claude/agents/<name>.md`)
 
@@ -56,6 +58,8 @@ especificación oficial de subagentes.
 | `supabase-persistence-guardian` | Glob, Grep, Read, Bash | Verifica que el fallback público de Supabase y el patrón de overrides de `localStorage` no se rompan |
 | `performance-budget-auditor` | Glob, Grep, Read, Bash | Presupuesto de tamaño de bundle, code-splitting y memoización en rutas con Realtime |
 | `async-error-handling-guardian` | Glob, Grep, Read, Bash | Verifica que toda operación async con estado de carga la revierta y muestre error en el `catch` |
+| `react-hooks-invariant-guardian` | Glob, Grep, Read, Bash | Verifica que todo hook esté antes de cualquier `return` condicional y fuera de bloques condicionales (invariante de runtime que `tsc`/`build` no detectan) |
+| `stateful-prop-transition-guardian` | Glob, Grep, Read, Bash | Verifica qué pasa con el estado local (persistido o no) de un componente cuando un prop identificador cambia sin desmontaje — `key={prop}` o efecto de re-sincronización explícito |
 
 Todos son de solo-lectura salvo `design-token-architect` (alcance
 deliberadamente angosto: solo puede tocar el archivo de tokens, no

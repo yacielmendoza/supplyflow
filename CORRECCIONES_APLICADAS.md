@@ -631,3 +631,183 @@ asimetría CRUD de Restaurantes/Proveedores, números mágicos).
   funcionalidad existente sin regresión (tabs, tema/idioma, campana→
   Notificaciones, avatar→Cuenta, Modo Compra, CRUD de catálogo, checklist
   con envío, badges).
+
+---
+
+## Ciclo — respuesta a `AUDITORIA_RESULTADOS.md` (auditado `cfdd27d`, VEREDICTO: CON HALLAZGOS)
+
+Este ciclo implementó la lista de mejoras priorizadas de la auditoría de
+2026-08-01 08:20 UTC sobre `cfdd27d`, que encontró 2 Críticos nuevos (ambos
+introducidos por los propios commits correctores del ciclo previo), 9 Altos
+y una familia de Medios/Bajos.
+
+### 🔴 Crítico
+
+1. **C1 — Crash de React en cada login/logout (Rules of Hooks).** El
+   `useMemo` de `currentNavTabs` en `App.tsx` estaba declarado después del
+   `return` condicional que muestra `LoginScreen` cuando no hay sesión. Se
+   movió (junto con `activePendingRequestsCount`, del que depende) por
+   encima de ese `return`, usando `currentUser?.role` para tolerar que
+   `currentUser` aún sea `null` en ese punto. Verificado con `tsc`/`build`
+   (que no detectan este tipo de bug — es un invariante de runtime) y
+   revisando manualmente que el orden/cantidad de hooks ya no cambia entre
+   el render sin sesión y el render con sesión.
+2. **C2 — Pérdida de datos del Checklist Diario al cambiar de restaurante
+   sin cambiar de pestaña.** `<DailyChecklist>` en `App.tsx` no tenía
+   `key={selectedRestaurant.id}`, así que cambiar de local desde el selector
+   del Header (sin cambiar de tab) no remontaba el componente: sus
+   `useState` no releían el draft del nuevo restaurante, y el efecto de
+   persistencia sobrescribía el `localStorage` del restaurante nuevo con
+   estado obsoleto del anterior. Se añadió `key={selectedRestaurant.id}`
+   para forzar el remount (reutiliza el mismo mecanismo de persistencia ya
+   probado para el cambio de pestaña).
+
+### 🟠 Alto (9/9 cerrados)
+
+3. **A1 —** `flex-wrap` en el grupo interno de acciones del footer de
+   `RequestsList.tsx` + `whitespace-nowrap` en `chipBtn`, para que los CTAs
+   no partan el texto a media palabra en viewports estrechos con 2 acciones
+   simultáneas.
+4. **A2 —** Badge "URGENTE" de `RequestsList.tsx` pasado al mismo
+   tratamiento sólido que el badge OVERDUE (`background: var(--sf-rose)` +
+   `color: var(--sf-accent-contrast)`), cerrando el fallo de contraste AA en
+   tema oscuro.
+5. **A3 —** Regla global `@media (prefers-reduced-motion: reduce)` en
+   `index.css` que neutraliza `.animate-fadeIn`/`.sf-pop`/`.animate-pulse` y
+   fuerza `transition-duration` casi a cero para cualquier elemento — cubre
+   de una vez el badge OVERDUE, las transiciones inline de `LoginScreen.tsx`
+   y cualquier animación CSS futura sin tener que tocar cada componente.
+6. **A4 —** El conteo pendiente ahora forma parte del `aria-label` del botón
+   de notificaciones de `Header.tsx` y de cada tab de `BottomNav.tsx`
+   (antes el `aria-label` del contenedor ocultaba el número al lector de
+   pantalla).
+7. **A5 —** Texto de rol y las iniciales del avatar de `LoginScreen.tsx` ya
+   no reutilizan el mismo hue de baja opacidad que su propio fondo tintado
+   (fallaba AA en tema claro para cocinero/comprador); ahora usan
+   `var(--sf-text)`/`var(--sf-text-muted)`, de contraste garantizado en
+   ambos temas, y el fondo/borde tintado sigue comunicando el color por rol.
+8. **A6 —** Los 2 drawers (vista previa de pedido y nota) de
+   `DailyChecklist.tsx` se movieron después de la barra principal en el
+   JSX (antes en DOM); `flex-col-reverse` en el contenedor restaura el
+   apilamiento visual esperado (drawers arriba, barra abajo) sin acoplar
+   orden de tabulación a orden visual — un usuario de teclado ahora sí
+   llega al textarea de la nota tabulando hacia adelante desde su botón.
+9. **A7 —** `itemsNeedingReplenishment` de `DailyChecklist.tsx` ahora filtra
+   por `p.active`, igual que `activeProducts`/`filteredProducts` — el badge
+   "bajo mínimo" y el drawer de vista previa ya no cuentan productos
+   desactivados que de todos modos `submitDailyChecklist`/el fallback local
+   ya excluían del envío real.
+10. **A8 —** Nuevo helper `formatRestaurantType(type, t)` en
+    `formatters.ts` (mismo patrón que `formatCategoryName`), usado en el
+    badge de tarjeta de restaurante y en el `<select>` de filtro de
+    productos de `AdminCatalog.tsx` — cierra los 2 sitios donde `r.type`
+    seguía mostrándose sin traducir.
+11. **A9 —** Los 6 botones Cancelar/Guardar de los 3 formularios de
+    producto/restaurante de `AdminCatalog.tsx` (alta inline, alta de
+    restaurante, `EditCard`) subidos a `min-h-11`, consistente con el resto
+    del archivo.
+
+### 🟡 Medio (cerrados los de mayor impacto/menor riesgo)
+
+12. **M5 —** `aria-expanded`/`aria-controls` en los botones "+N más"/"Ver
+    detalles" de `RequestsList.tsx`, con un `id` real en el contenido
+    expandido al que apuntan.
+13. **M7 —** `ShoppingView.tsx` re-sincroniza `itemNotes[id]` desde
+    `item.itemNote` (el valor autoritativo del servidor) justo al abrir el
+    editor de nota, en vez de confiar solo en el estado capturado al montar
+    — evita mostrar un borrador obsoleto si Realtime actualizó la nota
+    desde otro dispositivo.
+14. **M8 —** Chips de filtro de proveedor de `ShoppingView.tsx` subidos a
+    `min-h-11`, consistentes con el resto de controles táctiles del archivo.
+15. **M9 —** Nuevo token `--sf-brand-fg` (`#0c1a12`, verificado ≥4.5:1
+    contra los 3 stops del degradado de marca) reemplaza el `color:
+    '#ffffff'` hardcodeado del ícono `Flame` en `LoginScreen.tsx` y
+    `Header.tsx`.
+16. **M10 —** `Header`/`BottomNav` envueltos en `React.memo`; los callbacks
+    que `App.tsx` les pasa (`onSelectRestaurant`, `onOpenNotifications`,
+    `onOpenProfile`, `onChange` de tabs) ahora son `useCallback` de
+    identidad estable, para que la memoización deje de anularse por
+    props nuevas en cada render de `App`.
+17. **M11/M12/M13 —** Familia de defectos de la barra fija de
+    `DailyChecklist.tsx` cerrada por completo: `summaryBarH` ahora se lee
+    de forma síncrona (`el.offsetHeight`) dentro del mismo
+    `useLayoutEffect` que arma el `ResizeObserver`, en vez de esperar solo
+    a su callback asíncrono; la clave de fecha del draft (`draftKeyFor`)
+    usa fecha calendario **local**, no UTC; `showOrderPreview` se añadió a
+    `ChecklistDraft` y se persiste/restaura igual que el resto del draft.
+18. **M15 —** `LoginScreen.handleSelect` ahora tiene `catch` explícito (no
+    solo `finally`); los `localStorage.setItem` sueltos de `App.tsx`
+    (idioma, ajustes de atraso) se movieron a los helpers ya existentes
+    `persistJSON`/nuevo `safeSetItem`, ambos con `try/catch`, en vez de
+    llamadas directas sin protección.
+19. **M14 —** Guarda de exhaustividad en tiempo de compilación entre
+    `PRODUCT_CATEGORIES` (`formatters.ts`) y el tipo `Category`
+    (`types.ts`): si `Category` gana un miembro que falte en el array, el
+    build ahora falla en vez de derivar en silencio.
+20. **M17 —** `NotificationsView.tsx` escucha el evento `storage` para
+    mantener `dismissedIds` sincronizado entre pestañas del mismo
+    dispositivo.
+
+### 🟢 Bajo
+
+21. **B1 —** Footer "SupplyFlow V2 · Demo" de `LoginScreen.tsx` ahora pasa
+    por `t.loginFooter` (clave nueva, añadida en paridad ES/EN).
+22. **B2 —** `title`/`aria-label` del botón de perfil de `Header.tsx`
+    alineados (ambos comunican nombre + estado de conexión).
+23. **B4 —** `LoginScreen.handleSelect` ahora dispara `playAlertSound`,
+    igual que el resto del shell.
+24. **B9 —** `readDraft` de `DailyChecklist.tsx` valida la forma del JSON
+    parseado en runtime antes de confiar en él (evita que un draft
+    corrupto/de un esquema anterior haga fallar `new Set(...)`).
+25. **B10 —** Separador decorativo `•` de `DailyChecklist.tsx` marcado
+    `aria-hidden="true"`.
+26. **B12 —** `FILTERS` de `RequestsList.tsx` envuelto en `useMemo`.
+
+### Skills/subagentes nuevos
+
+Los 2 gaps que esta auditoría identificó (ninguno cubierto por los 12
+pares existentes) porque ninguno auditaba el flujo de renderizado
+condicional de React ni la relación prop→estado-persistido entre
+componentes padre-hijo:
+
+- **`react-hooks-invariant-guardian`** (skill + subagente) — checklist para
+  detectar hooks declarados después de un `return` condicional o dentro de
+  un bloque condicional, exactamente la clase de bug de C1. Documentado en
+  `HERRAMIENTAS_IA.md`.
+- **`stateful-prop-transition-guardian`** (skill + subagente) — checklist
+  para verificar qué pasa con el estado local (persistido o no) de un
+  componente cuando un prop identificador cambia sin desmontaje, exactamente
+  la clase de bug de C2. Documentado en `HERRAMIENTAS_IA.md`.
+
+### Diferido deliberadamente (fuera de alcance seguro de este ciclo)
+
+M1–M3 (refactor mayor del formulario triplicado / doble render móvil-desktop
+de `AdminCatalog.tsx` / asimetría CRUD sin documentar), M4 (filtrar el canal
+Realtime de `App.tsx` por restaurante/usuario — cambio arquitectónico de
+mayor alcance que un ciclo incremental), M6 (duplicación de 3 branches en
+`Dashboard.tsx`), M16 (virtualización de listas), B3 (patrón
+`listbox`/`menu` real para el popover de Header), B5/B6/B7 (objetivos
+táctiles por debajo de 44px pero sobre el mínimo WCAG de 24px), B8 (tipo
+`React.FormEvent` sin `<form>` real en `DailyChecklist.tsx`), B11
+(`document.querySelector('nav')` frágil). Ninguno es Crítico ni Alto; quedan
+para un ciclo dedicado a arquitectura/refactor mayor, tal como los ciclos
+anteriores vienen documentando.
+
+### Verificación
+
+- `npx tsc --noEmit`: **sin errores**.
+- `npm run build`: **build limpio**, chunk principal ~309.6 kB / 86.35 kB
+  gzip (variación mínima esperada por los cambios de este ciclo, sin aviso
+  de tamaño de Vite).
+- i18n: **380/380 claves** en ambos idiomas (verificado por extracción
+  programática), sin huecos — se añadió `loginFooter` en paridad ES/EN.
+- Cero modales nuevos, fallback público de Supabase sin tocar, cero clases
+  dark-only nuevas, funcionalidad existente sin regresión (tabs,
+  tema/idioma persistido, campana→Notificaciones, avatar→Cuenta, Modo
+  Compra, alta/edición de productos/locales, checklist con envío, badges).
+- Verificación manual dirigida de los 2 Críticos: login desde cero
+  (`localStorage` limpio) y logout ya no requieren la rama de hooks
+  cambiante que causaba el crash; cambiar de restaurante desde el selector
+  del Header mientras la pestaña Checklist está abierta ahora remonta el
+  componente (mismo mecanismo de persistencia ya verificado para cambio de
+  pestaña) en vez de sobrescribir el draft del restaurante de destino.
