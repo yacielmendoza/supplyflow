@@ -21,17 +21,44 @@ interface ChecklistDraft {
   reviewedIds: string[];
   notes: string;
   isUrgent: boolean;
+  showOrderPreview: boolean;
+}
+
+// Local calendar date, not UTC — a restaurant on a night shift outside UTC+0
+// would otherwise see its draft key roll over to "tomorrow" hours early.
+function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 function draftKeyFor(restaurantId: string) {
-  const today = new Date().toISOString().slice(0, 10);
-  return `restosupply_checklist_draft_${restaurantId}_${today}`;
+  return `restosupply_checklist_draft_${restaurantId}_${localDateKey(new Date())}`;
 }
 
 function readDraft(restaurantId: string): ChecklistDraft | null {
   try {
     const raw = localStorage.getItem(draftKeyFor(restaurantId));
-    return raw ? (JSON.parse(raw) as ChecklistDraft) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      typeof parsed.readings !== 'object' ||
+      !Array.isArray(parsed.reviewedIds) ||
+      typeof parsed.notes !== 'string' ||
+      typeof parsed.isUrgent !== 'boolean'
+    ) {
+      return null;
+    }
+    return {
+      readings: parsed.readings,
+      reviewedIds: parsed.reviewedIds,
+      notes: parsed.notes,
+      isUrgent: parsed.isUrgent,
+      showOrderPreview: typeof parsed.showOrderPreview === 'boolean' ? parsed.showOrderPreview : false,
+    };
   } catch {
     return null;
   }
@@ -77,19 +104,25 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [isUrgent, setIsUrgent] = useState(draft?.isUrgent ?? false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
-  const [showOrderPreview, setShowOrderPreview] = useState(false);
+  const [showOrderPreview, setShowOrderPreview] = useState(draft?.showOrderPreview ?? false);
 
   useEffect(() => {
     const key = draftKeyFor(selectedRestaurant.id);
     try {
       localStorage.setItem(
         key,
-        JSON.stringify({ readings, reviewedIds: Array.from(reviewedIds), notes, isUrgent } satisfies ChecklistDraft)
+        JSON.stringify({
+          readings,
+          reviewedIds: Array.from(reviewedIds),
+          notes,
+          isUrgent,
+          showOrderPreview,
+        } satisfies ChecklistDraft)
       );
     } catch {
       /* storage unavailable — in-memory state still works for this session */
     }
-  }, [selectedRestaurant.id, readings, reviewedIds, notes, isUrgent]);
+  }, [selectedRestaurant.id, readings, reviewedIds, notes, isUrgent, showOrderPreview]);
 
   // Anchor the summary bar flush above the app's fixed BottomNav by measuring it.
   // useLayoutEffect (not useEffect) so the correct height is applied before
@@ -112,6 +145,10 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   useLayoutEffect(() => {
     const el = summaryBarRef.current;
     if (!el) return;
+    // Read the real height synchronously before paint — ResizeObserver's own
+    // initial callback fires as a microtask, one frame too late, which is
+    // what caused the padding flicker this replaces.
+    setSummaryBarH(el.offsetHeight);
     const observer = new ResizeObserver(([entry]) => setSummaryBarH(entry.contentRect.height));
     observer.observe(el);
     return () => observer.disconnect();
@@ -149,6 +186,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
   const itemsNeedingReplenishment = useMemo(() => {
     return products.filter((p) => {
+      if (!p.active) return false;
       const currentVal = readings[p.id] !== undefined ? readings[p.id] : p.minThreshold + 1;
       return currentVal < p.minThreshold;
     });
@@ -293,7 +331,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   <span className="font-extrabold text-base sm:text-lg truncate block" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
                   <div className="text-xs mt-0.5 flex items-center gap-2 flex-wrap">
                     <span className="font-bold sf-accent whitespace-nowrap">{formatCategoryName(p.category, t)}</span>
-                    <span className="sf-subtle">•</span>
+                    <span className="sf-subtle" aria-hidden="true">•</span>
                     <span className="sf-muted whitespace-nowrap">{t.minimum} <strong style={{ color: 'var(--sf-text)' }}>{p.minThreshold} {p.unit}s</strong></span>
                   </div>
                 </div>
@@ -362,76 +400,12 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           borderTopRightRadius: '22px',
         }}
       >
-        <div className="max-w-5xl mx-auto">
-          {/* Expandable order preview */}
-          <AnimatePresence initial={false}>
-            {showOrderPreview && (
-              <motion.div
-                key="order-preview"
-                id="checklist-order-preview"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={drawerTransition}
-                style={{ overflow: 'hidden', borderBottom: '1px solid var(--sf-border)' }}
-              >
-                <div className="px-4 pt-3 pb-2 max-h-[42vh] overflow-y-auto">
-                  <div className="text-xs font-black uppercase tracking-wider sf-muted mb-2">
-                    {t.checklistOrderPreviewTitle} ({itemsNeedingReplenishment.length})
-                  </div>
-                  {itemsNeedingReplenishment.length === 0 ? (
-                    <div className="py-4 text-center sf-subtle text-sm font-semibold">{t.stockCompleteMsg}</div>
-                  ) : (
-                    <ul className="space-y-1.5">
-                      {itemsNeedingReplenishment.map((p) => (
-                        <li key={p.id} className="sf-inset flex items-center justify-between gap-3 px-3 py-2">
-                          <span className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
-                          <span className="text-xs font-black flex-shrink-0 sf-accent whitespace-nowrap">
-                            {p.suggestedQuantity} {p.unit}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Expandable note drawer */}
-          <AnimatePresence initial={false}>
-            {showNoteInput && (
-              <motion.div
-                key="note-drawer"
-                id="checklist-note-drawer"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={drawerTransition}
-                style={{ overflow: 'hidden', borderBottom: '1px solid var(--sf-border)' }}
-              >
-                <div className="px-4 pt-3 pb-2 space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <label className="font-bold flex items-center gap-1.5" style={{ color: 'var(--sf-text)' }}>
-                      <MessageSquare className="w-3.5 h-3.5 sf-accent" />
-                      {t.noteForBuyers}
-                    </label>
-                    <button type="button" onClick={() => setShowNoteInput(false)} className="text-[11px] font-medium sf-muted">{t.hideNote}</button>
-                  </div>
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder={t.checklistNotePlaceholder}
-                    rows={2}
-                    className="w-full sf-inset rounded-xl p-2 text-xs focus:outline-none resize-none"
-                    style={{ color: 'var(--sf-text)' }}
-                  />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Main bar */}
+        <div className="max-w-5xl mx-auto flex flex-col-reverse">
+          {/* Main bar — placed first in the DOM (not just visually last) so
+              keyboard users tabbing forward from its trigger buttons land in
+              the drawers below in the DOM, not "behind" them (WCAG 2.4.3).
+              flex-col-reverse restores the expected on-screen stacking
+              (drawers open upward, above this bar). */}
           <div className="px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
             <button
               type="button"
@@ -479,6 +453,74 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Expandable note drawer */}
+          <AnimatePresence initial={false}>
+            {showNoteInput && (
+              <motion.div
+                key="note-drawer"
+                id="checklist-note-drawer"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={drawerTransition}
+                style={{ overflow: 'hidden', borderBottom: '1px solid var(--sf-border)' }}
+              >
+                <div className="px-4 pt-3 pb-2 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <label className="font-bold flex items-center gap-1.5" style={{ color: 'var(--sf-text)' }}>
+                      <MessageSquare className="w-3.5 h-3.5 sf-accent" />
+                      {t.noteForBuyers}
+                    </label>
+                    <button type="button" onClick={() => setShowNoteInput(false)} className="text-[11px] font-medium sf-muted">{t.hideNote}</button>
+                  </div>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder={t.checklistNotePlaceholder}
+                    rows={2}
+                    className="w-full sf-inset rounded-xl p-2 text-xs focus:outline-none resize-none"
+                    style={{ color: 'var(--sf-text)' }}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Expandable order preview */}
+          <AnimatePresence initial={false}>
+            {showOrderPreview && (
+              <motion.div
+                key="order-preview"
+                id="checklist-order-preview"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={drawerTransition}
+                style={{ overflow: 'hidden', borderBottom: '1px solid var(--sf-border)' }}
+              >
+                <div className="px-4 pt-3 pb-2 max-h-[42vh] overflow-y-auto">
+                  <div className="text-xs font-black uppercase tracking-wider sf-muted mb-2">
+                    {t.checklistOrderPreviewTitle} ({itemsNeedingReplenishment.length})
+                  </div>
+                  {itemsNeedingReplenishment.length === 0 ? (
+                    <div className="py-4 text-center sf-subtle text-sm font-semibold">{t.stockCompleteMsg}</div>
+                  ) : (
+                    <ul className="space-y-1.5">
+                      {itemsNeedingReplenishment.map((p) => (
+                        <li key={p.id} className="sf-inset flex items-center justify-between gap-3 px-3 py-2">
+                          <span className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
+                          <span className="text-xs font-black flex-shrink-0 sf-accent whitespace-nowrap">
+                            {p.suggestedQuantity} {p.unit}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>,
         document.body
