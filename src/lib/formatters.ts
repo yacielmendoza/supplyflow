@@ -13,9 +13,31 @@ export const PRODUCT_CATEGORIES: Category[] = [
   'SUPPLIES',
 ];
 
+// Compile-time guard: if `Category` (types.ts) ever gains a member missing
+// from PRODUCT_CATEGORIES above, this line fails to type-check — the two
+// lists used to be able to drift silently in opposite directions.
+type AssertNoMissingCategory<T extends readonly Category[]> = Category extends T[number] ? true : never;
+const _allCategoriesCovered: AssertNoMissingCategory<typeof PRODUCT_CATEGORIES> = true;
+void _allCategoriesCovered;
+
 export function formatCleanName(name?: string | null): string {
   if (!name) return '';
   return name.replace(/\s*\([^)]*\)/g, '').trim();
+}
+
+export function formatRestaurantType(type: string, t: Translations): string {
+  switch (type) {
+    case 'Food Truck':
+      return t.adminTypeFoodTruck;
+    case 'Restaurante':
+      return t.adminTypeRestaurant;
+    case 'Cafe':
+      return t.adminTypeCafe;
+    case 'Bistro':
+      return t.adminTypeBistro;
+    default:
+      return type;
+  }
 }
 
 export function formatCategoryName(category: string, t: Translations): string {

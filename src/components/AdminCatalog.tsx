@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Product, Restaurant, Supplier, Category, UnitType, UserProfile } from '../types';
 import { getTranslation } from '../lib/translations';
-import { PRODUCT_CATEGORIES } from '../lib/formatters';
+import { PRODUCT_CATEGORIES, formatRestaurantType } from '../lib/formatters';
 import { tint, RESTAURANT_COLOR_TOKENS } from '../lib/colors';
 import { Plus, Edit2, Trash2, Save, X, Search, SlidersHorizontal, Clock, Flame } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
@@ -168,7 +168,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
               <span className="text-xs font-bold sf-muted flex-shrink-0">{t.adminLocalLabel}</span>
               <select value={selectedRestFilter} onChange={(e) => setSelectedRestFilter(e.target.value)}
                 className="w-full sm:w-auto sf-inset text-xs rounded-xl px-2.5 py-1.5 focus:outline-none" style={inputStyle}>
-                {restaurants.map((r) => <option key={r.id} value={r.id}>{r.name} ({r.type})</option>)}
+                {restaurants.map((r) => <option key={r.id} value={r.id}>{r.name} ({formatRestaurantType(r.type, t)})</option>)}
               </select>
             </div>
             <div className="relative flex-1 max-w-xs w-full">
@@ -223,8 +223,8 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                 <input type="text" value={newProdSupplier} onChange={(e) => setNewProdSupplier(e.target.value)} className={inputCls} style={inputStyle} />
               </div>
               <div className="pt-1 flex justify-end gap-2">
-                <button type="button" onClick={() => setShowAddForm(false)} className="px-4 py-2 sf-btn-ghost rounded-xl font-bold">{t.adminCancel}</button>
-                <button type="submit" className="px-4 py-2 sf-btn-accent rounded-xl font-bold">{t.adminSaveProduct}</button>
+                <button type="button" onClick={() => setShowAddForm(false)} className="px-4 min-h-11 sf-btn-ghost rounded-xl font-bold">{t.adminCancel}</button>
+                <button type="submit" className="px-4 min-h-11 sf-btn-accent rounded-xl font-bold">{t.adminSaveProduct}</button>
               </div>
             </form>
           )}
@@ -380,8 +380,8 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                 <input type="text" value={newRestAddress} onChange={(e) => setNewRestAddress(e.target.value)} className={inputCls} style={inputStyle} />
               </div>
               <div className="pt-1 flex justify-end gap-2">
-                <button type="button" onClick={() => setShowAddRestForm(false)} className="px-4 py-2 sf-btn-ghost rounded-xl font-bold">{t.adminCancel}</button>
-                <button type="submit" className="px-4 py-2 sf-btn-accent rounded-xl font-bold">{t.adminRegisterLocal}</button>
+                <button type="button" onClick={() => setShowAddRestForm(false)} className="px-4 min-h-11 sf-btn-ghost rounded-xl font-bold">{t.adminCancel}</button>
+                <button type="submit" className="px-4 min-h-11 sf-btn-accent rounded-xl font-bold">{t.adminRegisterLocal}</button>
               </div>
             </form>
           )}
@@ -392,7 +392,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ background: RESTAURANT_COLOR_TOKENS[r.colorBadge] }} />
                   <span className="font-bold text-base" style={{ color: 'var(--sf-text)' }}>{r.name}</span>
-                  <span className="sf-inset px-2 py-0.5 rounded-lg text-[10px] font-mono sf-accent">{r.type}</span>
+                  <span className="sf-inset px-2 py-0.5 rounded-lg text-[10px] font-mono sf-accent">{formatRestaurantType(r.type, t)}</span>
                 </div>
                 <p className="text-xs sf-muted mt-1">{r.address}</p>
                 <p className="text-xs sf-subtle">{t.adminPhoneLabel} {r.phone}</p>
@@ -467,8 +467,8 @@ const EditCard: React.FC<{
         <input type="text" value={editForm.suggestedSupplier || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedSupplier: e.target.value }))} className={inputCls} style={inputStyle} />
       </div>
       <div className="flex justify-end gap-2 pt-1">
-        <button onClick={onCancel} className="px-3 py-1.5 sf-btn-ghost font-bold rounded-lg">{t.adminCancel}</button>
-        <button onClick={onSave} className="px-3 py-1.5 sf-btn-accent font-bold rounded-lg flex items-center gap-1"><Save className="w-3.5 h-3.5" />{t.adminSave}</button>
+        <button onClick={onCancel} className="px-3 min-h-11 sf-btn-ghost font-bold rounded-lg">{t.adminCancel}</button>
+        <button onClick={onSave} className="px-3 min-h-11 sf-btn-accent font-bold rounded-lg flex items-center gap-1"><Save className="w-3.5 h-3.5" />{t.adminSave}</button>
       </div>
     </div>
   </div>
