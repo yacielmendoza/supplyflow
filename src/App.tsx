@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, Suspense, lazy } from 'react';
 import {
   Restaurant,
   UserProfile,
@@ -29,13 +29,17 @@ import { INITIAL_SUPPLIERS } from './data/caddyShackData';
 import { Header } from './components/Header';
 import { BottomNav, BottomNavTab } from './components/BottomNav';
 import { Dashboard } from './components/Dashboard';
-import { AccountView } from './components/AccountView';
-import { NotificationsView } from './components/NotificationsView';
-import { DailyChecklist } from './components/DailyChecklist';
-import { RequestsList } from './components/RequestsList';
-import { ShoppingView } from './components/ShoppingView';
-import { AdminCatalog, OverdueSettings } from './components/AdminCatalog';
 import { LoginScreen } from './components/LoginScreen';
+import type { OverdueSettings } from './components/AdminCatalog';
+
+// Tab/screen destinations are only ever needed after the initial Dashboard
+// render, so they're code-split out of the main bundle and fetched on demand.
+const AccountView = lazy(() => import('./components/AccountView').then((m) => ({ default: m.AccountView })));
+const NotificationsView = lazy(() => import('./components/NotificationsView').then((m) => ({ default: m.NotificationsView })));
+const DailyChecklist = lazy(() => import('./components/DailyChecklist').then((m) => ({ default: m.DailyChecklist })));
+const RequestsList = lazy(() => import('./components/RequestsList').then((m) => ({ default: m.RequestsList })));
+const ShoppingView = lazy(() => import('./components/ShoppingView').then((m) => ({ default: m.ShoppingView })));
+const AdminCatalog = lazy(() => import('./components/AdminCatalog').then((m) => ({ default: m.AdminCatalog })));
 import { showLocalNotification, playAlertSound, setAppBadge } from './lib/notifications';
 import { getTranslation } from './lib/translations';
 import {
@@ -47,6 +51,16 @@ import {
 
 type TabId = 'DASHBOARD' | 'REQUESTS' | 'CHECKLIST' | 'ADMIN';
 type Screen = 'NONE' | 'NOTIFICATIONS' | 'ACCOUNT';
+
+// Lightweight, theme-aware placeholder shown while a lazy-loaded view's chunk fetches.
+const ViewFallback: React.FC = () => (
+  <div className="flex items-center justify-center py-24">
+    <div
+      className="w-8 h-8 rounded-full border-2 animate-spin"
+      style={{ borderColor: 'var(--sf-border)', borderTopColor: 'var(--sf-accent)' }}
+    />
+  </div>
+);
 
 const SESSION_KEY = 'restosupply_session_user';
 const LANGUAGE_KEY = 'restosupply_language';
@@ -269,7 +283,7 @@ export default function App() {
       address: 'Big Spring, TX',
       phone: '',
       active: true,
-      colorBadge: 'bg-emerald-600',
+      colorBadge: 'emerald',
     };
 
   const currentRestaurantProducts = products.filter(
@@ -531,7 +545,7 @@ export default function App() {
   };
 
   const handleAddRestaurant = async (restData: { name: string; type: any; address: string; phone: string }) => {
-    const newRest = { ...restData, id: `rest-${Date.now()}`, active: true, colorBadge: 'bg-emerald-600' };
+    const newRest = { ...restData, id: `rest-${Date.now()}`, active: true, colorBadge: 'emerald' as const };
     setRestaurants((prev) => {
       const next = [...prev, newRest];
       persistJSON(RESTAURANTS_OVERRIDE_KEY, next);
@@ -636,49 +650,55 @@ export default function App() {
   // Shopping mode is a full-screen view (no modal), takes priority when active
   if (shoppingModalRequest) {
     return (
-      <ShoppingView
-        request={shoppingModalRequest}
-        currentUser={currentUser}
-        onClose={() => setShoppingModalRequest(null)}
-        onToggleItem={handleToggleItem}
-        onCompleteShopping={handleFinishShopping}
-      />
+      <Suspense fallback={<ViewFallback />}>
+        <ShoppingView
+          request={shoppingModalRequest}
+          currentUser={currentUser}
+          onClose={() => setShoppingModalRequest(null)}
+          onToggleItem={handleToggleItem}
+          onCompleteShopping={handleFinishShopping}
+        />
+      </Suspense>
     );
   }
 
   // Drill-in full-screen views (no modals): notifications & account
   if (screen === 'NOTIFICATIONS') {
     return (
-      <NotificationsView
-        onBack={() => setScreen('NONE')}
-        sseConnected={sseConnected}
-        currentUserPhone={currentUser.phone}
-        currentUserRole={currentUser.role}
-        currentUserLanguage={currentUser.language}
-        requests={supplyRequests}
-        onSelectRequest={handleSelectRequestFromNotification}
-      />
+      <Suspense fallback={<ViewFallback />}>
+        <NotificationsView
+          onBack={() => setScreen('NONE')}
+          sseConnected={sseConnected}
+          currentUserPhone={currentUser.phone}
+          currentUserRole={currentUser.role}
+          currentUserLanguage={currentUser.language}
+          requests={supplyRequests}
+          onSelectRequest={handleSelectRequestFromNotification}
+        />
+      </Suspense>
     );
   }
 
   if (screen === 'ACCOUNT') {
     return (
-      <AccountView
-        currentUser={currentUser}
-        users={users}
-        onBack={() => setScreen('NONE')}
-        onSaveProfile={handleSaveProfile}
-        onSelectUser={handleSelectUser}
-        isPWAInstallable={!!deferredPrompt || isIOS}
-        isIOS={isIOS}
-        onInstallDirect={() => {
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
-          }
-        }}
-        onLogout={handleLogout}
-      />
+      <Suspense fallback={<ViewFallback />}>
+        <AccountView
+          currentUser={currentUser}
+          users={users}
+          onBack={() => setScreen('NONE')}
+          onSaveProfile={handleSaveProfile}
+          onSelectUser={handleSelectUser}
+          isPWAInstallable={!!deferredPrompt || isIOS}
+          isIOS={isIOS}
+          onInstallDirect={() => {
+            if (deferredPrompt) {
+              deferredPrompt.prompt();
+              deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
+            }
+          }}
+          onLogout={handleLogout}
+        />
+      </Suspense>
     );
   }
 
@@ -711,41 +731,47 @@ export default function App() {
         )}
 
         {activeTab === 'CHECKLIST' && (
-          <DailyChecklist
-            products={currentRestaurantProducts}
-            selectedRestaurant={selectedRestaurant}
-            currentUser={currentUser}
-            onSubmitChecklist={handleSubmitChecklist}
-            isSubmitting={isSubmittingChecklist}
-          />
+          <Suspense fallback={<ViewFallback />}>
+            <DailyChecklist
+              products={currentRestaurantProducts}
+              selectedRestaurant={selectedRestaurant}
+              currentUser={currentUser}
+              onSubmitChecklist={handleSubmitChecklist}
+              isSubmitting={isSubmittingChecklist}
+            />
+          </Suspense>
         )}
 
         {activeTab === 'REQUESTS' && (
-          <RequestsList
-            requests={supplyRequests}
-            currentUser={currentUser}
-            onClaimRequest={handleClaimRequest}
-            onOpenShoppingMode={handleOpenShoppingMode}
-            onUpdateStatus={handleUpdateStatus}
-            selectedRestaurantId={selectedRestaurantId}
-            highlightedRequestId={highlightedRequestId}
-            overdueRequestIds={overdueRequestIds}
-          />
+          <Suspense fallback={<ViewFallback />}>
+            <RequestsList
+              requests={supplyRequests}
+              currentUser={currentUser}
+              onClaimRequest={handleClaimRequest}
+              onOpenShoppingMode={handleOpenShoppingMode}
+              onUpdateStatus={handleUpdateStatus}
+              selectedRestaurantId={selectedRestaurantId}
+              highlightedRequestId={highlightedRequestId}
+              overdueRequestIds={overdueRequestIds}
+            />
+          </Suspense>
         )}
 
         {activeTab === 'ADMIN' && (
-          <AdminCatalog
-            products={products}
-            restaurants={restaurants}
-            suppliers={INITIAL_SUPPLIERS}
-            currentUser={currentUser}
-            onAddProduct={handleAddProduct}
-            onUpdateProduct={handleUpdateProduct}
-            onDeleteProduct={handleDeleteProduct}
-            onAddRestaurant={handleAddRestaurant}
-            overdueSettings={overdueSettings}
-            onSaveOverdueSettings={handleSaveOverdueSettings}
-          />
+          <Suspense fallback={<ViewFallback />}>
+            <AdminCatalog
+              products={products}
+              restaurants={restaurants}
+              suppliers={INITIAL_SUPPLIERS}
+              currentUser={currentUser}
+              onAddProduct={handleAddProduct}
+              onUpdateProduct={handleUpdateProduct}
+              onDeleteProduct={handleDeleteProduct}
+              onAddRestaurant={handleAddRestaurant}
+              overdueSettings={overdueSettings}
+              onSaveOverdueSettings={handleSaveOverdueSettings}
+            />
+          </Suspense>
         )}
 
       </main>
