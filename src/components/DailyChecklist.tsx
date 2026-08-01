@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Product, Category, Restaurant, UserProfile } from '../types';
-import { formatCategoryName } from '../lib/formatters';
+import { formatCategoryName, PRODUCT_CATEGORIES } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
 import { tint } from '../lib/colors';
 import { CheckCircle2, Send, Plus, Minus, Search, MessageSquare, ChevronUp, ChevronDown } from 'lucide-react';
@@ -14,6 +15,27 @@ interface DailyChecklistProps {
   isSubmitting: boolean;
 }
 
+interface ChecklistDraft {
+  readings: Record<string, number>;
+  reviewedIds: string[];
+  notes: string;
+  isUrgent: boolean;
+}
+
+function draftKeyFor(restaurantId: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  return `restosupply_checklist_draft_${restaurantId}_${today}`;
+}
+
+function readDraft(restaurantId: string): ChecklistDraft | null {
+  try {
+    const raw = localStorage.getItem(draftKeyFor(restaurantId));
+    return raw ? (JSON.parse(raw) as ChecklistDraft) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   products,
   selectedRestaurant,
@@ -22,16 +44,22 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   isSubmitting,
 }) => {
   const t = getTranslation(currentUser.language ?? 'es');
+  const shouldReduceMotion = useReducedMotion();
+  const drawerTransition = shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' as const };
+
+  // Draft is keyed by restaurant+day and restored on mount so switching tabs
+  // (which unmounts this component) never discards in-progress checklist work.
+  const draft = useMemo(() => readDraft(selectedRestaurant.id), [selectedRestaurant.id]);
 
   const [readings, setReadings] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     products.forEach((p) => {
       initial[p.id] = p.currentStock !== undefined ? p.currentStock : p.minThreshold + 2;
     });
-    return initial;
+    return { ...initial, ...draft?.readings };
   });
 
-  const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
+  const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set(draft?.reviewedIds ?? []));
   const toggleReviewed = (id: string) =>
     setReviewedIds((prev) => {
       const next = new Set(prev);
@@ -44,11 +72,23 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<Category | 'TODAS'>('TODAS');
   const [reviewFilter, setReviewFilter] = useState<'ALL' | 'UNREVIEWED' | 'REVIEWED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(draft?.notes ?? '');
   const [showNoteInput, setShowNoteInput] = useState(false);
-  const [isUrgent, setIsUrgent] = useState(false);
+  const [isUrgent, setIsUrgent] = useState(draft?.isUrgent ?? false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [showOrderPreview, setShowOrderPreview] = useState(false);
+
+  useEffect(() => {
+    const key = draftKeyFor(selectedRestaurant.id);
+    try {
+      localStorage.setItem(
+        key,
+        JSON.stringify({ readings, reviewedIds: Array.from(reviewedIds), notes, isUrgent } satisfies ChecklistDraft)
+      );
+    } catch {
+      /* storage unavailable — in-memory state still works for this session */
+    }
+  }, [selectedRestaurant.id, readings, reviewedIds, notes, isUrgent]);
 
   // Anchor the summary bar flush above the app's fixed BottomNav by measuring it.
   const [navH, setNavH] = useState(76);
@@ -101,6 +141,11 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
     e.preventDefault();
     playAlertSound('urgent');
     await onSubmitChecklist(readings, notes, isUrgent);
+    try {
+      localStorage.removeItem(draftKeyFor(selectedRestaurant.id));
+    } catch {
+      /* storage unavailable — nothing to clear */
+    }
     setSubmittedSuccess(true);
     setTimeout(() => setSubmittedSuccess(false), 4000);
   };
@@ -178,7 +223,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
         {/* Category selector */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-          {(['TODAS', 'INGREDIENTS', 'SNACKS', 'BEVERAGES', 'MIXERS', 'CANDY', 'CHEMICALS', 'PAPER / DISPOSABLES', 'ALCOHOL'] as const).map((cat) => {
+          {(['TODAS', ...PRODUCT_CATEGORIES] as const).map((cat) => {
             const active = selectedCategory === cat;
             const label = cat === 'TODAS' ? t.checklistFilterAll : formatCategoryName(cat, t);
             return (
@@ -195,6 +240,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
       {/* Product grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <AnimatePresence initial={false}>
         {filteredProducts.map((p) => {
           const currentVal = readings[p.id] !== undefined ? readings[p.id] : p.minThreshold + 1;
           const isBelowThreshold = currentVal < p.minThreshold;
@@ -203,8 +249,13 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           const stateColor = isCriticalZero ? 'var(--sf-rose)' : isBelowThreshold ? 'var(--sf-amber)' : 'var(--sf-accent)';
 
           return (
-            <div key={p.id} className="sf-card p-4"
-              style={isReviewed ? { borderColor: stateColor, borderWidth: '2px' } : { opacity: 0.92 }}>
+            <motion.div key={p.id} layout="position"
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: isReviewed ? 1 : 0.92, y: 0 }}
+              exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+              transition={drawerTransition}
+              className="sf-card p-4"
+              style={isReviewed ? { borderColor: stateColor, borderWidth: '2px' } : undefined}>
               <div className="flex items-start justify-between gap-2 mb-2.5">
                 <div className="min-w-0 flex-1">
                   <span className="font-extrabold text-base sm:text-lg truncate block" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
@@ -257,9 +308,10 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
+        </AnimatePresence>
       </div>
 
       {/* Summary bar — fixed, anchored flush above the BottomNav, tap to preview the order */}
@@ -276,48 +328,70 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
       >
         <div className="max-w-5xl mx-auto">
           {/* Expandable order preview */}
-          {showOrderPreview && (
-            <div className="px-4 pt-3 pb-2 max-h-[42vh] overflow-y-auto animate-fadeIn" style={{ borderBottom: '1px solid var(--sf-border)' }}>
-              <div className="text-xs font-black uppercase tracking-wider sf-muted mb-2">
-                {t.checklistOrderPreviewTitle} ({itemsNeedingReplenishment.length})
-              </div>
-              {itemsNeedingReplenishment.length === 0 ? (
-                <div className="py-4 text-center sf-subtle text-sm font-semibold">{t.stockCompleteMsg}</div>
-              ) : (
-                <ul className="space-y-1.5">
-                  {itemsNeedingReplenishment.map((p) => (
-                    <li key={p.id} className="sf-inset flex items-center justify-between gap-3 px-3 py-2">
-                      <span className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
-                      <span className="text-xs font-black flex-shrink-0 sf-accent whitespace-nowrap">
-                        {p.suggestedQuantity} {p.unit}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
+          <AnimatePresence initial={false}>
+            {showOrderPreview && (
+              <motion.div
+                key="order-preview"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={drawerTransition}
+                style={{ overflow: 'hidden', borderBottom: '1px solid var(--sf-border)' }}
+              >
+                <div className="px-4 pt-3 pb-2 max-h-[42vh] overflow-y-auto">
+                  <div className="text-xs font-black uppercase tracking-wider sf-muted mb-2">
+                    {t.checklistOrderPreviewTitle} ({itemsNeedingReplenishment.length})
+                  </div>
+                  {itemsNeedingReplenishment.length === 0 ? (
+                    <div className="py-4 text-center sf-subtle text-sm font-semibold">{t.stockCompleteMsg}</div>
+                  ) : (
+                    <ul className="space-y-1.5">
+                      {itemsNeedingReplenishment.map((p) => (
+                        <li key={p.id} className="sf-inset flex items-center justify-between gap-3 px-3 py-2">
+                          <span className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
+                          <span className="text-xs font-black flex-shrink-0 sf-accent whitespace-nowrap">
+                            {p.suggestedQuantity} {p.unit}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Expandable note drawer */}
-          {showNoteInput && (
-            <div className="px-4 pt-3 pb-2 space-y-1.5 animate-fadeIn" style={{ borderBottom: '1px solid var(--sf-border)' }}>
-              <div className="flex items-center justify-between text-xs">
-                <label className="font-bold flex items-center gap-1.5" style={{ color: 'var(--sf-text)' }}>
-                  <MessageSquare className="w-3.5 h-3.5 sf-accent" />
-                  {t.noteForBuyers}
-                </label>
-                <button type="button" onClick={() => setShowNoteInput(false)} className="text-[11px] font-medium sf-muted">{t.hideNote}</button>
-              </div>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder={t.checklistNotePlaceholder}
-                rows={2}
-                className="w-full sf-inset rounded-xl p-2 text-xs focus:outline-none resize-none"
-                style={{ color: 'var(--sf-text)' }}
-              />
-            </div>
-          )}
+          <AnimatePresence initial={false}>
+            {showNoteInput && (
+              <motion.div
+                key="note-drawer"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={drawerTransition}
+                style={{ overflow: 'hidden', borderBottom: '1px solid var(--sf-border)' }}
+              >
+                <div className="px-4 pt-3 pb-2 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <label className="font-bold flex items-center gap-1.5" style={{ color: 'var(--sf-text)' }}>
+                      <MessageSquare className="w-3.5 h-3.5 sf-accent" />
+                      {t.noteForBuyers}
+                    </label>
+                    <button type="button" onClick={() => setShowNoteInput(false)} className="text-[11px] font-medium sf-muted">{t.hideNote}</button>
+                  </div>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder={t.checklistNotePlaceholder}
+                    rows={2}
+                    className="w-full sf-inset rounded-xl p-2 text-xs focus:outline-none resize-none"
+                    style={{ color: 'var(--sf-text)' }}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Main bar */}
           <div className="px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
@@ -329,7 +403,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               className="flex items-center gap-2.5 min-w-0 flex-1 text-left rounded-2xl px-1 py-1 transition"
             >
               <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-                style={{ background: itemsNeedingReplenishment.length > 0 ? 'var(--sf-rose)' : 'var(--sf-accent)', color: '#fff' }}>
+                style={{ background: itemsNeedingReplenishment.length > 0 ? 'var(--sf-rose)' : 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' }}>
                 {itemsNeedingReplenishment.length}
               </div>
               <div className="min-w-0">
