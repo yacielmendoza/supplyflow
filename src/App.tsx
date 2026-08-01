@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, Suspense, lazy } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef, Suspense, lazy } from 'react';
 import {
   Restaurant,
   UserProfile,
@@ -20,7 +20,6 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  triggerNotification,
   upsertSupplyRequest,
   getNextRequestNumber,
 } from './lib/api';
@@ -619,7 +618,7 @@ export default function App() {
     themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
   }
 
-  const getNavTabs = (): BottomNavTab[] => {
+  const currentNavTabs = useMemo((): BottomNavTab[] => {
     const dashboard: BottomNavTab = { id: 'DASHBOARD', label: t.tabDashboard, icon: LayoutDashboard };
     switch (currentUser.role) {
       case 'cocinero':
@@ -643,9 +642,7 @@ export default function App() {
       default:
         return [dashboard];
     }
-  };
-
-  const currentNavTabs = getNavTabs();
+  }, [currentUser.role, t, activePendingRequestsCount]);
 
   // Shopping mode is a full-screen view (no modal), takes priority when active
   if (shoppingModalRequest) {

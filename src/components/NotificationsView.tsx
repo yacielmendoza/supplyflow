@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { SupplyRequest } from '../types';
 import { getTranslation } from '../lib/translations';
 import { formatCleanName } from '../lib/formatters';
@@ -23,7 +23,6 @@ import {
   showLocalNotification,
   generateWhatsAppLink,
 } from '../lib/notifications';
-import { triggerNotification } from '../lib/api';
 import { STATUS_COLORS, getStatusLabels } from '../lib/colors';
 import { ViewHeader } from './ViewHeader';
 
@@ -99,8 +98,11 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
     }
   };
 
-  const visibleRequests = requests.filter((r) => !dismissedIds.has(r.id) && r.status !== 'Completada');
-  const urgentCount = visibleRequests.filter((r) => r.urgent).length;
+  const visibleRequests = useMemo(
+    () => requests.filter((r) => !dismissedIds.has(r.id) && r.status !== 'Completada'),
+    [requests, dismissedIds]
+  );
+  const urgentCount = useMemo(() => visibleRequests.filter((r) => r.urgent).length, [visibleRequests]);
 
   const handleEnablePush = async () => {
     const granted = await requestPushPermission();
@@ -110,10 +112,9 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
     }
   };
 
-  const handleSendTestPush = async () => {
+  const handleSendTestPush = () => {
     playAlertSound('urgent');
     showLocalNotification(testTitle, testBody);
-    await triggerNotification(testTitle, testBody);
     setSimulatedSent(true);
     setTimeout(() => setSimulatedSent(false), 3000);
   };

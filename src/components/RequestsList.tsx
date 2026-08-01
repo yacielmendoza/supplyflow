@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { SupplyRequest, RequestStatus, UserProfile } from '../types';
 import { formatCleanName } from '../lib/formatters';
@@ -67,24 +67,35 @@ export const RequestsList: React.FC<RequestsListProps> = ({
 
   const inScope = (r: SupplyRequest) => !selectedRestaurantId || r.restaurantId === selectedRestaurantId;
 
-  const filteredRequests = requests.filter((r) => {
-    if (!inScope(r)) return false;
-    if (filterTab === 'PENDING') return r.status === 'Pendiente';
-    if (filterTab === 'IN_PROGRESS') return ['Asignada', 'En Compra', 'Comprada'].includes(r.status);
-    if (filterTab === 'COMPLETED') return ['Entregada', 'Completada'].includes(r.status);
-    return true;
-  });
-
-  const countPending = requests.filter((r) => inScope(r) && r.status === 'Pendiente').length;
-  const countInProgress = requests.filter((r) => inScope(r) && ['Asignada', 'En Compra', 'Comprada'].includes(r.status)).length;
-  const countCompleted = requests.filter((r) => inScope(r) && ['Entregada', 'Completada'].includes(r.status)).length;
-  const countAll = requests.filter(inScope).length;
+  const { filteredRequests, countPending, countInProgress, countCompleted, countAll } = useMemo(() => {
+    const scoped = requests.filter(inScope);
+    return {
+      filteredRequests: scoped.filter((r) => {
+        if (filterTab === 'PENDING') return r.status === 'Pendiente';
+        if (filterTab === 'IN_PROGRESS') return ['Asignada', 'En Compra', 'Comprada'].includes(r.status);
+        if (filterTab === 'COMPLETED') return ['Entregada', 'Completada'].includes(r.status);
+        return true;
+      }),
+      countPending: scoped.filter((r) => r.status === 'Pendiente').length,
+      countInProgress: scoped.filter((r) => ['Asignada', 'En Compra', 'Comprada'].includes(r.status)).length,
+      countCompleted: scoped.filter((r) => ['Entregada', 'Completada'].includes(r.status)).length,
+      countAll: scoped.length,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requests, selectedRestaurantId, filterTab]);
 
   const statusLabels = getStatusLabels(t);
   const getStatusLabel = (status: RequestStatus): string => statusLabels[status] ?? status;
 
+  // Ticks once a minute so relative timestamps ("5 min ago") advance without a prop change.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, []);
+
   const getTimeAgo = (dateStr: string) => {
-    const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
+    const mins = Math.floor((nowTick - new Date(dateStr).getTime()) / 60000);
     if (mins < 1) return t.timeJustNow;
     if (mins < 60) return `${t.timePrefix}${mins} ${t.timeMin}${t.timeSuffix}`;
     const hours = Math.floor(mins / 60);

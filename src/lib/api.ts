@@ -209,7 +209,3 @@ export async function deleteProduct(_id: string): Promise<boolean> {
 export async function fetchAnalytics(): Promise<unknown> {
   return null;
 }
-
-export async function triggerNotification(_title: string, _body: string, _targetRole?: string): Promise<void> {
-  // Supabase Realtime handles cross-device sync; no push server needed
-}

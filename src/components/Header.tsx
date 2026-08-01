@@ -159,7 +159,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="relative w-11 h-11 rounded-full flex-shrink-0 transition ring-2"
               style={{ ['--tw-ring-color' as string]: 'var(--sf-accent)' }}
               title={formatCleanName(currentUser.name)}
-              aria-label={t.tabSettings}
+              aria-label={`${t.tabSettings} — ${sseConnected ? t.online : t.reconnecting}`}
             >
               <span className="block w-full h-full rounded-full overflow-hidden">
                 {currentUser.avatarUrl ? (
