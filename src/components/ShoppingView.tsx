@@ -216,13 +216,21 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                       type="text"
                       value={itemNotes[item.id] || ''}
                       onChange={(e) => setItemNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleSaveNote(item.id);
+                        }
+                      }}
+                      onBlur={() => handleSaveNote(item.id)}
                       placeholder={t.notePlaceholder}
-                      className="flex-1 sf-inset px-2.5 py-1.5 text-xs focus:outline-none"
+                      autoFocus
+                      className="flex-1 sf-inset px-2.5 min-h-11 text-xs focus:outline-none"
                       style={{ color: 'var(--sf-text)' }}
                     />
                     <button
                       onClick={() => handleSaveNote(item.id)}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-bold sf-btn-accent"
+                      className="px-3 min-h-11 rounded-lg text-xs font-bold sf-btn-accent transition active:scale-95"
                     >
                       {t.noteSave}
                     </button>
@@ -230,7 +238,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                 ) : (
                   <button
                     onClick={() => setEditingNoteItemId(item.id)}
-                    className="text-[11px] sf-muted flex items-center gap-1 hover:brightness-125"
+                    className="px-2 min-h-11 -mx-2 rounded-lg text-[11px] sf-muted flex items-center gap-1 hover:brightness-125 transition active:scale-95"
                   >
                     <MessageSquare className="w-3 h-3" />
                     <span>{item.itemNote ? t.noteEdit : t.noteAdd}</span>
@@ -259,6 +267,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
           <button
             onClick={handleFinish}
             disabled={isSubmitting}
+            aria-live="polite"
             className="w-full sm:w-auto px-8 py-3.5 rounded-2xl font-black text-sm sf-btn-accent shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-60"
           >
             <Truck className="w-4 h-4" />
