@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Product, Restaurant, Supplier, Category, UnitType, UserProfile } from '../types';
 import { getTranslation } from '../lib/translations';
-import { tint } from '../lib/colors';
+import { PRODUCT_CATEGORIES } from '../lib/formatters';
+import { tint, RESTAURANT_COLOR_TOKENS } from '../lib/colors';
 import { Plus, Edit2, Trash2, Save, X, Search, SlidersHorizontal, Clock, Flame } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
 
@@ -59,7 +60,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
 
   const [editForm, setEditForm] = useState<Partial<Product>>({});
 
-  const categories: Category[] = ['INGREDIENTS', 'SNACKS', 'BEVERAGES', 'MIXERS', 'CANDY', 'CHEMICALS', 'PAPER / DISPOSABLES', 'ALCOHOL'];
+  const categories: Category[] = PRODUCT_CATEGORIES;
   const unitOptions: UnitType[] = ['Paquete', 'Caja', 'Tubo', 'Bolsa', 'Libra', 'Galón', 'Botella', 'Lata', 'Unidad', 'Tanque', 'Rollo', 'Atado', 'Cubeta', 'Caja / Cartón'];
 
   const filteredProducts = products.filter((p) => {
@@ -205,6 +206,10 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             </form>
           )}
 
+          {filteredProducts.length === 0 && (
+            <div className="sf-card p-8 text-center sf-subtle text-sm font-semibold">{t.adminNoResults}</div>
+          )}
+
           {/* Mobile cards */}
           <div className="block md:hidden space-y-2.5">
             {filteredProducts.map((p) => {
@@ -252,13 +257,13 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
               <table className="w-full text-left text-xs">
                 <thead className="uppercase font-mono" style={{ background: 'var(--sf-surface-2)', color: 'var(--sf-text-muted)', borderBottom: '1px solid var(--sf-border)' }}>
                   <tr>
-                    <th className="p-3">{t.adminTableProduct}</th>
-                    <th className="p-3">{t.adminCategory}</th>
-                    <th className="p-3">{t.adminUnit}</th>
-                    <th className="p-3">{t.adminMinThreshold}</th>
-                    <th className="p-3">{t.adminSuggestedQty}</th>
-                    <th className="p-3">{t.adminSuggestedSupplier}</th>
-                    <th className="p-3 text-right">{t.adminTableActions}</th>
+                    <th scope="col" className="p-3">{t.adminTableProduct}</th>
+                    <th scope="col" className="p-3">{t.adminCategory}</th>
+                    <th scope="col" className="p-3">{t.adminUnit}</th>
+                    <th scope="col" className="p-3">{t.adminMinThreshold}</th>
+                    <th scope="col" className="p-3">{t.adminSuggestedQty}</th>
+                    <th scope="col" className="p-3">{t.adminSuggestedSupplier}</th>
+                    <th scope="col" className="p-3 text-right">{t.adminTableActions}</th>
                   </tr>
                 </thead>
                 <tbody style={{ color: 'var(--sf-text)' }}>
@@ -267,43 +272,43 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                     return (
                       <tr key={p.id} style={{ borderTop: '1px solid var(--sf-border)' }}>
                         <td className="p-3 font-bold">
-                          {isEditing ? <input type="text" value={editForm.name || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} className="sf-inset px-2 py-1 rounded text-xs w-full" style={inputStyle} /> : p.name}
+                          {isEditing ? <input type="text" value={editForm.name || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} className="sf-inset px-2 py-1 text-xs w-full" style={inputStyle} /> : p.name}
                         </td>
                         <td className="p-3">
                           {isEditing ? (
-                            <select value={editForm.category} onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value as any }))} className="sf-inset px-2 py-1 rounded text-xs" style={inputStyle}>
+                            <select value={editForm.category} onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value as any }))} className="sf-inset px-2 py-1 text-xs" style={inputStyle}>
                               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
                             </select>
                           ) : <span className="sf-inset px-2 py-0.5 rounded-lg font-mono text-[10px] sf-muted">{p.category}</span>}
                         </td>
                         <td className="p-3">
                           {isEditing ? (
-                            <select value={editForm.unit} onChange={(e) => setEditForm((prev) => ({ ...prev, unit: e.target.value as any }))} className="sf-inset px-2 py-1 rounded text-xs" style={inputStyle}>
+                            <select value={editForm.unit} onChange={(e) => setEditForm((prev) => ({ ...prev, unit: e.target.value as any }))} className="sf-inset px-2 py-1 text-xs" style={inputStyle}>
                               {unitOptions.map((u) => <option key={u} value={u}>{u}</option>)}
                             </select>
                           ) : <span className="sf-muted">{p.unit}</span>}
                         </td>
                         <td className="p-3">
-                          {isEditing ? <input type="number" min="1" value={editForm.minThreshold || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, minThreshold: Number(e.target.value) }))} className="sf-inset px-2 py-1 rounded text-xs w-16" style={inputStyle} /> : (
-                            <span className="font-extrabold px-2 py-0.5 rounded" style={{ background: tint('var(--sf-amber)', 16), color: 'var(--sf-amber)', border: `1px solid ${tint('var(--sf-amber)', 30)}` }}>{p.minThreshold} {p.unit}s</span>
+                          {isEditing ? <input type="number" min="1" value={editForm.minThreshold || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, minThreshold: Number(e.target.value) }))} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : (
+                            <span className="sf-inset font-extrabold px-2 py-0.5" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {p.unit}s</span>
                           )}
                         </td>
                         <td className="p-3">
-                          {isEditing ? <input type="number" min="1" value={editForm.suggestedQuantity || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedQuantity: Number(e.target.value) }))} className="sf-inset px-2 py-1 rounded text-xs w-16" style={inputStyle} /> : <span>{p.suggestedQuantity} {p.unit}s</span>}
+                          {isEditing ? <input type="number" min="1" value={editForm.suggestedQuantity || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedQuantity: Number(e.target.value) }))} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : <span>{p.suggestedQuantity} {p.unit}s</span>}
                         </td>
                         <td className="p-3">
-                          {isEditing ? <input type="text" value={editForm.suggestedSupplier || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedSupplier: e.target.value }))} className="sf-inset px-2 py-1 rounded text-xs w-full" style={inputStyle} /> : <span className="sf-muted">{p.suggestedSupplier || '-'}</span>}
+                          {isEditing ? <input type="text" value={editForm.suggestedSupplier || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedSupplier: e.target.value }))} className="sf-inset px-2 py-1 text-xs w-full" style={inputStyle} /> : <span className="sf-muted">{p.suggestedSupplier || '-'}</span>}
                         </td>
                         <td className="p-3 text-right">
                           {isEditing ? (
                             <div className="flex items-center justify-end gap-1">
-                              <button onClick={() => handleSaveEdit(p.id)} aria-label={t.adminSave} className="sf-btn-accent p-1.5 rounded"><Save className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => setEditingProdId(null)} aria-label={t.adminCancel} className="sf-btn-ghost p-1.5 rounded"><X className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleSaveEdit(p.id)} aria-label={t.adminSave} className="sf-btn-accent p-1.5 rounded-lg"><Save className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => setEditingProdId(null)} aria-label={t.adminCancel} className="sf-btn-ghost p-1.5 rounded-lg"><X className="w-3.5 h-3.5" /></button>
                             </div>
                           ) : (
                             <div className="flex items-center justify-end gap-1">
-                              <button onClick={() => handleStartEdit(p)} aria-label={t.adminEdit} className="sf-btn-ghost p-1.5 rounded"><Edit2 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => onDeleteProduct(p.id)} aria-label={t.adminDelete} className="p-1.5 rounded" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}><Trash2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleStartEdit(p)} aria-label={t.adminEdit} className="sf-btn-ghost p-1.5 rounded-lg"><Edit2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => onDeleteProduct(p.id)} aria-label={t.adminDelete} className="p-1.5 rounded-lg" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           )}
                         </td>
@@ -341,10 +346,10 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
               <div>
                 <label className="block sf-muted font-bold mb-1">{t.adminEstablishmentType}</label>
                 <select value={newRestType} onChange={(e) => setNewRestType(e.target.value as any)} className={inputCls} style={inputStyle}>
-                  <option value="Food Truck">Food Truck</option>
-                  <option value="Restaurante">Restaurante</option>
+                  <option value="Food Truck">{t.adminTypeFoodTruck}</option>
+                  <option value="Restaurante">{t.adminTypeRestaurant}</option>
                   <option value="Cafe">{t.adminTypeCafe}</option>
-                  <option value="Bistro">Bistro</option>
+                  <option value="Bistro">{t.adminTypeBistro}</option>
                 </select>
               </div>
               <div>
@@ -362,7 +367,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             {restaurants.map((r) => (
               <div key={r.id} className="sf-card p-4">
                 <div className="flex items-center gap-2">
-                  <span className={`w-2.5 h-2.5 rounded-full ${r.colorBadge || 'bg-emerald-500'}`} />
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: RESTAURANT_COLOR_TOKENS[r.colorBadge] }} />
                   <span className="font-bold text-base" style={{ color: 'var(--sf-text)' }}>{r.name}</span>
                   <span className="sf-inset px-2 py-0.5 rounded-lg text-[10px] font-mono sf-accent">{r.type}</span>
                 </div>
@@ -407,7 +412,7 @@ const EditCard: React.FC<{
     <div className="font-bold text-xs sf-accent">{t.adminEditingLabel}</div>
     <div className="space-y-2 text-xs">
       <div>
-        <label className="text-[10px] sf-muted block font-bold">{t.adminRestaurantName}</label>
+        <label className="text-[10px] sf-muted block font-bold">{t.adminProductName}</label>
         <input type="text" value={editForm.name || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} className={inputCls} style={inputStyle} />
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -500,7 +505,7 @@ function OverdueSettingsPanel({
           </div>
         </div>
 
-        <button type="submit" className="w-full py-2.5 rounded-xl font-black text-sm transition flex items-center justify-center gap-2"
+        <button type="submit" aria-live="polite" className="w-full min-h-11 rounded-xl font-black text-sm transition flex items-center justify-center gap-2"
           style={saved ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' } : { background: 'var(--sf-amber)', color: 'var(--sf-amber-contrast)' }}>
           {saved && <Save className="w-4 h-4" />}
           {saved ? t.adminOverdueSavedBtn : t.adminOverdueSaveBtn}
