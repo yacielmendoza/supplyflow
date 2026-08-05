@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { SupplyRequest, RequestStatus, UserProfile } from '../types';
 import { formatCleanName, formatUnitName } from '../lib/formatters';
@@ -49,6 +49,13 @@ export const RequestsList: React.FC<RequestsListProps> = ({
 
   const [filterTab, setFilterTab] = useState<'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ALL'>('ALL');
   const [expandedRequestIds, setExpandedRequestIds] = useState<Set<string>>(new Set());
+  // The footer's "Ver/Ocultar detalles" button stays mounted across expand/
+  // collapse (only its label changes) — unlike "+N más", which only exists
+  // while collapsed and unmounts itself the instant it's activated. Keeping
+  // a ref to the footer button per request lets us move focus there when
+  // "+N más" is what triggered the expand, so keyboard/screen-reader focus
+  // never falls through to <body>.
+  const footerToggleRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   React.useEffect(() => {
     if (highlightedRequestId) {
@@ -288,7 +295,14 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       </span>
                     ))}
                     {req.items.length > 3 && (
-                      <button onClick={() => toggleExpand(req.id)} className="text-xs sf-accent font-extrabold px-2 py-1"
+                      <button onClick={() => {
+                        toggleExpand(req.id);
+                        // This button only exists while collapsed and is about
+                        // to unmount — hand focus to the footer's equivalent
+                        // disclosure control, which stays mounted, instead of
+                        // letting it fall through to <body>.
+                        footerToggleRefs.current[req.id]?.focus();
+                      }} className="text-xs sf-accent font-extrabold px-2 py-1 min-h-11"
                         aria-expanded={isExpanded} aria-controls={isExpanded ? `request-details-${req.id}` : undefined}>
                         +{req.items.length - 3} {t.labelMore}...
                       </button>
@@ -347,7 +361,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
 
                 {/* Footer actions */}
                 <div className="mt-3 pt-2.5 flex items-center justify-between gap-2 flex-wrap" style={{ borderTop: '1px solid var(--sf-border)' }}>
-                  <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 min-h-11 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0"
+                  <button ref={(el) => { footerToggleRefs.current[req.id] = el; }} onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 min-h-11 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0"
                     aria-expanded={isExpanded} aria-controls={isExpanded ? `request-details-${req.id}` : undefined}>
                     <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 sf-muted" /> : <ChevronDown className="w-4 h-4 sf-muted" />}
