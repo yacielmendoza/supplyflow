@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Product, Restaurant, Supplier, Category, UnitType, UserProfile } from '../types';
 import { getTranslation } from '../lib/translations';
 import { PRODUCT_CATEGORIES, formatRestaurantType, formatCategoryName, formatUnitName } from '../lib/formatters';
@@ -19,7 +19,7 @@ interface AdminCatalogProps {
   onAddProduct: (product: Omit<Product, 'id' | 'updatedAt'>) => Promise<void>;
   onUpdateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   onDeleteProduct: (id: string) => Promise<void>;
-  onAddRestaurant: (rest: { name: string; type: any; address: string; phone: string }) => Promise<void>;
+  onAddRestaurant: (rest: { name: string; type: Restaurant['type']; address: string; phone: string }) => Promise<void>;
   overdueSettings: OverdueSettings;
   onSaveOverdueSettings: (settings: OverdueSettings) => void;
 }
@@ -78,23 +78,37 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
     setEditForm({ name: p.name, category: p.category, unit: p.unit, minThreshold: p.minThreshold, suggestedQuantity: p.suggestedQuantity, suggestedSupplier: p.suggestedSupplier });
   };
 
-  const [saveError, setSaveError] = useState(false);
+  // Scoped per-form so the edit / create-product / create-restaurant forms
+  // never show each other's error banner or message.
+  const [saveError, setSaveError] = useState<{ scope: 'edit' | 'createProduct' | 'createRestaurant'; message: string } | null>(null);
+
+  // In-flight guards: block a second submit (double-tap) from firing the
+  // mutation twice before the first response updates the UI, and disable the
+  // trigger button while awaiting.
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [isCreatingRestaurant, setIsCreatingRestaurant] = useState(false);
 
   const handleSaveEdit = async (id: string) => {
-    setSaveError(false);
+    if (isSavingEdit) return;
+    setIsSavingEdit(true);
+    setSaveError(null);
     try {
       await onUpdateProduct(id, editForm);
       playAlertSound('success');
       setEditingProdId(null);
     } catch {
-      setSaveError(true);
+      setSaveError({ scope: 'edit', message: t.adminSaveErrorEdit });
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
   const handleCreateProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProdName.trim()) return;
-    setSaveError(false);
+    if (!newProdName.trim() || isCreatingProduct) return;
+    setIsCreatingProduct(true);
+    setSaveError(null);
     try {
       await onAddProduct({
         restaurantId: selectedRestFilter || 'rest-1',
@@ -106,22 +120,58 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
       setNewProdName('');
       setShowAddForm(false);
     } catch {
-      setSaveError(true);
+      setSaveError({ scope: 'createProduct', message: t.adminSaveErrorCreateProduct });
+    } finally {
+      setIsCreatingProduct(false);
     }
   };
 
   const handleCreateRestaurantSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newRestName.trim()) return;
-    setSaveError(false);
+    if (!newRestName.trim() || isCreatingRestaurant) return;
+    setIsCreatingRestaurant(true);
+    setSaveError(null);
     try {
       await onAddRestaurant({ name: newRestName, type: newRestType, address: newRestAddress, phone: '(432) 555-0000' });
       playAlertSound('success');
       setNewRestName('');
       setShowAddRestForm(false);
     } catch {
-      setSaveError(true);
+      setSaveError({ scope: 'createRestaurant', message: t.adminSaveErrorCreateRestaurant });
+    } finally {
+      setIsCreatingRestaurant(false);
     }
+  };
+
+  // Two-tap inline delete confirmation (no modal): first tap arms the row's
+  // product id, second tap within the window actually deletes. Keyed by id
+  // (not a single boolean) so arming one row's delete never visually arms a
+  // different row in the list.
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const confirmDeleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (confirmDeleteTimeoutRef.current) clearTimeout(confirmDeleteTimeoutRef.current);
+  }, []);
+
+  const handleDeleteClick = (id: string) => {
+    if (confirmDeleteId === id) {
+      if (confirmDeleteTimeoutRef.current) clearTimeout(confirmDeleteTimeoutRef.current);
+      confirmDeleteTimeoutRef.current = null;
+      setConfirmDeleteId(null);
+      onDeleteProduct(id);
+      return;
+    }
+    if (confirmDeleteTimeoutRef.current) clearTimeout(confirmDeleteTimeoutRef.current);
+    setConfirmDeleteId(id);
+    confirmDeleteTimeoutRef.current = setTimeout(() => setConfirmDeleteId(null), 3000);
+  };
+
+  const resetDeleteConfirm = (id: string) => {
+    if (confirmDeleteId !== id) return;
+    if (confirmDeleteTimeoutRef.current) clearTimeout(confirmDeleteTimeoutRef.current);
+    confirmDeleteTimeoutRef.current = null;
+    setConfirmDeleteId(null);
   };
 
   const TABS = [
@@ -141,12 +191,6 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
         </h1>
         <p className="sf-muted text-sm mt-0.5">{t.adminConfigSubtitle}</p>
       </div>
-
-      {saveError && (
-        <div role="status" aria-live="polite" className="text-xs font-bold px-3 py-2.5 rounded-xl" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
-          {t.adminSaveError}
-        </div>
-      )}
 
       {/* Tab switcher */}
       <div className="sf-inset p-1 flex items-center gap-1 overflow-x-auto no-scrollbar">
@@ -171,6 +215,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <span className="text-xs font-bold sf-muted flex-shrink-0">{t.adminLocalLabel}</span>
               <select value={selectedRestFilter} onChange={(e) => setSelectedRestFilter(e.target.value)}
+                aria-label={t.adminLocalLabel}
                 className="w-full sm:w-auto sf-inset text-xs rounded-xl px-2.5 py-1.5 focus:outline-none" style={inputStyle}>
                 {restaurants.map((r) => <option key={r.id} value={r.id}>{r.name} ({formatRestaurantType(r.type, t)})</option>)}
               </select>
@@ -187,13 +232,24 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
             </button>
           </div>
 
+          {saveError?.scope === 'edit' && (
+            <div role="status" aria-live="polite" className="text-xs font-bold px-3 py-2.5 rounded-xl" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
+              {saveError.message}
+            </div>
+          )}
+
           {/* Inline add form */}
           {showAddForm && (
             <form onSubmit={handleCreateProductSubmit} className="sf-card p-4 space-y-3 text-xs animate-fadeIn">
               <div className="flex items-center justify-between">
-                <h3 className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>{t.adminModalAddProductTitle}</h3>
+                <h2 className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>{t.adminModalAddProductTitle}</h2>
                 <button type="button" onClick={() => setShowAddForm(false)} aria-label={t.adminCancel} className="sf-btn-ghost w-11 h-11 rounded-lg flex items-center justify-center"><X className="w-4 h-4" /></button>
               </div>
+              {saveError?.scope === 'createProduct' && (
+                <div role="status" aria-live="polite" className="text-xs font-bold px-3 py-2.5 rounded-xl" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
+                  {saveError.message}
+                </div>
+              )}
               <div>
                 <label htmlFor="admin-new-prod-name" className="block sf-muted font-bold mb-1">{t.adminProductName}</label>
                 <input id="admin-new-prod-name" type="text" required value={newProdName} onChange={(e) => setNewProdName(e.target.value)} placeholder={t.adminProductNamePlaceholder} className={inputCls} style={inputStyle} />
@@ -228,7 +284,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
               </div>
               <div className="pt-1 flex justify-end gap-2">
                 <button type="button" onClick={() => setShowAddForm(false)} className="px-4 min-h-11 sf-btn-ghost rounded-xl font-bold">{t.adminCancel}</button>
-                <button type="submit" className="px-4 min-h-11 sf-btn-accent rounded-xl font-bold">{t.adminSaveProduct}</button>
+                <button type="submit" disabled={isCreatingProduct} className="px-4 min-h-11 sf-btn-accent rounded-xl font-bold disabled:opacity-60">{isCreatingProduct ? t.btnSending : t.adminSaveProduct}</button>
               </div>
             </form>
           )}
@@ -241,7 +297,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
           <div className="block md:hidden space-y-2.5">
             {filteredProducts.map((p) => {
               const isEditing = editingProdId === p.id;
-              if (isEditing) return <EditCard key={p.id} p={p} editForm={editForm} setEditForm={setEditForm} categories={categories} unitOptions={unitOptions} onCancel={() => setEditingProdId(null)} onSave={() => handleSaveEdit(p.id)} t={t} />;
+              if (isEditing) return <EditCard key={p.id} p={p} editForm={editForm} setEditForm={setEditForm} categories={categories} unitOptions={unitOptions} onCancel={() => setEditingProdId(null)} onSave={() => handleSaveEdit(p.id)} isSaving={isSavingEdit} t={t} />;
               return (
                 <div key={p.id} className="sf-card p-3 space-y-2">
                   <div className="flex items-start justify-between gap-2">
@@ -254,7 +310,12 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button onClick={() => handleStartEdit(p)} aria-label={t.adminEdit} className="sf-btn-ghost w-11 h-11 rounded-lg flex items-center justify-center"><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => onDeleteProduct(p.id)} aria-label={t.adminDelete} className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDeleteClick(p.id)} onBlur={() => resetDeleteConfirm(p.id)}
+                        aria-label={confirmDeleteId === p.id ? t.adminDeleteConfirm : t.adminDelete}
+                        className="w-11 h-11 rounded-lg flex items-center justify-center transition"
+                        style={confirmDeleteId === p.id ? { background: 'var(--sf-rose)', color: 'var(--sf-accent-contrast)' } : { background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pt-1.5 text-xs" style={{ borderTop: '1px solid var(--sf-border)' }}>
@@ -329,13 +390,18 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                         <td className="p-3 text-right">
                           {isEditing ? (
                             <div className="flex items-center justify-end gap-1">
-                              <button onClick={() => handleSaveEdit(p.id)} aria-label={t.adminSave} className="sf-btn-accent p-1.5 rounded-lg"><Save className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleSaveEdit(p.id)} disabled={isSavingEdit} aria-label={isSavingEdit ? t.btnSending : t.adminSave} className="sf-btn-accent p-1.5 rounded-lg disabled:opacity-60"><Save className="w-3.5 h-3.5" /></button>
                               <button onClick={() => setEditingProdId(null)} aria-label={t.adminCancel} className="sf-btn-ghost p-1.5 rounded-lg"><X className="w-3.5 h-3.5" /></button>
                             </div>
                           ) : (
                             <div className="flex items-center justify-end gap-1">
                               <button onClick={() => handleStartEdit(p)} aria-label={t.adminEdit} className="sf-btn-ghost p-1.5 rounded-lg"><Edit2 className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => onDeleteProduct(p.id)} aria-label={t.adminDelete} className="p-1.5 rounded-lg" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}><Trash2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => handleDeleteClick(p.id)} onBlur={() => resetDeleteConfirm(p.id)}
+                                aria-label={confirmDeleteId === p.id ? t.adminDeleteConfirm : t.adminDelete}
+                                className="p-1.5 rounded-lg transition"
+                                style={confirmDeleteId === p.id ? { background: 'var(--sf-rose)', color: 'var(--sf-accent-contrast)' } : { background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
                             </div>
                           )}
                         </td>
@@ -363,9 +429,14 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
           {showAddRestForm && (
             <form onSubmit={handleCreateRestaurantSubmit} className="sf-card p-4 space-y-3 text-xs animate-fadeIn">
               <div className="flex items-center justify-between">
-                <h3 className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>{t.adminModalAddRestTitle}</h3>
+                <h2 className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>{t.adminModalAddRestTitle}</h2>
                 <button type="button" onClick={() => setShowAddRestForm(false)} aria-label={t.adminCancel} className="sf-btn-ghost w-11 h-11 rounded-lg flex items-center justify-center"><X className="w-4 h-4" /></button>
               </div>
+              {saveError?.scope === 'createRestaurant' && (
+                <div role="status" aria-live="polite" className="text-xs font-bold px-3 py-2.5 rounded-xl" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
+                  {saveError.message}
+                </div>
+              )}
               <div>
                 <label htmlFor="admin-new-rest-name" className="block sf-muted font-bold mb-1">{t.adminCommercialName}</label>
                 <input id="admin-new-rest-name" type="text" required value={newRestName} onChange={(e) => setNewRestName(e.target.value)} placeholder={t.adminRestNamePlaceholder} className={inputCls} style={inputStyle} />
@@ -385,7 +456,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
               </div>
               <div className="pt-1 flex justify-end gap-2">
                 <button type="button" onClick={() => setShowAddRestForm(false)} className="px-4 min-h-11 sf-btn-ghost rounded-xl font-bold">{t.adminCancel}</button>
-                <button type="submit" className="px-4 min-h-11 sf-btn-accent rounded-xl font-bold">{t.adminRegisterLocal}</button>
+                <button type="submit" disabled={isCreatingRestaurant} className="px-4 min-h-11 sf-btn-accent rounded-xl font-bold disabled:opacity-60">{isCreatingRestaurant ? t.btnSending : t.adminRegisterLocal}</button>
               </div>
             </form>
           )}
@@ -438,8 +509,9 @@ const EditCard: React.FC<{
   unitOptions: UnitType[];
   onCancel: () => void;
   onSave: () => void;
+  isSaving?: boolean;
   t: ReturnType<typeof getTranslation>;
-}> = ({ p, editForm, setEditForm, categories, unitOptions, onCancel, onSave, t }) => (
+}> = ({ p, editForm, setEditForm, categories, unitOptions, onCancel, onSave, isSaving, t }) => (
   <div className="sf-card p-3.5 space-y-3" style={{ borderColor: 'var(--sf-accent)' }}>
     <div className="font-bold text-xs sf-accent">{t.adminEditingLabel}</div>
     <div className="space-y-2 text-xs">
@@ -477,7 +549,7 @@ const EditCard: React.FC<{
       </div>
       <div className="flex justify-end gap-2 pt-1">
         <button onClick={onCancel} className="px-3 min-h-11 sf-btn-ghost font-bold rounded-lg">{t.adminCancel}</button>
-        <button onClick={onSave} className="px-3 min-h-11 sf-btn-accent font-bold rounded-lg flex items-center gap-1"><Save className="w-3.5 h-3.5" />{t.adminSave}</button>
+        <button onClick={onSave} disabled={isSaving} className="px-3 min-h-11 sf-btn-accent font-bold rounded-lg flex items-center gap-1 disabled:opacity-60"><Save className="w-3.5 h-3.5" />{isSaving ? t.btnSending : t.adminSave}</button>
       </div>
     </div>
   </div>
@@ -513,7 +585,7 @@ function OverdueSettingsPanel({
       <div className="flex items-center gap-2">
         <Clock className="w-5 h-5" style={{ color: 'var(--sf-amber)' }} />
         <div>
-          <h3 className="font-black text-base" style={{ color: 'var(--sf-text)' }}>{t.adminOverdueTitle}</h3>
+          <h2 className="font-black text-base" style={{ color: 'var(--sf-text)' }}>{t.adminOverdueTitle}</h2>
           <p className="text-xs sf-muted mt-0.5">
             {t.adminOverdueDesc} <span className="font-bold" style={{ color: 'var(--sf-rose)' }}>{t.tagOverdue}</span> {t.adminOverdueDescSuffix}
           </p>
