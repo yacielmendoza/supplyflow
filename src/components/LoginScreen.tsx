@@ -28,7 +28,6 @@ const roleLabel = (role: Role, t: ReturnType<typeof getTranslation>) =>
   role === 'cocinero' ? t.roleCook : role === 'comprador' ? t.roleBuyer : t.roleAdmin;
 
 export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }: LoginScreenProps) {
-  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [loadTimedOut, setLoadTimedOut] = useState(false);
   const t = getTranslation(language);
@@ -52,19 +51,11 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
   const admins = users.filter((u) => u.role === 'admin');
 
   const handleSelect = (user: UserProfile) => {
-    if (loadingUserId) return;
     playAlertSound('click');
-    setLoadingUserId(user.id);
-    // onSelectUser is synchronous (local session state only) — no real async
-    // work to wait on, so navigate immediately instead of padding the tap
-    // with an artificial delay.
-    try {
-      onSelectUser(user);
-    } catch {
-      /* onSelectUser only persists local session state; nothing to surface to the user */
-    } finally {
-      setLoadingUserId(null);
-    }
+    // onSelectUser is synchronous (local session state only, see
+    // App.tsx#handleSelectUser) — no real async work ever happens here, so
+    // there's no loading state to show; navigate immediately.
+    onSelectUser(user);
   };
 
   const sections: Array<{ key: Role; label: string; users: UserProfile[] }> = [
@@ -142,38 +133,30 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
               >
                 <div className="flex items-center gap-2 mb-3 px-1">
                   <SectionIcon className="w-4 h-4" style={{ color: config.color }} />
-                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: config.color }}>{section.label}</span>
+                  <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: config.color }}>{section.label}</h2>
                 </div>
 
                 <div className="space-y-2">
-                  {section.users.map((user) => {
-                    const isLoading = loadingUserId === user.id;
-                    return (
-                      <button
-                        key={user.id}
-                        onClick={() => handleSelect(user)}
-                        disabled={loadingUserId !== null}
-                        className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 text-left active:scale-[0.98] hover:brightness-105 disabled:opacity-60"
-                        style={{ background: tint(config.color, 10), border: `1px solid ${tint(config.color, 28)}` }}
-                      >
-                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-sm font-black flex-shrink-0"
-                          style={{ background: tint(config.color, 16), color: 'var(--sf-text)', border: `1px solid ${tint(config.color, 30)}` }}>
-                          {getInitials(user.name)}
+                  {section.users.map((user) => (
+                    <button
+                      key={user.id}
+                      onClick={() => handleSelect(user)}
+                      className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 text-left active:scale-[0.98] hover:brightness-105"
+                      style={{ background: tint(config.color, 10), border: `1px solid ${tint(config.color, 28)}` }}
+                    >
+                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-sm font-black flex-shrink-0"
+                        style={{ background: tint(config.color, 16), color: 'var(--sf-text)', border: `1px solid ${tint(config.color, 30)}` }}>
+                        {getInitials(user.name)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{user.name}</div>
+                        <div className="text-xs mt-0.5 font-bold" style={{ color: 'var(--sf-text-muted)' }}>
+                          {roleLabel(user.role, t)}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{user.name}</div>
-                          <div className="text-xs mt-0.5 font-bold" style={{ color: 'var(--sf-text-muted)' }}>
-                            {roleLabel(user.role, t)}
-                          </div>
-                        </div>
-                        {isLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" style={{ color: config.color }} />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 sf-subtle" />
-                        )}
-                      </button>
-                    );
-                  })}
+                      </div>
+                      <ChevronRight className="w-4 h-4 sf-subtle" />
+                    </button>
+                  ))}
                 </div>
               </div>
             );

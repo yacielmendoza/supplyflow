@@ -137,7 +137,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
             </span>
             <button
               onClick={() => setSelectedSupplierFilter('TODOS')}
-              aria-pressed={selectedSupplierFilter === 'TODOS'}
+              aria-current={selectedSupplierFilter === 'TODOS' ? 'true' : undefined}
               className="px-3 min-h-11 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center"
               style={filterBtn(selectedSupplierFilter === 'TODOS')}
             >
@@ -149,7 +149,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                 <button
                   key={sup}
                   onClick={() => setSelectedSupplierFilter(sup)}
-                  aria-pressed={selectedSupplierFilter === sup}
+                  aria-current={selectedSupplierFilter === sup ? 'true' : undefined}
                   className="px-3 min-h-11 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center"
                   style={filterBtn(selectedSupplierFilter === sup)}
                 >
@@ -233,9 +233,24 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           handleSaveNote(item.id);
+                        } else if (e.key === 'Escape') {
+                          // Cancel path: revert to the pre-edit value and exit
+                          // without saving, distinct from Enter/blur which save.
+                          e.preventDefault();
+                          setItemNotes((prev) => ({ ...prev, [item.id]: item.itemNote || '' }));
+                          setEditingNoteItemId(null);
                         }
                       }}
-                      onBlur={() => handleSaveNote(item.id)}
+                      onBlur={(e) => {
+                        // Clicking the Save button first moves focus there,
+                        // firing this blur before the button's own click handler.
+                        // Skip the blur-triggered save in that case so only one
+                        // handleSaveNote call happens per user action — the
+                        // click handler below is the sole source of truth then.
+                        const nextFocus = e.relatedTarget as HTMLElement | null;
+                        if (nextFocus?.getAttribute('data-note-save') === item.id) return;
+                        handleSaveNote(item.id);
+                      }}
                       placeholder={t.notePlaceholder}
                       aria-label={`${t.notePlaceholder} — ${item.productName}`}
                       autoFocus
@@ -244,6 +259,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                     />
                     <button
                       onClick={() => handleSaveNote(item.id)}
+                      data-note-save={item.id}
                       aria-label={`${t.noteSave} — ${item.productName}`}
                       className="px-3 min-h-11 rounded-lg text-xs font-bold sf-btn-accent transition active:scale-95"
                     >

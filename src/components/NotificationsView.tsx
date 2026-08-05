@@ -326,7 +326,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
           <div className="space-y-4">
             <div className="sf-card p-4 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>{t.notifPushBrowserTitle}</div>
+                <h2 className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>{t.notifPushBrowserTitle}</h2>
                 <p className="sf-muted text-xs mt-0.5">{t.notifPushBrowserDesc}</p>
                 {pushGranted !== null && (
                   <div className="text-xs font-bold mt-1 sf-accent">
@@ -340,7 +340,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
             </div>
 
             <div className="sf-card p-4 space-y-3">
-              <div className="text-xs font-black uppercase tracking-wider sf-muted">{t.notifSoundTestLabel}</div>
+              <h2 className="text-xs font-black uppercase tracking-wider sf-muted">{t.notifSoundTestLabel}</h2>
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => playAlertSound('urgent')}
                   className="flex items-center justify-center gap-1.5 min-h-11 rounded-2xl text-xs font-bold sf-btn-ghost transition active:scale-95">
@@ -356,10 +356,10 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
             </div>
 
             <div className="sf-card p-4 space-y-3">
-              <div className="font-black text-sm flex items-center gap-1.5" style={{ color: 'var(--sf-text)' }}>
+              <h2 className="font-black text-sm flex items-center gap-1.5" style={{ color: 'var(--sf-text)' }}>
                 <Zap className="w-4 h-4" style={{ color: 'var(--sf-amber)' }} />
                 {t.notifSimulateLabel}
-              </div>
+              </h2>
               <label htmlFor="notif-test-title" className="sr-only">{t.notifTestTitleFieldLabel}</label>
               <input
                 id="notif-test-title"
