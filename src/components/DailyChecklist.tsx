@@ -136,16 +136,43 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [showOrderPreview, setShowOrderPreview] = useState(draft?.showOrderPreview ?? false);
 
-  // Shown when the loaded draft was last saved by a different user — makes a
-  // shift handoff on a shared device explicit instead of silently showing
-  // someone else's unsent stock counts as if they were the current user's own.
+  // Shown when the loaded draft was last saved by a different user (or by an
+  // unknown one — a draft persisted before authorId existed) — makes a shift
+  // handoff on a shared device explicit instead of silently showing someone
+  // else's unsent stock counts as if they were the current user's own.
   const [draftOwner, setDraftOwner] = useState(() =>
-    draft?.authorId && draft.authorId !== currentUser.id
+    draft && draft.authorId !== currentUser.id
       ? { name: draft.authorName || '', savedAt: draft.savedAt ?? 0 }
       : null
   );
 
-  const discardDraft = () => {
+  // Set when another tab/device reports (via a `storage` event with
+  // `newValue === null`) that this restaurant/day's draft was already
+  // submitted or discarded elsewhere. Blocks local submit so a user looking
+  // at now-stale local data can't fire a second real purchase request.
+  const [remoteCleared, setRemoteCleared] = useState(false);
+
+  // Guards the persistence effect below against two distinct false-positive
+  // "authorship" writes: (a) merely opening the screen with someone else's
+  // existing draft still on it (no edit happened yet — skipped once via
+  // skipInitialPersistRef), and (b) applying a draft that just arrived from
+  // another tab via the `storage` listener (that write already has its own
+  // authorId/savedAt on disk — re-persisting it under the local user's id
+  // is what caused the authorship ping-pong loop between two open tabs).
+  const skipInitialPersistRef = useRef(!!draft);
+  const applyingRemoteUpdateRef = useRef(false);
+  // Tracks the freshest `savedAt` this tab has observed (its own writes and
+  // any accepted remote ones), so a `storage` event that re-delivers data
+  // this tab already has (or is older than what it has) is a no-op instead
+  // of triggering another round of the same re-broadcast.
+  const lastKnownSavedAtRef = useRef<number>(draft?.savedAt ?? 0);
+  // Fields the local user is actively typing into must never be silently
+  // overwritten by a remote update — that's the "keystrokes lost, no
+  // warning" half of the cross-tab race.
+  const noteFieldRef = useRef<HTMLTextAreaElement>(null);
+  const focusedStockProductIdRef = useRef<string | null>(null);
+
+  const resetToDefaults = () => {
     const defaults: Record<string, number> = {};
     products.forEach((p) => {
       defaults[p.id] = p.currentStock !== undefined ? p.currentStock : p.minThreshold + 2;
@@ -155,6 +182,10 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
     setNotes('');
     setIsUrgent(false);
     setShowOrderPreview(false);
+  };
+
+  const discardDraft = () => {
+    resetToDefaults();
     try {
       localStorage.removeItem(draftKeyFor(selectedRestaurant.id));
     } catch {
@@ -163,8 +194,31 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
     setDraftOwner(null);
   };
 
+  const startFreshAfterRemoteClear = () => {
+    resetToDefaults();
+    setDraftOwner(null);
+    setRemoteCleared(false);
+  };
+
   useEffect(() => {
+    if (applyingRemoteUpdateRef.current) {
+      // This render's state came from a remote draft applied by the
+      // `storage` listener below, which already wrote it with its own
+      // authorId/savedAt — persisting it again here under the local user's
+      // id is exactly the reattribution loop this guard exists to prevent.
+      applyingRemoteUpdateRef.current = false;
+      return;
+    }
+    if (skipInitialPersistRef.current) {
+      // First run after mounting on top of a pre-existing draft: state was
+      // just lazily initialized FROM that draft, nothing has actually been
+      // edited yet. Writing here would stamp the current user as author
+      // for content they haven't touched.
+      skipInitialPersistRef.current = false;
+      return;
+    }
     const key = draftKeyFor(selectedRestaurant.id);
+    const savedAt = Date.now();
     try {
       localStorage.setItem(
         key,
@@ -176,30 +230,57 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           showOrderPreview,
           authorId: currentUser.id,
           authorName: currentUser.name,
-          savedAt: Date.now(),
+          savedAt,
         } satisfies ChecklistDraft)
       );
+      lastKnownSavedAtRef.current = savedAt;
     } catch {
       /* storage unavailable — in-memory state still works for this session */
     }
   }, [selectedRestaurant.id, readings, reviewedIds, notes, isUrgent, showOrderPreview, currentUser.id, currentUser.name]);
 
   // Another tab/device editing the same restaurant/day draft should reflect
-  // here too — same pattern as NotificationsView's `dismissedIds` sync.
-  // Skips drafts this same user just wrote (that's this tab's own save
-  // echoing back, or this user's other open tab, not a conflicting edit).
+  // here too — same pattern as NotificationsView's `dismissedIds` sync. Note
+  // this listener only ever fires for writes from OTHER tabs (the browser
+  // never dispatches `storage` back to the tab that wrote it), so there is
+  // no "own echo" to filter by authorId — the real hazard is a genuine
+  // remote write from a *different* user's tab landing while this tab has
+  // unsaved edits of its own.
   useEffect(() => {
     const key = draftKeyFor(selectedRestaurant.id);
     const onStorage = (e: StorageEvent) => {
       if (e.key !== key) return;
+      if (e.newValue === null) {
+        // The draft was removed elsewhere — either submitted or discarded.
+        // Silently ignoring this (as "no draft data to apply") is what let a
+        // second real purchase request get sent from this tab's stale view.
+        setRemoteCleared(true);
+        return;
+      }
       const incoming = parseDraft(e.newValue);
-      if (!incoming || incoming.authorId === currentUser.id) return;
-      setReadings(incoming.readings);
+      if (!incoming) return;
+      if (incoming.savedAt !== undefined && incoming.savedAt <= lastKnownSavedAtRef.current) {
+        // Older than (or same as) what this tab already has — a duplicate
+        // or out-of-order delivery, not a new edit to apply.
+        return;
+      }
+      applyingRemoteUpdateRef.current = true;
+      setReadings((prev) => {
+        const focusedId = focusedStockProductIdRef.current;
+        if (focusedId && focusedId in prev) {
+          // Keep the count the local user currently has their finger/cursor
+          // on; accept every other product's incoming count.
+          return { ...incoming.readings, [focusedId]: prev[focusedId] };
+        }
+        return incoming.readings;
+      });
       setReviewedIds(new Set(incoming.reviewedIds));
-      setNotes(incoming.notes);
+      setNotes((prev) => (document.activeElement === noteFieldRef.current ? prev : incoming.notes));
       setIsUrgent(incoming.isUrgent);
       setShowOrderPreview(incoming.showOrderPreview);
-      setDraftOwner({ name: incoming.authorName || '', savedAt: incoming.savedAt ?? 0 });
+      setDraftOwner(incoming.authorId !== currentUser.id ? { name: incoming.authorName || '', savedAt: incoming.savedAt ?? 0 } : null);
+      setRemoteCleared(false);
+      lastKnownSavedAtRef.current = incoming.savedAt ?? Date.now();
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
@@ -289,6 +370,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (remoteCleared) return; // another tab already submitted/discarded this draft — refuse a second real request
     playAlertSound(isUrgent ? 'urgent' : 'success');
     await onSubmitChecklist(readings, notes, isUrgent);
     try {
@@ -337,12 +419,24 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
         </div>
       </div>
 
-      {draftOwner && (
+      {remoteCleared && (
+        <div role="status" className="p-3.5 rounded-2xl flex items-start gap-2.5 text-xs" style={{ background: tint('var(--sf-rose)', 14), border: `1px solid ${tint('var(--sf-rose)', 30)}` }}>
+          <UserRound className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--sf-rose)' }} />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <p className="font-bold" style={{ color: 'var(--sf-text)' }}>{t.checklistRemoteClearedMsg}</p>
+            <button type="button" onClick={startFreshAfterRemoteClear} className="font-extrabold min-h-11 px-1" style={{ color: 'var(--sf-rose)' }}>
+              {t.checklistRemoteClearedBtn}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {draftOwner && !remoteCleared && (
         <div role="status" className="p-3.5 rounded-2xl flex items-start gap-2.5 text-xs" style={{ background: tint('var(--sf-amber)', 14), border: `1px solid ${tint('var(--sf-amber)', 30)}` }}>
           <UserRound className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--sf-amber)' }} />
           <div className="min-w-0 flex-1 space-y-1.5">
             <p className="font-bold" style={{ color: 'var(--sf-text)' }}>
-              {t.checklistDraftBannerPrefix} <strong style={{ color: 'var(--sf-amber)' }}>{formatCleanName(draftOwner.name)}</strong>
+              {t.checklistDraftBannerPrefix} <strong style={{ color: 'var(--sf-amber)' }}>{formatCleanName(draftOwner.name) || t.checklistDraftUnknownAuthor}</strong>
               {draftOwner.savedAt ? `, ${formatDraftSavedAt(draftOwner.savedAt, t)}` : ''}
               {t.checklistDraftBannerSuffix}
             </p>
@@ -435,7 +529,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   <div className="text-xs mt-0.5 flex items-center gap-2 flex-wrap">
                     <span className="font-bold sf-accent whitespace-nowrap">{formatCategoryName(p.category, t)}</span>
                     <span className="sf-subtle" aria-hidden="true">•</span>
-                    <span className="sf-muted whitespace-nowrap">{t.minimum} <strong style={{ color: 'var(--sf-text)' }}>{p.minThreshold} {formatUnitName(p.unit, t)}s</strong></span>
+                    <span className="sf-muted whitespace-nowrap">{t.minimum} <strong style={{ color: 'var(--sf-text)' }}>{p.minThreshold} {formatUnitName(p.unit, t, p.minThreshold)}</strong></span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -473,7 +567,21 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                     className="w-11 h-11 rounded-full flex items-center justify-center font-black transition sf-btn-ghost">
                     <Minus className="w-4 h-4" />
                   </button>
-                  <div className="w-9 text-center font-black text-base sm:text-lg tabular-nums" style={{ color: 'var(--sf-text)' }}>{currentVal}</div>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    value={currentVal}
+                    onFocus={() => { focusedStockProductIdRef.current = p.id; }}
+                    onBlur={() => { if (focusedStockProductIdRef.current === p.id) focusedStockProductIdRef.current = null; }}
+                    onChange={(e) => {
+                      const parsed = Number(e.target.value);
+                      handleStockChange(p.id, Number.isFinite(parsed) ? parsed : 0);
+                    }}
+                    aria-label={`${t.ariaStockInput} ${p.name}`}
+                    className="w-12 text-center font-black text-base sm:text-lg tabular-nums bg-transparent focus:outline-none [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    style={{ color: 'var(--sf-text)' }}
+                  />
                   <button type="button" onClick={() => handleStockChange(p.id, currentVal + 1)}
                     aria-label={`${t.ariaIncreaseStock} ${p.name}`}
                     className="w-11 h-11 rounded-full flex items-center justify-center font-black transition sf-btn-ghost">
@@ -549,7 +657,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                 <span className="font-extrabold text-[11px]" style={{ color: 'var(--sf-rose)' }}>{t.checklistUrgent}</span>
               </label>
 
-              <button onClick={handleSubmit} disabled={isSubmitting}
+              <button onClick={handleSubmit} disabled={isSubmitting || remoteCleared}
                 className="px-4 h-11 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition sf-btn-accent disabled:opacity-60">
                 <Send className="w-3.5 h-3.5" />
                 {isSubmitting ? t.btnSending : itemsNeedingReplenishment.length > 0 ? t.btnSendRequest : t.btnSaveStock}
@@ -571,13 +679,15 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               >
                 <div className="px-4 pt-3 pb-2 space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <label className="font-bold flex items-center gap-1.5" style={{ color: 'var(--sf-text)' }}>
+                    <label htmlFor="checklist-note-textarea" className="font-bold flex items-center gap-1.5" style={{ color: 'var(--sf-text)' }}>
                       <MessageSquare className="w-3.5 h-3.5 sf-accent" />
                       {t.noteForBuyers}
                     </label>
                     <button type="button" onClick={() => setShowNoteInput(false)} className="text-[11px] font-medium sf-muted px-2 py-2 -mx-2 -my-1 min-h-11 flex items-center">{t.hideNote}</button>
                   </div>
                   <textarea
+                    id="checklist-note-textarea"
+                    ref={noteFieldRef}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder={t.checklistNotePlaceholder}
@@ -614,7 +724,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                         <li key={p.id} className="sf-inset flex items-center justify-between gap-3 px-3 py-2">
                           <span className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
                           <span className="text-xs font-black flex-shrink-0 sf-accent whitespace-nowrap">
-                            {p.suggestedQuantity} {formatUnitName(p.unit, t)}
+                            {p.suggestedQuantity} {formatUnitName(p.unit, t, p.suggestedQuantity)}
                           </span>
                         </li>
                       ))}
