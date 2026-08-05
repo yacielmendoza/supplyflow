@@ -1,5 +1,5 @@
 import type { Translations } from './translations';
-import type { Category } from '../types';
+import type { Category, UnitType } from '../types';
 
 export const PRODUCT_CATEGORIES: Category[] = [
   'INGREDIENTS',
@@ -38,6 +38,28 @@ export function formatRestaurantType(type: string, t: Translations): string {
     default:
       return type;
   }
+}
+
+const UNIT_KEY_MAP: Record<UnitType, keyof Translations> = {
+  Paquete: 'unitPaquete',
+  Caja: 'unitCaja',
+  Tubo: 'unitTubo',
+  Bolsa: 'unitBolsa',
+  Libra: 'unitLibra',
+  Galón: 'unitGalon',
+  Botella: 'unitBotella',
+  Lata: 'unitLata',
+  Unidad: 'unitUnidad',
+  Tanque: 'unitTanque',
+  Rollo: 'unitRollo',
+  Atado: 'unitAtado',
+  Cubeta: 'unitCubeta',
+  'Caja / Cartón': 'unitCajaCarton',
+};
+
+export function formatUnitName(unit: string, t: Translations): string {
+  const key = UNIT_KEY_MAP[unit as UnitType];
+  return key ? t[key] : unit;
 }
 
 export function formatCategoryName(category: string, t: Translations): string {
