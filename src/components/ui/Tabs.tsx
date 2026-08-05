@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import React, { useId, useRef } from 'react';
+import { motion } from 'motion/react';
 import { cn } from '../../lib/cn';
 import { Badge, type Tone } from './Badge';
 
@@ -21,8 +22,9 @@ export interface TabsProps<T extends string = string> {
 }
 
 /**
- * Accessible tab strip (roving focus + arrow-key navigation, `aria-selected`).
- * Used as a segmented control / filter; it manages selection only, not panels.
+ * Accessible tab strip (roving focus + arrow-key navigation, `aria-selected`)
+ * with a `motion` sliding active indicator that animates between tabs. The
+ * indicator honors prefers-reduced-motion via the app's MotionConfig.
  */
 export function Tabs<T extends string = string>({
   items,
@@ -33,6 +35,7 @@ export function Tabs<T extends string = string>({
   ...rest
 }: TabsProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const indicatorId = useId();
 
   const onKeyDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
@@ -68,34 +71,48 @@ export function Tabs<T extends string = string>({
             onClick={() => onChange(item.id)}
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
-              'inline-flex items-center gap-1.5 font-bold whitespace-nowrap ' +
-                'transition duration-[var(--duration-fast)] touch-manipulation',
+              'relative inline-flex items-center gap-1.5 font-bold whitespace-nowrap',
+              'transition-colors duration-[var(--duration-fast)] touch-manipulation',
               variant === 'segmented'
                 ? cn(
                     'px-3 h-9 rounded-[calc(var(--radius-control)-0.25rem)] text-sm',
-                    active
-                      ? 'bg-accent text-accent-contrast shadow-sm'
-                      : 'text-text-secondary hover:text-text-primary'
+                    active ? 'text-accent-contrast' : 'text-text-secondary hover:text-text-primary'
                   )
                 : cn(
-                    'px-3 h-10 text-sm border-b-2 -mb-px',
-                    active
-                      ? 'border-accent text-text-primary'
-                      : 'border-transparent text-text-secondary hover:text-text-primary'
+                    'px-3 h-10 text-sm',
+                    active ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
                   )
             )}
           >
-            {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
-            <span>{item.label}</span>
-            {item.badge !== undefined && item.badge > 0 && (
-              <Badge
-                solid={active}
-                tone={item.badgeTone ?? (active ? 'neutral' : 'accent')}
-                className="ml-0.5"
-              >
-                {item.badge}
-              </Badge>
+            {active && variant === 'segmented' && (
+              <motion.span
+                layoutId={indicatorId}
+                transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                className="absolute inset-0 rounded-[calc(var(--radius-control)-0.25rem)] bg-accent shadow-sm"
+                aria-hidden="true"
+              />
             )}
+            {active && variant === 'underline' && (
+              <motion.span
+                layoutId={indicatorId}
+                transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                className="absolute left-0 right-0 -bottom-px h-0.5 bg-accent"
+                aria-hidden="true"
+              />
+            )}
+            <span className="relative z-10 inline-flex items-center gap-1.5">
+              {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
+              <span>{item.label}</span>
+              {item.badge !== undefined && item.badge > 0 && (
+                <Badge
+                  solid={active}
+                  tone={item.badgeTone ?? (active ? 'neutral' : 'accent')}
+                  className="ml-0.5"
+                >
+                  {item.badge}
+                </Badge>
+              )}
+            </span>
           </button>
         );
       })}

@@ -24,6 +24,7 @@ import {
   generateWhatsAppLink,
   generateRequestWhatsAppSummary,
 } from '../lib/notifications';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/cn';
 import {
   Badge,
@@ -221,7 +222,8 @@ export const RequestsList: React.FC<RequestsListProps> = ({
           description={t.selectTabHint}
         />
       ) : (
-        <div className="space-y-3">
+        <motion.div layout className="space-y-3">
+          <AnimatePresence initial={false}>
           {filteredRequests.map((req) => {
             const totalItems = req.items.length;
             const purchasedItems = req.items.filter((i) => i.purchased).length;
@@ -240,11 +242,16 @@ export const RequestsList: React.FC<RequestsListProps> = ({
             const cleanBuyerName = formatCleanName(req.assignedBuyerName);
 
             return (
-              <div
+              <motion.div
                 key={req.id}
+                layout
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8, transition: { duration: 0.15 } }}
+                transition={{ type: 'spring', stiffness: 500, damping: 40 }}
                 id={`request-card-${req.id}`}
                 className={cn(
-                  'rounded-card border p-3.5 sm:p-4 transition-all',
+                  'rounded-card border p-3.5 sm:p-4 transition-colors',
                   cardShell({
                     highlighted: isHighlighted,
                     completed: isCompleted && !isHighlighted,
@@ -594,10 +601,11 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+          </AnimatePresence>
+        </motion.div>
       )}
     </div>
   );
