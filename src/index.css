@@ -1,5 +1,144 @@
 @import "tailwindcss";
 
+/* =============================================================================
+   DESIGN TOKENS — single source of truth (Phase 0 foundations)
+   -----------------------------------------------------------------------------
+   Two-layer system:
+     1. Primitive theme values live in :root / .light / .dark as --sf-* variables.
+     2. Semantic tokens are exposed to Tailwind via `@theme inline`, generating
+        utilities like `bg-surface`, `text-secondary`, `border-default`,
+        `rounded-card`, that resolve to the active theme's --sf-* value.
+   Components should migrate to these semantic utilities (Phase 2). Existing
+   slate/emerald utilities keep working — this layer is additive and does NOT
+   change current rendering.
+   ========================================================================== */
+
+/* --- Semantic color tokens (theme-switchable via `inline`) --------------- */
+@theme inline {
+  /* Accent */
+  --color-accent: var(--sf-accent);
+  --color-accent-hover: var(--sf-accent-hover);
+  --color-accent-contrast: var(--sf-accent-contrast);
+
+  /* Surfaces */
+  --color-app: var(--sf-bg-app);
+  --color-surface: var(--sf-bg-surface);
+  --color-elevated: var(--sf-bg-elevated);
+  --color-inset: var(--sf-bg-inset);
+
+  /* Text */
+  --color-text-primary: var(--sf-text-primary);
+  --color-text-secondary: var(--sf-text-secondary);
+  --color-text-muted: var(--sf-text-muted);
+
+  /* Borders */
+  --color-border-default: var(--sf-border);
+  --color-border-strong: var(--sf-border-strong);
+
+  /* Status (role-based semantic status colors) */
+  --color-success: var(--sf-success);
+  --color-warning: var(--sf-warning);
+  --color-danger: var(--sf-danger);
+  --color-info: var(--sf-info);
+}
+
+/* --- Static scales (theme-independent) ---------------------------------- */
+@theme {
+  /* Radius scale */
+  --radius-chip: 0.5rem;    /* 8px  */
+  --radius-control: 0.75rem; /* 12px */
+  --radius-card: 1rem;       /* 16px */
+  --radius-sheet: 1.5rem;    /* 24px */
+
+  /* Motion — durations */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+
+  /* Motion — easings */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* --- Primitive theme maps ------------------------------------------------ */
+/* Dark is the product default (used before a theme class is applied). */
+:root,
+html.dark {
+  --sf-accent: #10b981;          /* emerald-500 */
+  --sf-accent-hover: #34d399;    /* emerald-400 */
+  --sf-accent-contrast: #020617; /* slate-950  */
+
+  --sf-bg-app: #020617;          /* slate-950 */
+  --sf-bg-surface: #0f172a;      /* slate-900 */
+  --sf-bg-elevated: #1e293b;     /* slate-800 */
+  --sf-bg-inset: #020617;        /* slate-950 */
+
+  --sf-text-primary: #f1f5f9;    /* slate-100 */
+  --sf-text-secondary: #94a3b8;  /* slate-400 */
+  --sf-text-muted: #64748b;      /* slate-500 */
+
+  --sf-border: #1e293b;          /* slate-800 */
+  --sf-border-strong: #334155;   /* slate-700 */
+
+  --sf-success: #10b981;         /* emerald-500 */
+  --sf-warning: #f59e0b;         /* amber-500  */
+  --sf-danger: #f43f5e;          /* rose-500   */
+  --sf-info: #3b82f6;            /* blue-500   */
+}
+
+html.light {
+  --sf-accent: #059669;          /* emerald-600 — meets contrast on light */
+  --sf-accent-hover: #10b981;    /* emerald-500 */
+  --sf-accent-contrast: #ffffff;
+
+  --sf-bg-app: #f1f5f9;          /* slate-100 */
+  --sf-bg-surface: #ffffff;
+  --sf-bg-elevated: #ffffff;
+  --sf-bg-inset: #f1f5f9;        /* slate-100 */
+
+  --sf-text-primary: #0f172a;    /* slate-900 */
+  --sf-text-secondary: #475569;  /* slate-600 */
+  --sf-text-muted: #64748b;      /* slate-500 */
+
+  --sf-border: #e2e8f0;          /* slate-200 */
+  --sf-border-strong: #cbd5e1;   /* slate-300 */
+
+  --sf-success: #059669;         /* emerald-600 */
+  --sf-warning: #d97706;         /* amber-600  */
+  --sf-danger: #e11d48;          /* rose-600   */
+  --sf-info: #2563eb;            /* blue-600   */
+}
+
+/* =============================================================================
+   ACCESSIBILITY FOUNDATIONS
+   ========================================================================== */
+
+/* Visible keyboard focus (previously absent app-wide). Shows only for keyboard
+   users; mouse/touch interaction is unaffected. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--sf-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* Honor reduced-motion: neutralize non-essential animation/transition. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================================================
+   UTILITIES
+   ========================================================================== */
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
@@ -9,6 +148,16 @@
   .no-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+  }
+
+  /* Safe-area padding helpers (notch / home indicator / edges) */
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .pl-safe { padding-left: env(safe-area-inset-left); }
+  .pr-safe { padding-right: env(safe-area-inset-right); }
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
 
@@ -33,4 +182,3 @@ html.dark {
   background-color: #020617;
   color: #f8fafc;
 }
-
