@@ -944,3 +944,182 @@ detalle completo en `HERRAMIENTAS_IA.md`.
   regresión (tabs, tema/idioma persistido, campana→Notificaciones,
   avatar→Cuenta, Modo Compra, alta/edición de productos/locales, checklist
   con envío y borrador multiusuario, badges).
+
+## Ciclo — respuesta a `AUDITORIA_RESULTADOS.md` (auditado `21a730d`, VEREDICTO: CON HALLAZGOS, 2026-08-05)
+
+Este ciclo implementó la lista de mejoras priorizadas de la sección (e) de
+esa auditoría: los 7 Altos (A1 remanente + A6–A12), los 10 Medios con
+recomendación de una línea/patrón conocido, y una selección de Bajos por
+relación esfuerzo/impacto. La prioridad máxima explícita de la auditoría —
+A6/A7, una regresión de integridad de datos introducida por el propio ciclo
+corrector anterior — se cerró primero y en profundidad, no como un parche
+superficial.
+
+### 🔴 Prioridad máxima — regresión del ciclo anterior en `DailyChecklist`
+
+1. **A6 — Sobrescritura silenciosa de ediciones activas entre pestañas de
+   usuarios distintos.** El listener `storage` de `DailyChecklist.tsx`
+   aceptaba cualquier draft remoto incondicionalmente, incluso si el usuario
+   local tenía el foco puesto en su propio campo de nota o en un contador de
+   stock. Ahora: un `ref` rastrea qué producto/campo tiene foco
+   (`focusedStockProductIdRef`, y `document.activeElement` contra un `ref`
+   del `<textarea>` de nota) y el `setState` que aplica el draft remoto
+   preserva ese valor local en vez de sobrescribirlo — todo lo demás del
+   draft remoto sí se aplica.
+2. **A7 — Envío no propagado entre pestañas → riesgo de pedido duplicado
+   real.** `e.newValue === null` (la clave se borró tras un envío/descarte en
+   otra pestaña) caía en el mismo `if (!incoming) return` que "sin datos que
+   aplicar". Ahora se trata como señal explícita: un nuevo estado
+   `remoteCleared` deshabilita el botón de envío y muestra un banner
+   ("Este checklist ya fue enviado o descartado desde otro dispositivo") con
+   una acción para empezar un checklist nuevo, en vez de dejar que el
+   usuario reenvíe datos obsoletos.
+3. **Causa raíz del ciclo de reatribución de autoría** que A6/A7 arrastraban:
+   el filtro `incoming.authorId === currentUser.id` intentaba "saltar el eco
+   de mi propio guardado" — pero ese evento nunca se dispara en la pestaña
+   que escribió. Reemplazado por dos guardas reales: (a) `lastKnownSavedAtRef`
+   descarta entregas duplicadas/desordenadas comparando `savedAt` en vez de
+   autoría, y (b) `applyingRemoteUpdateRef` le dice al efecto de persistencia
+   "este cambio de estado vino de aplicar un draft remoto, no lo vuelvas a
+   escribir con mi autoría" — rompe el ping-pong de reatribución entre dos
+   pestañas que el fix anterior había introducido.
+4. **A1 (brechas remanentes) —** el banner de traspaso ahora se muestra
+   también para drafts heredados sin `authorId` (se etiquetan como
+   "otro usuario" en vez de no mostrar aviso alguno), y un nuevo
+   `skipInitialPersistRef` evita que el efecto de autoguardado reatribuya la
+   autoría a quien simplemente abrió la pantalla — la primera escritura tras
+   montar sobre un draft ya existente no persiste hasta que haya una edición
+   real.
+
+### 🟠 Alto (7/7 cerrados)
+
+5. **A8 —** `document.documentElement.lang` ahora se sincroniza con
+   `currentUser.language || appLanguage` en un `useEffect` de `App.tsx`,
+   junto al efecto de tema (antes del `return` condicional de sesión). Se
+   aprovechó el mismo efecto para sincronizar `document.title` con una nueva
+   clave `docTitle` (bonus de bajo esfuerzo, mismo patrón que B4).
+6. **A9 —** Los 6 controles de la fila editable de la tabla de escritorio de
+   `AdminCatalog.tsx` (nombre, categoría, unidad, mínimo, cantidad sugerida,
+   proveedor) ahora tienen `aria-label` con el nombre de columna + el
+   producto de esa fila — la cuarta superficie de edición que `A2` del ciclo
+   anterior no había cubierto.
+7. **A10 —** `ShoppingView.tsx` y `NotificationsView.tsx` ya no anidan
+   controles focalizables (input/botón de nota, botón "marcar leída") dentro
+   de un contenedor `role="button"`. `ShoppingView` ahora usa un `<button>`
+   real que envuelve solo el contenido no interactivo (checkbox + texto), con
+   el editor de nota como hermano fuera del botón. `NotificationsView` usa el
+   patrón de botón superpuesto (`absolute inset-0`, contenido visual con
+   `pointer-events-none` salvo el botón de descarte, que reactiva
+   `pointer-events-auto`) para mantener toda la tarjeta como objetivo de tap
+   sin anidar el botón de descarte dentro de otro botón.
+8. **A11 —** Icono `Flame` de urgencia en "Actividad reciente" de
+   `Dashboard.tsx` con `role="img"` + `aria-label={t.tagUrgent}` (mismo fix
+   aplicado también en `NotificationsView.tsx`, que tenía el mismo icono sin
+   alternativa textual aunque no estaba citado explícitamente por esta
+   pasada de la auditoría).
+9. **A12 —** El contador de stock de `DailyChecklist.tsx` ahora tiene un
+   `<input type="number">` editable directamente entre los botones ±1 (con
+   `aria-label` propio, spinners nativos ocultos vía Tailwind arbitrary
+   variants), sin reemplazar los botones ni los atajos "0"/"Bajo"/
+   "Suficiente" — son aceleradores, no el único mecanismo de entrada.
+
+### 🟡 Medio (10/10 cerrados)
+
+10. **M1 —** `highlightTimeoutRef` en `App.tsx` cancela el `setTimeout`
+    anterior en `handleSelectRequestFromNotification` — abrir dos
+    notificaciones en menos de 5s ya no deja que el primer timeout borre el
+    resaltado del segundo request antes de tiempo.
+11. **M2 —** Eliminado el `setTimeout` artificial de 500ms en
+    `LoginScreen.handleSelect` — `onSelectUser` es síncrono, así que ahora
+    navega de inmediato en vez de acolchar el tap con una demora sin trabajo
+    real detrás.
+12. **M3 —** Popover de restaurante de `Header.tsx` migrado a patrón
+    `listbox`/`option` real: `role="listbox"` en el contenedor,
+    `role="option"` + `aria-selected` en cada botón, foco movido a la opción
+    seleccionada (o la primera) al abrir, y navegación con flechas/Home/End
+    con `tabIndex` en roving entre las opciones.
+13. **M5 —** Botón "Ver/Ocultar detalles" de `RequestsList.tsx` (el control
+    de disclosure más usado de la pantalla) con `min-h-11` — ya no se queda
+    en ~28px.
+14. **M6 —** `generateRequestWhatsAppSummary` (`notifications.ts`) ahora usa
+    `formatUnitName` en vez de interpolar `item.unit` crudo — el resumen de
+    WhatsApp comparte la misma traducción que ya tenía la vista en tarjeta.
+15. **M8 —** El sufijo `"s"` hardcodeado tras `formatUnitName(...)` (que
+    producía "Unidads"/"Boxs") se reemplazó por una forma plural real:
+    `formatUnitName` ahora acepta un `count` opcional y resuelve contra un
+    segundo mapa de claves de traducción dedicadas (`unitXxxPlural`, 14
+    unidades × 2 idiomas, 28 claves nuevas) en vez de una regla de sufijo
+    frágil. Aplicado en los 6 sitios citados por la auditoría
+    (`AdminCatalog.tsx` ×4, `ShoppingView.tsx`, `DailyChecklist.tsx`) y,
+    por consistencia con el mismo helper, en 3 sitios más que tenían el
+    mismo defecto de fondo (siempre singular) sin la interpolación de "s"
+    literal: `RequestsList.tsx` (×2) y el resumen de WhatsApp (M6).
+16. **M9 —** La pestaña "Proveedores" de `AdminCatalog.tsx` (datos estáticos
+    de `caddyShackData.ts`, sin CRUD) ahora muestra un aviso explícito
+    (`role="status"`) de que son datos de demostración de solo lectura —
+    conectar un CRUD real queda fuera de alcance de una corrección de un
+    ciclo, tal como señalaba la propia auditoría.
+17. **M10 —** `<label htmlFor>`/`<textarea id>` reales en la nota de
+    `DailyChecklist.tsx` (antes sin asociación programática, a diferencia de
+    las otras 3 pantallas que el ciclo anterior sí había cerrado).
+
+### 🟢 Bajo (selección por esfuerzo/impacto, hecha junto a los Altos/Medios relacionados)
+
+18. **B5/B8 —** Tabs de filtro de `RequestsList.tsx`: `min-h-11` (antes
+    ~36px) y `aria-current` en vez de `aria-pressed` — son un grupo de
+    selección única (filtro activo), no toggles independientes.
+19. **B3 —** `<nav>` de `BottomNav.tsx` con `aria-label` (`t.navLandmarkLabel`,
+    nueva clave ES/EN) como landmark nombrado — antes sin identificar.
+20. **B4 —** `document.title` sincronizado con el idioma activo (ver A8
+    arriba) en vez de fijo en español.
+21. **`statusLabels` de `NotificationsView.tsx` memoizado** con
+    `useMemo(() => getStatusLabels(t), [t])` — el resto del archivo ya
+    seguía ese patrón, esta constante se había quedado fuera (observación de
+    la propia auditoría en la sección por pantalla, no numerada como Bajo
+    explícito).
+
+### Diferido deliberadamente (tal como señalaba la propia auditoría)
+
+Deuda de arquitectura mayor sin cambios de prioridad: formulario
+triplicado/doble montaje tabla+tarjetas de `AdminCatalog`, canal Realtime de
+`App.tsx` sin filtrar por restaurante, 3 ramas de rol duplicadas en
+Dashboard/RequestsList, `App.tsx` monolítico (M4 de esta auditoría, routing +
+sesión + 15 handlers de negocio en un archivo), virtualización de
+`NotificationsView`/`RequestsList` (B14 histórico). M7 (stat tiles
+interactivos con drill-down en Dashboard) y M6 histórico (indicadores de
+tendencia) quedan explícitamente fuera de este ciclo — ambos "requieren
+diseño, no una línea" según la propia auditoría. B10 histórico (guardado
+duplicado idempotente de nota en `ShoppingView`, mecanismo ya documentado en
+2 ciclos) y el resto de Bajos de pulido residual (B1/B2/B6/B7/B9/B13/B16–B22
+de la numeración de esta auditoría) no tocados por relación esfuerzo/impacto
+frente a los Altos/Medios de esta misma pasada.
+
+### Skill/subagente nuevo: `cross-tab-sync-guardian`
+
+Único gap de especialización real identificado por esta auditoría (a
+diferencia del ciclo anterior, que solo encontró checklists incompletas).
+Cubre la clase de bug que A6/A7 representan — sincronización *entre*
+pestañas/dispositivos vía `window.addEventListener('storage', ...)`, distinta
+de lo que audita `stateful-prop-transition-guardian` (props identificadores
+*dentro* de una misma pestaña). Detalle completo, incluida la justificación
+línea por línea, en `HERRAMIENTAS_IA.md`.
+
+### Verificación
+
+- `npx tsc --noEmit`: **sin errores**.
+- `npm run build`: **build limpio**, sin aviso de tamaño de Vite (chunk
+  principal ~314.3 kB / 87.8 kB gzip, variación mínima esperada por las
+  claves i18n y el input numérico nuevos).
+- i18n: **421/421 claves** en ambos idiomas (400 previas + 21 nuevas: 3 del
+  banner/estado de checklist enviado en otro lugar, 1 `ariaStockInput`, 14
+  `unitXxxPlural` de las 14 unidades existentes, 1 `docTitle`,
+  1 `navLandmarkLabel`, 1 aviso de solo-lectura de Proveedores), verificado
+  por extracción programática de ambos bloques `es`/`en` (421 claves cada
+  uno, 0 huecos en cualquier dirección).
+- Cero modales nuevos, cero clases dark-only (`bg-slate-*`/`text-white`/
+  `text-slate-*`/`border-slate-*`) nuevas, cero `fixed inset-0` nuevos (los
+  overlays `absolute inset-0` de A10 son botones superpuestos dentro de una
+  tarjeta existente, no pantallas modales), fallback público de Supabase sin
+  tocar, funcionalidad existente sin regresión (tabs, tema/idioma persistido,
+  campana→Notificaciones, avatar→Cuenta, Modo Compra, alta/edición de
+  productos/locales, checklist con envío y borrador multiusuario, badges).

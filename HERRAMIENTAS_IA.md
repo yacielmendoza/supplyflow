@@ -35,6 +35,7 @@ siguiendo la especificación oficial.
 | `async-error-handling-guardian` | Al añadir/editar un handler `async` conectado a un botón o `onSubmit` | Una auditoría (2026-08-01) encontró el mismo patrón —operación async sin `try/catch`, estado de carga que nunca se revierte, UI "atascada"— repetido en 3 pantallas independientes (M14); ninguna skill existente lo cubría |
 | `react-hooks-invariant-guardian` | Al añadir/editar un hook en un componente que tiene un `return` condicional temprano | La auditoría de `cfdd27d` encontró un crash real de producción (Rules of Hooks violadas en `App.tsx:621`, un `useMemo` colocado después del `return` de `LoginScreen`) invisible tanto para `tsc` como para `npm run build` — ninguna skill existente revisaba la posición de los hooks respecto a returns condicionales |
 | `stateful-prop-transition-guardian` | Al crear/tocar un componente con estado persistido (`localStorage`) inicializado desde un prop identificador (id de restaurante/usuario/fecha) | Misma auditoría: `DailyChecklist` perdía datos al cambiar de restaurante sin cambiar de pestaña (el componente no se remonta, sus `useState` no releen el draft nuevo, el efecto de persistencia sobrescribe el draft del restaurante nuevo con estado viejo) — la segunda vez en 2 ciclos que esta clase de bug reaparece por una puerta distinta; ninguna skill existente audita transiciones de props identificadores sin desmontaje |
+| `cross-tab-sync-guardian` | Al añadir/tocar un `window.addEventListener('storage', ...)` que sincroniza estado de UI entre pestañas/dispositivos para la misma clave de `localStorage` | Auditoría 2026-08-05: el listener de `DailyChecklist` sobrescribía en silencio el tecleo activo de un usuario distinto en otra pestaña (A6) y no propagaba un borrado como señal de "ya enviado", permitiendo un pedido de compra duplicado real (A7) — una clase de bug distinta a la que cubre `stateful-prop-transition-guardian` (esa es intra-pestaña; esta es entre pestañas, con su propia semántica: no existe "eco de mi propio guardado" porque el evento `storage` nunca se dispara en la pestaña que escribió) |
 
 ## Subagentes creados (`.claude/agents/<name>.md`)
 
@@ -60,6 +61,7 @@ especificación oficial de subagentes.
 | `async-error-handling-guardian` | Glob, Grep, Read, Bash | Verifica que toda operación async con estado de carga la revierta y muestre error en el `catch` |
 | `react-hooks-invariant-guardian` | Glob, Grep, Read, Bash | Verifica que todo hook esté antes de cualquier `return` condicional y fuera de bloques condicionales (invariante de runtime que `tsc`/`build` no detectan) |
 | `stateful-prop-transition-guardian` | Glob, Grep, Read, Bash | Verifica qué pasa con el estado local (persistido o no) de un componente cuando un prop identificador cambia sin desmontaje — `key={prop}` o efecto de re-sincronización explícito |
+| `cross-tab-sync-guardian` | Glob, Grep, Read, Bash | Verifica listeners `window.addEventListener('storage', ...)`: distingue eco propio (inexistente) de escritura remota real, detecta sobrescritura de campos con foco activo, y que un `newValue === null` se trate como señal explícita de borrado/envío en vez de ignorarse |
 
 Todos son de solo-lectura salvo `design-token-architect` (alcance
 deliberadamente angosto: solo puede tocar el archivo de tokens, no
@@ -108,3 +110,39 @@ fortalecieron 3 `SKILL.md` con ítems de checklist explícitos y accionables:
 
 Sin cambios en los MCP recomendados (siguen sin ser instalables en este
 entorno headless).
+
+## Ciclo corrector 2026-08-05 (segunda pasada, contra `AUDITORIA_RESULTADOS.md`, commit `ffa8e56`, VEREDICTO: CON HALLAZGOS)
+
+Este ciclo sí encontró un gap de especialización real, no solo checklists
+incompletas: `stateful-prop-transition-guardian` audita qué pasa con el
+estado local de un componente cuando un *prop identificador* cambia sin
+desmontaje (una clase de bug dentro de una misma pestaña). El hallazgo A6/A7
+de esta auditoría — el listener `window.addEventListener('storage', ...)`
+de `DailyChecklist` sobrescribiendo en silencio el tecleo activo de un
+usuario distinto en otra pestaña, y no propagando un borrado como señal de
+"ya enviado" — es una clase de bug distinta: sincronización *entre*
+pestañas/dispositivos vía el evento `storage`, con su propia semántica (no
+existe "eco de mi propio guardado" porque ese evento nunca se dispara en la
+pestaña que escribió; un valor `null` es una señal, no una ausencia de
+cambio). Ninguna de las 14 skills/subagentes existentes lo cubría como
+responsabilidad propia, pese a ser ya la segunda implementación de este
+patrón en el repo (`NotificationsView` lo usa también para `dismissedIds`).
+
+| Skill/subagente nuevo | Cuándo se dispara | Por qué se creó |
+|---|---|---|
+| `cross-tab-sync-guardian` (`.claude/skills/cross-tab-sync-guardian/SKILL.md` + `.claude/agents/cross-tab-sync-guardian.md`, tools: Glob/Grep/Read/Bash, solo lectura) | Al añadir/tocar un `window.addEventListener('storage', ...)` que sincroniza estado de UI entre pestañas/dispositivos para la misma clave de `localStorage` | A6 (sobrescritura silenciosa de tecleo activo entre usuarios distintos) y A7 (borrado no propagado → riesgo de pedido de compra duplicado real) en `DailyChecklist.tsx:191-206`. El propio comentario del código que introdujo el bug describía mal la semántica del evento `storage` (asumía un "eco" que el navegador nunca dispara en la pestaña de origen) — exactamente el tipo de error de modelo mental que una checklist explícita previene. |
+
+Correcciones aplicadas en el propio código en este ciclo (ver
+`CORRECCIONES_APLICADAS.md` para el detalle línea por línea): el listener de
+`DailyChecklist` ahora (1) usa `savedAt` para descartar entregas
+duplicadas/fuera de orden en vez de filtrar por `authorId`, (2) no
+sobrescribe el campo de nota ni el contador de stock que el usuario local
+tiene enfocado en ese instante, (3) trata `e.newValue === null` como señal
+explícita de "enviado/descartado en otro lugar" (bloquea el reenvío y avisa
+en vez de ignorarlo), y (4) un flag de ref rompe el ciclo de reatribución de
+autoría entre pestañas que el propio fix anterior había introducido.
+
+Sin cambios en los MCP recomendados (siguen sin ser instalables en este
+entorno headless) — se reitera que Playwright local (`/opt/pw-browsers/chromium`)
+es la forma más directa de reproducir en un navegador real el escenario de
+dos pestañas de A6/A7 en un ciclo futuro, sin necesidad de un MCP dedicado.
