@@ -193,7 +193,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         #{r.requestNumber}
                       </span>
                       {r.urgent && (
-                        <Flame className="w-3.5 h-3.5" style={{ color: 'var(--sf-rose)' }} />
+                        <Flame className="w-3.5 h-3.5" style={{ color: 'var(--sf-rose)' }} role="img" aria-label={t.tagUrgent} />
                       )}
                     </div>
                     <div className="sf-muted text-xs truncate">
