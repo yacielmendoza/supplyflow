@@ -2,15 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { Product, Category, Restaurant, UserProfile } from '../types';
 import { formatCategoryName } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
-import {
-  CheckCircle2,
-  Send,
-  Plus,
-  Minus,
-  Search,
-  MessageSquare,
-} from 'lucide-react';
+import { CheckCircle2, Send, Plus, Minus, Search, MessageSquare } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
+import { cn } from '../lib/cn';
+import { Badge, Button, Tabs, type TabItem } from './ui';
 
 interface DailyChecklistProps {
   products: Product[];
@@ -23,6 +18,20 @@ interface DailyChecklistProps {
   ) => Promise<void>;
   isSubmitting: boolean;
 }
+
+type ReviewFilter = 'ALL' | 'UNREVIEWED' | 'REVIEWED';
+
+const CATEGORIES = [
+  'TODAS',
+  'INGREDIENTS',
+  'SNACKS',
+  'BEVERAGES',
+  'MIXERS',
+  'CANDY',
+  'CHEMICALS',
+  'PAPER / DISPOSABLES',
+  'ALCOHOL',
+] as const;
 
 export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   products,
@@ -46,11 +55,8 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const toggleReviewed = (productId: string) => {
     setReviewedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(productId)) {
-        next.delete(productId);
-      } else {
-        next.add(productId);
-      }
+      if (next.has(productId)) next.delete(productId);
+      else next.add(productId);
       return next;
     });
   };
@@ -58,14 +64,12 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const markAsReviewed = (productId: string) => {
     setReviewedIds((prev) => {
       if (prev.has(productId)) return prev;
-      const next = new Set(prev);
-      next.add(productId);
-      return next;
+      return new Set(prev).add(productId);
     });
   };
 
   const [selectedCategory, setSelectedCategory] = useState<Category | 'TODAS'>('TODAS');
-  const [reviewFilter, setReviewFilter] = useState<'ALL' | 'UNREVIEWED' | 'REVIEWED'>('ALL');
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [notes, setNotes] = useState('');
   const [showNoteInput, setShowNoteInput] = useState(false);
@@ -86,11 +90,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
       const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
       const isRev = reviewedIds.has(p.id);
       const matchRev =
-        reviewFilter === 'ALL'
-          ? true
-          : reviewFilter === 'UNREVIEWED'
-          ? !isRev
-          : isRev;
+        reviewFilter === 'ALL' ? true : reviewFilter === 'UNREVIEWED' ? !isRev : isRev;
       return matchCat && matchSearch && matchRev && p.active;
     });
   }, [products, selectedCategory, searchQuery, reviewFilter, reviewedIds]);
@@ -103,7 +103,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   }, [products, readings]);
 
   const handleStockChange = (productId: string, val: number) => {
-    const safeVal = Math.max(0, val);
+    const safeVal = Math.max(0, Number.isFinite(val) ? val : 0);
     setReadings((prev) => ({ ...prev, [productId]: safeVal }));
     markAsReviewed(productId);
   };
@@ -111,13 +111,9 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const handleQuickSet = (productId: string, status: 'out' | 'low' | 'ok') => {
     const p = products.find((prod) => prod.id === productId);
     if (!p) return;
-    if (status === 'out') {
-      handleStockChange(productId, 0);
-    } else if (status === 'low') {
-      handleStockChange(productId, Math.max(0, p.minThreshold - 1));
-    } else if (status === 'ok') {
-      handleStockChange(productId, p.minThreshold + 3);
-    }
+    if (status === 'out') handleStockChange(productId, 0);
+    else if (status === 'low') handleStockChange(productId, Math.max(0, p.minThreshold - 1));
+    else if (status === 'ok') handleStockChange(productId, p.minThreshold + 3);
     markAsReviewed(productId);
   };
 
@@ -129,151 +125,147 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
     setTimeout(() => setSubmittedSuccess(false), 4000);
   };
 
-  const isLight = currentUser.theme === 'light';
+  const reviewTabs: TabItem<ReviewFilter>[] = [
+    { id: 'ALL', label: t.checklistFilterAll, badge: activeProducts.length, badgeTone: 'neutral' },
+    {
+      id: 'UNREVIEWED',
+      label: t.checklistFilterUnreviewed,
+      badge: activeProducts.length - totalReviewedCount,
+      badgeTone: 'warning',
+    },
+    { id: 'REVIEWED', label: t.checklistFilterReviewed, badge: totalReviewedCount, badgeTone: 'success' },
+  ];
+
+  const preset = (active: boolean, tone: 'danger' | 'warning' | 'success') =>
+    cn(
+      'px-2.5 py-1.5 rounded-control text-xs font-extrabold transition',
+      active
+        ? tone === 'danger'
+          ? 'bg-danger text-white'
+          : tone === 'warning'
+          ? 'bg-warning text-accent-contrast'
+          : 'bg-success text-accent-contrast'
+        : 'bg-elevated text-text-secondary hover:text-text-primary border border-border-default'
+    );
 
   return (
-    <div className="space-y-3.5 pb-24">
-      {/* Compact Banner with Progress */}
-      <div className={`border rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3 transition-colors ${
-        isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
-      }`}>
+    <div className="space-y-3.5 pb-28">
+      {/* Banner + progress */}
+      <div className="border border-border-default bg-surface rounded-card p-3.5 sm:p-4 shadow-sm space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-0.5 min-w-0">
-            <div className="flex items-center space-x-2">
-              <h2 className={`text-base sm:text-lg font-extrabold truncate ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-extrabold truncate text-text-primary">
                 {t.checklistTitle} — {selectedRestaurant.name}
               </h2>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${
-                isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-800 text-emerald-400 border-slate-700'
-              }`}>
+              <Badge tone="accent" className="flex-shrink-0">
                 {t.checklistSpeed}
-              </span>
+              </Badge>
             </div>
-            <p className={`text-xs truncate ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-              {t.checklistSubtitle}
-            </p>
+            <p className="text-xs truncate text-text-secondary">{t.checklistSubtitle}</p>
           </div>
 
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            <div className={`text-right px-3 py-1.5 rounded-xl border ${
-              isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-            }`}>
-              <div className={`text-[9px] font-bold uppercase ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{t.checklistProgressLabel}</div>
-              <div className="text-sm font-black text-emerald-600">
-                {totalReviewedCount} / {activeProducts.length} <span className={`text-[11px] font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>({reviewProgressPct}%)</span>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="text-right px-3 py-1.5 rounded-control border border-border-default bg-inset">
+              <div className="text-[9px] font-bold uppercase text-text-secondary">
+                {t.checklistProgressLabel}
+              </div>
+              <div className="text-sm font-black text-accent">
+                {totalReviewedCount} / {activeProducts.length}{' '}
+                <span className="text-[11px] font-bold text-text-secondary">({reviewProgressPct}%)</span>
               </div>
             </div>
 
-            <div className={`text-right px-3 py-1.5 rounded-xl border ${
-              isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-            }`}>
-              <div className={`text-[9px] font-bold uppercase ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{t.checklistBelowMin}</div>
-              <div className={`text-sm font-black ${itemsNeedingReplenishment.length > 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
+            <div className="text-right px-3 py-1.5 rounded-control border border-border-default bg-inset">
+              <div className="text-[9px] font-bold uppercase text-text-secondary">
+                {t.checklistBelowMin}
+              </div>
+              <div
+                className={cn(
+                  'text-sm font-black',
+                  itemsNeedingReplenishment.length > 0 ? 'text-danger' : 'text-accent'
+                )}
+              >
                 {itemsNeedingReplenishment.length}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Inspection Progress Bar */}
         <div className="space-y-1">
-          <div className={`w-full rounded-full h-2 overflow-hidden border ${
-            isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-950 border-slate-800'
-          }`}>
+          <div
+            className="w-full rounded-full h-2 overflow-hidden border border-border-default bg-inset"
+            role="progressbar"
+            aria-valuenow={reviewProgressPct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <div
-              className="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-300"
+              className="bg-accent h-2 rounded-full transition-all duration-[var(--duration-base)]"
               style={{ width: `${reviewProgressPct}%` }}
             />
           </div>
-          <div className={`flex items-center justify-between text-[10px] ${isLight ? 'text-slate-600 font-medium' : 'text-slate-400'}`}>
+          <div className="flex items-center justify-between text-[10px] text-text-secondary">
             <span>
               {totalReviewedCount === activeProducts.length
                 ? t.checklistComplete
                 : `${activeProducts.length - totalReviewedCount} ${t.checklistPending}`}
             </span>
-            <span className="font-bold text-emerald-600">{reviewProgressPct}%</span>
+            <span className="font-bold text-accent">{reviewProgressPct}%</span>
           </div>
         </div>
       </div>
 
       {submittedSuccess && (
-        <div className={`p-3 rounded-xl border flex items-center space-x-2.5 text-xs font-bold ${
-          isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-emerald-950 border-emerald-500/50 text-emerald-200'
-        }`}>
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+        <div className="p-3 rounded-control border border-success/40 bg-success/10 text-success flex items-center gap-2.5 text-xs font-bold">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
           <span>{t.checklistSentMsg}</span>
         </div>
       )}
 
-      {/* Search Bar & Review Filters */}
+      {/* Search + review filters */}
       <div className="space-y-2">
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <Search className={`w-4 h-4 absolute left-3 top-2.5 ${isLight ? 'text-slate-400' : 'text-slate-500'}`} />
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-text-muted" />
+            <label htmlFor="checklist-search" className="sr-only">
+              {t.checklistSearch}
+            </label>
             <input
+              id="checklist-search"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.checklistSearch}
-              className={`w-full pl-9 pr-3 py-2 border rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                isLight
-                  ? 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 shadow-xs'
-                  : 'bg-slate-900 border-slate-800 text-slate-100 placeholder-slate-500'
-              }`}
+              className="w-full pl-9 pr-3 py-2 border border-border-default bg-surface rounded-control text-xs font-medium text-text-primary placeholder:text-text-muted focus:outline-none"
             />
           </div>
 
-          {/* Filter by Review Status */}
-          <div className={`flex items-center space-x-1 p-1 rounded-xl border text-xs flex-shrink-0 ${
-            isLight ? 'bg-slate-200/80 border-slate-300' : 'bg-slate-900 border-slate-800'
-          }`}>
-            <button
-              onClick={() => setReviewFilter('ALL')}
-              className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition ${
-                reviewFilter === 'ALL'
-                  ? isLight ? 'bg-white text-slate-900 shadow-xs font-extrabold' : 'bg-slate-800 text-slate-100 shadow-sm'
-                  : isLight ? 'text-slate-700 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {t.checklistFilterAll} ({activeProducts.length})
-            </button>
-            <button
-              onClick={() => setReviewFilter('UNREVIEWED')}
-              className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition ${
-                reviewFilter === 'UNREVIEWED'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm font-black'
-                  : isLight ? 'text-slate-700 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {t.checklistFilterUnreviewed} ({activeProducts.length - totalReviewedCount})
-            </button>
-            <button
-              onClick={() => setReviewFilter('REVIEWED')}
-              className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition ${
-                reviewFilter === 'REVIEWED'
-                  ? 'bg-emerald-500 text-slate-950 shadow-sm font-black'
-                  : isLight ? 'text-slate-700 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {t.checklistFilterReviewed} ({totalReviewedCount})
-            </button>
-          </div>
+          <Tabs
+            items={reviewTabs}
+            value={reviewFilter}
+            onChange={setReviewFilter}
+            aria-label={t.checklistFilterAll}
+            className="flex-shrink-0"
+          />
         </div>
 
-        {/* Category Horizontal Selector */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
-          {(['TODAS', 'INGREDIENTS', 'SNACKS', 'BEVERAGES', 'MIXERS', 'CANDY', 'CHEMICALS', 'PAPER / DISPOSABLES', 'ALCOHOL'] as const).map((cat) => {
+        {/* Category selector */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+          {CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat;
             const displayLabel = cat === 'TODAS' ? t.checklistFilterAll : formatCategoryName(cat);
             return (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat as any)}
-                className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
+                onClick={() => setSelectedCategory(cat as Category | 'TODAS')}
+                aria-pressed={isSelected}
+                className={cn(
+                  'px-3 py-1.5 rounded-control text-xs sm:text-sm font-bold whitespace-nowrap transition-all',
                   isSelected
-                    ? isLight ? 'bg-emerald-600 text-white shadow-sm font-extrabold' : 'bg-emerald-500 text-slate-950 shadow-sm font-black'
-                    : isLight ? 'bg-white text-slate-700 hover:text-slate-900 border border-slate-200 shadow-xs' : 'bg-slate-900 text-slate-300 hover:text-slate-100 border border-slate-800'
-                }`}
+                    ? 'bg-accent text-accent-contrast shadow-sm'
+                    : 'bg-surface text-text-secondary hover:text-text-primary border border-border-default'
+                )}
               >
                 {displayLabel}
               </button>
@@ -282,7 +274,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
         </div>
       </div>
 
-      {/* Products Inspection Grid */}
+      {/* Products grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {filteredProducts.map((p) => {
           const currentVal = readings[p.id] !== undefined ? readings[p.id] : p.minThreshold + 1;
@@ -293,144 +285,109 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           return (
             <div
               key={p.id}
-              className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
+              className={cn(
+                'p-3.5 sm:p-4 rounded-card border transition-all',
                 isReviewed
                   ? isCriticalZero
-                    ? isLight
-                      ? 'bg-rose-50 border-2 border-rose-500 shadow-sm'
-                      : 'bg-rose-950/30 border-2 border-rose-500 shadow-md shadow-rose-950/30'
+                    ? 'bg-danger/10 border-2 border-danger shadow-sm'
                     : isBelowThreshold
-                    ? isLight
-                      ? 'bg-amber-50 border-2 border-amber-500 shadow-sm'
-                      : 'bg-amber-950/30 border-2 border-amber-500 shadow-md shadow-amber-950/30'
-                    : isLight
-                      ? 'bg-emerald-50/70 border-2 border-emerald-500 shadow-sm'
-                      : 'bg-slate-900 border-2 border-emerald-500/80 shadow-md shadow-emerald-950/20 ring-1 ring-emerald-500/20'
-                  : isLight
-                    ? 'bg-white border-slate-200 shadow-xs hover:shadow-sm'
-                    : 'bg-slate-900/60 border-slate-800/80 opacity-90'
-              }`}
+                    ? 'bg-warning/10 border-2 border-warning shadow-sm'
+                    : 'bg-accent/5 border-2 border-accent/70 shadow-sm'
+                  : 'bg-surface/60 border-border-default opacity-90'
+              )}
             >
               <div className="flex items-start justify-between gap-2 mb-2.5">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center space-x-1.5">
-                    <span className={`font-extrabold text-base sm:text-lg truncate ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>{p.name}</span>
-                  </div>
+                  <span className="font-extrabold text-base sm:text-lg truncate text-text-primary block">
+                    {p.name}
+                  </span>
                   <div className="text-xs space-x-2 mt-0.5">
-                    <span className={`font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>{formatCategoryName(p.category)}</span>
-                    <span className={isLight ? 'text-slate-300' : 'text-slate-600'}>•</span>
-                    <span className={isLight ? 'text-slate-600 font-medium' : 'text-slate-300'}>{t.minimum} <strong className={isLight ? 'text-slate-900 font-extrabold' : 'text-slate-100 font-bold'}>{p.minThreshold} {p.unit}s</strong></span>
+                    <span className="font-bold text-accent">{formatCategoryName(p.category)}</span>
+                    <span className="text-text-muted">•</span>
+                    <span className="text-text-secondary">
+                      {t.minimum}{' '}
+                      <strong className="text-text-primary font-bold">
+                        {p.minThreshold} {p.unit}s
+                      </strong>
+                    </span>
                   </div>
                 </div>
 
-                {/* Reviewed Badge + Stock Status Badge */}
-                <div className="flex items-center space-x-1.5 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => toggleReviewed(p.id)}
-                    className={`px-2.5 py-1 rounded-full text-xs font-extrabold uppercase flex items-center space-x-1 transition-all ${
+                    aria-pressed={isReviewed}
+                    className={cn(
+                      'px-2.5 py-1 rounded-full text-xs font-extrabold uppercase flex items-center gap-1 transition-all',
                       isReviewed
-                        ? isLight ? 'bg-emerald-600 text-white shadow-xs' : 'bg-emerald-500 text-slate-950 shadow-sm'
-                        : isLight ? 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-300' : 'bg-slate-800 text-slate-300 hover:text-slate-100 border border-slate-700'
-                    }`}
+                        ? 'bg-accent text-accent-contrast shadow-sm'
+                        : 'bg-elevated text-text-secondary hover:text-text-primary border border-border-default'
+                    )}
                   >
-                    <CheckCircle2 className={`w-3.5 h-3.5 ${isReviewed ? (isLight ? 'text-white' : 'text-slate-950') : (isLight ? 'text-slate-500' : 'text-slate-400')}`} />
-                    <span>{isReviewed ? t.tagReviewed : t.tagUnreviewed}</span>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {isReviewed ? t.tagReviewed : t.tagUnreviewed}
                   </button>
 
                   {isCriticalZero ? (
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-black uppercase ${
-                      isLight ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                    }`}>
+                    <Badge tone="danger" className="uppercase">
                       {t.tagEmpty}
-                    </span>
+                    </Badge>
                   ) : isBelowThreshold ? (
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-black uppercase ${
-                      isLight ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    }`}>
+                    <Badge tone="warning" className="uppercase">
                       {t.tagReplenish}
-                    </span>
+                    </Badge>
                   ) : (
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-extrabold uppercase ${
-                      isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    }`}>
+                    <Badge tone="success" className="uppercase">
                       {t.tagOk}
-                    </span>
+                    </Badge>
                   )}
                 </div>
               </div>
 
-              {/* Counter Row */}
-              <div className={`flex items-center justify-between pt-2 border-t gap-2 ${
-                isLight ? 'border-slate-200' : 'border-slate-800/80'
-              }`}>
-                {/* Quick Presets */}
-                <div className="flex items-center space-x-1 sm:space-x-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickSet(p.id, 'out')}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition ${
-                      currentVal === 0
-                        ? 'bg-rose-600 text-white shadow-xs'
-                        : isLight ? 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200' : 'bg-slate-800 text-slate-300 hover:text-slate-100 border border-slate-700/60'
-                    }`}
-                  >
+              {/* Counter row */}
+              <div className="flex items-center justify-between pt-2 border-t border-border-default gap-2">
+                <div className="flex items-center gap-1 sm:gap-1.5">
+                  <button type="button" onClick={() => handleQuickSet(p.id, 'out')} className={preset(currentVal === 0, 'danger')}>
                     0
                   </button>
                   <button
                     type="button"
                     onClick={() => handleQuickSet(p.id, 'low')}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition ${
-                      isBelowThreshold && currentVal > 0
-                        ? 'bg-amber-600 text-white shadow-xs'
-                        : isLight ? 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200' : 'bg-slate-800 text-slate-300 hover:text-slate-100 border border-slate-700/60'
-                    }`}
+                    className={preset(isBelowThreshold && currentVal > 0, 'warning')}
                   >
                     {t.stockLow}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickSet(p.id, 'ok')}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition ${
-                      !isBelowThreshold
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : isLight ? 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200' : 'bg-slate-800 text-slate-300 hover:text-slate-100 border border-slate-700/60'
-                    }`}
-                  >
+                  <button type="button" onClick={() => handleQuickSet(p.id, 'ok')} className={preset(!isBelowThreshold, 'success')}>
                     {t.stockSufficient}
                   </button>
                 </div>
 
-                {/* Counter */}
-                <div className={`flex items-center space-x-1.5 px-2 py-1 rounded-xl border ${
-                  isLight ? 'bg-slate-100 border-slate-300' : 'bg-slate-950 border-slate-800'
-                }`}>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-control border border-border-default bg-inset">
                   <button
                     type="button"
                     onClick={() => handleStockChange(p.id, currentVal - 1)}
-                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-black transition ${
-                      isLight
-                        ? 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 active:bg-slate-200 shadow-xs'
-                        : 'bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-100'
-                    }`}
+                    aria-label={`${p.name} −1`}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-control flex items-center justify-center font-black transition bg-elevated hover:bg-border-default text-text-primary"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
 
-                  <div className={`w-10 text-center font-black text-base sm:text-lg ${
-                    isLight ? 'text-slate-900' : 'text-white'
-                  }`}>
-                    {currentVal}
-                  </div>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={currentVal}
+                    onChange={(e) => handleStockChange(p.id, parseInt(e.target.value.replace(/\D/g, ''), 10) || 0)}
+                    aria-label={`${t.minimum} ${p.name}`}
+                    className="w-12 text-center font-black text-base sm:text-lg bg-transparent text-text-primary focus:outline-none"
+                  />
 
                   <button
                     type="button"
                     onClick={() => handleStockChange(p.id, currentVal + 1)}
-                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-black transition ${
-                      isLight
-                        ? 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 active:bg-slate-200 shadow-xs'
-                        : 'bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-100'
-                    }`}
+                    aria-label={`${p.name} +1`}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-control flex items-center justify-center font-black transition bg-elevated hover:bg-border-default text-text-primary"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -441,114 +398,103 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
         })}
       </div>
 
-      {/* Sticky Bottom Action Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 z-30 backdrop-blur-md border-t shadow-2xl transition-colors ${
-        isLight ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
-      }`}>
-        {/* Optional Note Drawer */}
+      {/* Sticky action bar */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-30 backdrop-blur-md border-t border-border-default bg-surface/95 shadow-2xl"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         {showNoteInput && (
-          <div className={`border-b p-2.5 space-y-1.5 animate-fadeIn max-w-7xl mx-auto ${
-            isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-          }`}>
+          <div className="border-b border-border-default bg-inset p-2.5 space-y-1.5 animate-fadeIn max-w-7xl mx-auto">
             <div className="flex items-center justify-between text-xs">
-              <label className={`font-bold flex items-center space-x-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{t.noteForBuyers}</span>
+              <label htmlFor="checklist-note" className="font-bold flex items-center gap-1.5 text-text-primary">
+                <MessageSquare className="w-3.5 h-3.5 text-accent" />
+                {t.noteForBuyers}
               </label>
               <button
                 type="button"
                 onClick={() => setShowNoteInput(false)}
-                className={`text-[11px] font-medium ${isLight ? 'text-slate-500 hover:text-slate-800' : 'text-slate-400 hover:text-slate-200'}`}
+                className="text-[11px] font-medium text-text-secondary hover:text-text-primary"
               >
                 {t.hideNote}
               </button>
             </div>
             <textarea
+              id="checklist-note"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder={t.checklistNotePlaceholder}
               rows={2}
-              className={`w-full border rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none ${
-                isLight ? 'bg-white border-slate-300 text-slate-900 placeholder-slate-400' : 'bg-slate-900 border-slate-800 text-slate-100 placeholder-slate-500'
-              }`}
+              className="w-full border border-border-default bg-surface rounded-control p-2 text-xs text-text-primary placeholder:text-text-muted focus:outline-none resize-none"
             />
           </div>
         )}
 
         <div className="max-w-7xl mx-auto p-2.5 sm:p-3 flex items-center justify-between gap-2">
-          <div className="flex items-center space-x-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <div
-              className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0 ${
+              className={cn(
+                'w-8 h-8 rounded-control flex items-center justify-center font-black text-sm flex-shrink-0',
                 itemsNeedingReplenishment.length > 0
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-emerald-500 text-slate-950'
-              }`}
+                  ? 'bg-danger text-white'
+                  : 'bg-accent text-accent-contrast'
+              )}
             >
               {itemsNeedingReplenishment.length}
             </div>
-
             <div className="min-w-0">
-              <div className={`font-bold text-xs truncate ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>
+              <div className="font-bold text-xs truncate text-text-primary">
                 {itemsNeedingReplenishment.length > 0
                   ? `${itemsNeedingReplenishment.length} ${t.itemsToReplenish}`
                   : t.stockCompleteMsg}
               </div>
-              <div className={`text-[10px] truncate flex items-center space-x-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+              <div className="text-[10px] truncate flex items-center gap-1 text-text-secondary">
                 <span>{t.notifyBuyers}</span>
-                {notes.trim() && <span className="text-emerald-600 font-bold">• {t.withNote}</span>}
+                {notes.trim() && <span className="text-accent font-bold">• {t.withNote}</span>}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            {/* Note Toggle */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               type="button"
               onClick={() => setShowNoteInput((prev) => !prev)}
-              className={`flex items-center space-x-1 text-xs font-bold p-2 sm:px-2.5 sm:py-1.5 rounded-lg border transition flex-shrink-0 ${
+              aria-pressed={showNoteInput}
+              className={cn(
+                'flex items-center gap-1 text-xs font-bold p-2 sm:px-2.5 sm:py-1.5 rounded-control border transition flex-shrink-0',
                 notes.trim()
-                  ? 'bg-emerald-600 text-white border-emerald-500'
-                  : showNoteInput
-                  ? isLight ? 'bg-slate-200 text-slate-900 border-slate-300' : 'bg-slate-700 text-emerald-400 border-emerald-500/50'
-                  : isLight ? 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
-              }`}
+                  ? 'bg-accent text-accent-contrast border-accent'
+                  : 'bg-elevated text-text-secondary border-border-default hover:text-text-primary'
+              )}
             >
-              <MessageSquare className={`w-4 h-4 sm:w-3.5 sm:h-3.5 ${notes.trim() ? 'text-white' : 'text-emerald-600'}`} />
+              <MessageSquare className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
               <span className="hidden sm:inline">
                 {notes.trim() ? t.noteActive : showNoteInput ? t.closeNote : t.noteAddBtn}
               </span>
             </button>
 
-            <label className={`flex items-center space-x-1 text-xs font-medium px-2 py-1.5 rounded-lg border cursor-pointer ${
-              isLight ? 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200' : 'bg-slate-800 border-slate-700 text-slate-300'
-            }`}>
+            <label className="flex items-center gap-1.5 text-xs font-medium px-2 py-1.5 rounded-control border border-border-default bg-elevated text-text-secondary cursor-pointer">
               <input
                 type="checkbox"
                 checked={isUrgent}
                 onChange={(e) => setIsUrgent(e.target.checked)}
-                className="rounded text-rose-500 focus:ring-rose-500"
+                className="accent-[var(--sf-danger)]"
               />
-              <span className="text-rose-600 font-extrabold text-[11px]">{t.checklistUrgent}</span>
+              <span className="text-danger font-extrabold text-[11px]">{t.checklistUrgent}</span>
             </label>
 
-            <button
+            <Button
+              variant={itemsNeedingReplenishment.length > 0 ? 'primary' : 'secondary'}
+              size="md"
               onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`px-4 py-2 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md transition-all ${
-                itemsNeedingReplenishment.length > 0
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white font-black shadow-emerald-600/20'
-                  : isLight ? 'bg-slate-900 hover:bg-slate-800 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
-              }`}
+              loading={isSubmitting}
+              leftIcon={<Send className="w-3.5 h-3.5" />}
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>
-                {isSubmitting
-                  ? t.btnSending
-                  : itemsNeedingReplenishment.length > 0
-                  ? t.btnSendRequest
-                  : t.btnSaveStock}
-              </span>
-            </button>
+              {isSubmitting
+                ? t.btnSending
+                : itemsNeedingReplenishment.length > 0
+                ? t.btnSendRequest
+                : t.btnSaveStock}
+            </Button>
           </div>
         </div>
       </div>

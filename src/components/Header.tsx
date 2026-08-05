@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Restaurant, UserProfile, Role } from '../types';
 import { formatCleanName } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
@@ -8,13 +8,14 @@ import {
   Bell,
   Smartphone,
   CheckCircle2,
-  AlertTriangle,
   Flame,
   Volume2,
   Settings,
   LogOut,
 } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
+import { cn } from '../lib/cn';
+import { Badge, Button, IconButton, type Tone } from './ui';
 
 interface HeaderProps {
   restaurants: Restaurant[];
@@ -32,6 +33,12 @@ interface HeaderProps {
   onLogout?: () => void;
 }
 
+const roleTone: Record<Role, Tone> = {
+  cocinero: 'warning',
+  comprador: 'accent',
+  admin: 'info',
+};
+
 export const Header: React.FC<HeaderProps> = ({
   restaurants,
   selectedRestaurantId,
@@ -48,63 +55,74 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-  const selectedRest = restaurants.find((r) => r.id === selectedRestaurantId) || restaurants[0];
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const t = getTranslation(currentUser.language || 'es');
 
-  const getRoleLabel = (role: Role) => {
-    switch (role) {
-      case 'cocinero':
-        return t.roleCook;
-      case 'comprador':
-        return t.roleBuyer;
-      case 'admin':
-        return t.roleAdmin;
-    }
-  };
+  // Close the role menu on outside click or Escape, and restore focus to the trigger.
+  useEffect(() => {
+    if (!showRoleDropdown) return;
+    const onDown = (e: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        !triggerRef.current?.contains(e.target as Node)
+      ) {
+        setShowRoleDropdown(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowRoleDropdown(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [showRoleDropdown]);
 
-  const getRoleBadgeColor = (role: Role) => {
-    switch (role) {
-      case 'cocinero':
-        return 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/20';
-      case 'comprador':
-        return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20';
-      case 'admin':
-        return 'bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/20';
-    }
-  };
+  const getRoleLabel = (role: Role) =>
+    role === 'cocinero' ? t.roleCook : role === 'comprador' ? t.roleBuyer : t.roleAdmin;
 
   return (
     <header
-      className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white shadow-md"
+      className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-border-default text-text-primary shadow-md"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5">
         <div className="flex items-center justify-between gap-2">
-          {/* Left: Brand Logo & Compact Location Selector */}
-          <div className="flex items-center space-x-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-amber-500 flex items-center justify-center shadow-md shadow-emerald-950/50 flex-shrink-0">
+          {/* Brand + location */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-control bg-gradient-to-tr from-emerald-600 via-teal-500 to-amber-500 flex items-center justify-center shadow-md flex-shrink-0">
               <Flame className="w-5 h-5 text-slate-950 stroke-[2.5]" />
             </div>
 
-            <div className="flex items-center space-x-2 min-w-0">
-              {/* App Name */}
-              <span className="hidden sm:inline-block font-extrabold text-base sm:text-lg tracking-tight text-white font-sans flex-shrink-0">
-                Resto<span className="text-emerald-400">Supply</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="hidden sm:inline-block font-extrabold text-base sm:text-lg tracking-tight flex-shrink-0">
+                Resto<span className="text-accent">Supply</span>
               </span>
 
-              {/* Restaurant Selector Pill */}
-              <div className="relative flex items-center bg-slate-950 border border-slate-800 rounded-xl px-2 sm:px-2.5 py-1 text-xs min-w-0">
-                <Store className="w-3.5 h-3.5 text-emerald-400 mr-1 sm:mr-1.5 flex-shrink-0" />
+              {/* Restaurant selector */}
+              <div className="relative flex items-center bg-inset border border-border-default rounded-control px-2 sm:px-2.5 py-1 text-xs min-w-0">
+                <Store className="w-3.5 h-3.5 text-accent mr-1 sm:mr-1.5 flex-shrink-0" />
+                <label htmlFor="restaurant-select" className="sr-only">
+                  {currentUser.language === 'en' ? 'Restaurant' : 'Restaurante'}
+                </label>
                 <select
+                  id="restaurant-select"
                   value={selectedRestaurantId}
                   onChange={(e) => {
                     onSelectRestaurant(e.target.value);
                     playAlertSound('click');
                   }}
-                  className="bg-transparent text-slate-100 font-extrabold focus:outline-none cursor-pointer pr-1 text-xs max-w-[150px] sm:max-w-[220px] truncate"
+                  className="bg-transparent text-text-primary font-extrabold focus:outline-none cursor-pointer pr-1 text-xs max-w-[150px] sm:max-w-[220px] truncate"
                 >
                   {restaurants.map((r) => (
-                    <option key={r.id} value={r.id} className="bg-slate-900 text-slate-100 font-normal">
+                    <option key={r.id} value={r.id} className="bg-surface text-text-primary font-normal">
                       {r.name}
                     </option>
                   ))}
@@ -113,170 +131,179 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Right Controls */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2">
-            {/* Live SSE Indicator */}
-            <div
-              className={`hidden md:flex items-center space-x-1.5 text-[11px] px-2.5 py-1 rounded-full border ${
+          {/* Right controls */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Live status */}
+            <span
+              className={cn(
+                'hidden md:inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border',
                 sseConnected
-                  ? 'bg-emerald-950/80 border-emerald-700/50 text-emerald-300'
-                  : 'bg-amber-950/80 border-amber-700/50 text-amber-300'
-              }`}
+                  ? 'bg-success/10 border-success/40 text-success'
+                  : 'bg-warning/10 border-warning/40 text-warning'
+              )}
+              role="status"
             >
-              <span className={`w-2 h-2 rounded-full ${sseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+              <span
+                className={cn(
+                  'w-2 h-2 rounded-full',
+                  sseConnected ? 'bg-success animate-pulse' : 'bg-warning'
+                )}
+              />
               <span className="font-semibold">{sseConnected ? t.online : t.reconnecting}</span>
-            </div>
+            </span>
 
-            {/* Profile Settings Quick Gear Button */}
-            <button
+            <IconButton
+              label={t.profileSettings}
+              variant="accent"
+              size="sm"
               onClick={() => {
                 onOpenProfileSettings();
                 playAlertSound('click');
               }}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 transition-colors border border-slate-700/60"
-              title={t.profileSettings}
             >
-              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
+              <Settings className="w-5 h-5" />
+            </IconButton>
 
-            {/* Test Audio Chime */}
-            <button
+            <IconButton
+              label={t.headerTestChime}
+              size="sm"
               onClick={() => playAlertSound('urgent')}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-              title={t.headerTestChime}
             >
               <Volume2 className="w-4 h-4" />
-            </button>
+            </IconButton>
 
-            {/* Notifications Button */}
-            <button
-              onClick={onOpenNotifications}
-              className="relative p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-              title={t.headerNotifications}
-            >
-              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="relative">
+              <IconButton label={t.headerNotifications} size="sm" onClick={onOpenNotifications}>
+                <Bell className="w-5 h-5" />
+              </IconButton>
               {activeRequestsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center animate-bounce shadow-md">
+                <span className="absolute -top-1 -right-1 bg-danger text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md">
                   {activeRequestsCount}
                 </span>
               )}
-            </button>
+            </div>
 
-            {/* PWA Install Button */}
             {isPWAInstallable && onInstallPWA && (
-              <button
+              <Button
+                variant="primary"
+                size="sm"
+                className="hidden sm:inline-flex"
                 onClick={onInstallPWA}
-                className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-sm transition"
+                leftIcon={<Smartphone className="w-3.5 h-3.5" />}
               >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>{t.installApp}</span>
-              </button>
+                {t.installApp}
+              </Button>
             )}
 
-            {/* User Profile / Role Selector */}
+            {/* User / role menu */}
             <div className="relative">
               <button
-                onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition ${getRoleBadgeColor(
-                  currentUser.role
-                )}`}
+                ref={triggerRef}
+                onClick={() => setShowRoleDropdown((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={showRoleDropdown}
+                className={cn(
+                  'flex items-center gap-1.5 px-2.5 h-11 rounded-control border text-xs font-medium transition',
+                  'bg-elevated border-border-default hover:border-border-strong text-text-primary'
+                )}
               >
                 {currentUser.avatarUrl ? (
                   <img
                     src={currentUser.avatarUrl}
-                    alt={currentUser.name}
-                    className="w-5 h-5 rounded-full object-cover border border-emerald-400/50"
+                    alt=""
+                    className="w-5 h-5 rounded-full object-cover border border-border-strong"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
                   <User className="w-4 h-4" />
                 )}
                 <div className="text-left hidden sm:block">
-                  <div className="font-bold text-white text-xs leading-tight truncate max-w-[120px]">
+                  <div className="font-bold text-xs leading-tight truncate max-w-[120px]">
                     {formatCleanName(currentUser.name)}
                   </div>
-                  <div className="text-[10px] opacity-80 font-bold uppercase tracking-wider">
+                  <div className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">
                     {getRoleLabel(currentUser.role)}
                   </div>
                 </div>
               </button>
 
-              {/* Role Dropdown */}
               {showRoleDropdown && (
-                <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl py-2 z-50 text-slate-200">
-                  {/* Configure Profile Button inside dropdown */}
-                  <div className="p-1 border-b border-slate-800">
-                    <button
+                <div
+                  ref={menuRef}
+                  role="menu"
+                  className="absolute right-0 mt-2 w-64 bg-surface border border-border-default rounded-card shadow-2xl py-2 z-50"
+                >
+                  <div className="p-1 border-b border-border-default">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      role="menuitem"
                       onClick={() => {
                         setShowRoleDropdown(false);
                         onOpenProfileSettings();
                         playAlertSound('click');
                       }}
-                      className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-700/60 text-emerald-300 font-extrabold text-xs transition"
+                      leftIcon={<Settings className="w-4 h-4 text-accent" />}
                     >
-                      <Settings className="w-4 h-4 text-emerald-400" />
-                      <span>{t.profileSettings}</span>
-                    </button>
+                      {t.profileSettings}
+                    </Button>
                   </div>
 
-                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold text-text-secondary uppercase tracking-wider">
                     {t.changeUser}
                   </div>
                   <div className="space-y-1 p-1">
                     {users.map((u) => (
                       <button
                         key={u.id}
+                        role="menuitem"
                         onClick={() => {
                           onSelectUser(u);
                           setShowRoleDropdown(false);
                           playAlertSound('click');
                         }}
-                        className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-xl text-xs text-left transition ${
+                        className={cn(
+                          'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-control text-xs text-left transition',
                           u.id === currentUser.id
-                            ? 'bg-slate-800 text-white font-bold border border-slate-700'
-                            : 'hover:bg-slate-800/60 text-slate-300'
-                        }`}
+                            ? 'bg-elevated text-text-primary font-bold border border-border-default'
+                            : 'hover:bg-elevated text-text-secondary'
+                        )}
                       >
                         {u.avatarUrl ? (
                           <img
                             src={u.avatarUrl}
-                            alt={u.name}
-                            className="w-5 h-5 rounded-full object-cover border border-slate-700"
+                            alt=""
+                            className="w-5 h-5 rounded-full object-cover border border-border-default"
                             referrerPolicy="no-referrer"
                           />
                         ) : (
-                          <div
-                            className={`w-2.5 h-2.5 rounded-full ${
-                              u.role === 'cocinero'
-                                ? 'bg-amber-400'
-                                : u.role === 'comprador'
-                                ? 'bg-emerald-400'
-                                : 'bg-purple-400'
-                            }`}
-                          />
+                          <Badge tone={roleTone[u.role]} className="w-2.5 h-2.5 p-0 rounded-full" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="font-bold text-slate-100 truncate">{formatCleanName(u.name)}</div>
-                          <div className="text-xs text-slate-400">
+                          <div className="font-bold text-text-primary truncate">
+                            {formatCleanName(u.name)}
+                          </div>
+                          <div className="text-xs text-text-secondary">
                             {t.headerRolePrefix}: {getRoleLabel(u.role)}
                           </div>
                         </div>
                         {u.id === currentUser.id && (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
                         )}
                       </button>
                     ))}
                   </div>
 
-                  {/* Logout */}
                   {onLogout && (
-                    <div className="p-1 border-t border-slate-800 mt-1">
+                    <div className="p-1 border-t border-border-default mt-1">
                       <button
+                        role="menuitem"
                         onClick={() => {
                           setShowRoleDropdown(false);
                           onLogout();
                         }}
-                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl hover:bg-slate-800/80 text-slate-400 hover:text-rose-400 text-xs transition"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-control hover:bg-elevated text-text-secondary hover:text-danger text-xs transition"
                       >
                         <LogOut className="w-4 h-4" />
                         <span className="font-semibold">{t.logout || 'Cerrar sesión'}</span>

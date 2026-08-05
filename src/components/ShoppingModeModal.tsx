@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { SupplyRequest, RequestItem, UserProfile } from '../types';
 import { getTranslation } from '../lib/translations';
 import {
-  X,
   CheckCircle2,
   Check,
   ShoppingBag,
   Store,
   MessageSquare,
   Truck,
+  X,
 } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
+import { cn } from '../lib/cn';
+import { Badge, Button, IconButton, useDialogA11y } from './ui';
 
 interface ShoppingModeModalProps {
   request: SupplyRequest;
@@ -28,6 +30,8 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
   onCompleteShopping,
 }) => {
   const t = getTranslation(currentUser.language ?? 'es');
+  const panelRef = useRef<HTMLDivElement>(null);
+  const { onKeyDown } = useDialogA11y(true, onClose, panelRef);
 
   const [selectedSupplierFilter, setSelectedSupplierFilter] = useState<string>('TODOS');
   const [editingNoteItemId, setEditingNoteItemId] = useState<string | null>(null);
@@ -41,15 +45,13 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const supplierFallback = t.storeGeneral;
-
-  const suppliers = Array.from(
+  const suppliers: string[] = Array.from(
     new Set(request.items.map((i) => i.suggestedSupplier || supplierFallback))
   );
 
   const filteredItems = request.items.filter((item) => {
     if (selectedSupplierFilter === 'TODOS') return true;
-    const sup = item.suggestedSupplier || supplierFallback;
-    return sup === selectedSupplierFilter;
+    return (item.suggestedSupplier || supplierFallback) === selectedSupplierFilter;
   });
 
   const totalItems = request.items.length;
@@ -58,16 +60,12 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
 
   const handleCheck = async (item: RequestItem) => {
     playAlertSound(item.purchased ? 'click' : 'success');
-    const newStatus = !item.purchased;
-    await onToggleItem(item.id, newStatus, itemNotes[item.id]);
+    await onToggleItem(item.id, !item.purchased, itemNotes[item.id]);
   };
 
   const handleSaveNote = async (itemId: string) => {
-    const noteText = itemNotes[itemId] || '';
     const item = request.items.find((i) => i.id === itemId);
-    if (item) {
-      await onToggleItem(itemId, item.purchased, noteText);
-    }
+    if (item) await onToggleItem(itemId, item.purchased, itemNotes[itemId] || '');
     setEditingNoteItemId(null);
   };
 
@@ -79,169 +77,192 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
     onClose();
   };
 
+  const supplierChip = (id: string, label: string, count: number) => (
+    <button
+      key={id}
+      onClick={() => setSelectedSupplierFilter(id)}
+      aria-pressed={selectedSupplierFilter === id}
+      className={cn(
+        'px-3 h-8 rounded-full text-xs font-bold transition whitespace-nowrap flex-shrink-0',
+        selectedSupplierFilter === id
+          ? 'bg-accent text-accent-contrast'
+          : 'bg-elevated text-text-secondary hover:text-text-primary'
+      )}
+    >
+      {label} ({count})
+    </button>
+  );
+
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between animate-fadeIn">
-      {/* Top Sticky Header */}
-      <div className="bg-slate-900 border-b border-slate-800 p-4 shadow-xl">
+    <div
+      ref={panelRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${t.shopModeTitle}${request.requestNumber}`}
+      tabIndex={-1}
+      onKeyDown={onKeyDown}
+      className="fixed inset-0 z-50 bg-app/95 backdrop-blur-md flex flex-col outline-none animate-fadeIn"
+      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      {/* Sticky header */}
+      <div className="bg-surface border-b border-border-default p-4 shadow-xl">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950 flex items-center justify-center font-black">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-control bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950 flex items-center justify-center flex-shrink-0">
               <ShoppingBag className="w-6 h-6" />
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-white text-base">
-                  {t.shopModeTitle}{request.requestNumber}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-extrabold text-text-primary text-base truncate">
+                  {t.shopModeTitle}
+                  {request.requestNumber}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-400 font-semibold text-xs">
+                <Badge tone="accent" className="flex-shrink-0">
                   {request.restaurantName}
-                </span>
+                </Badge>
               </div>
-              <p className="text-xs text-slate-400">{t.shopModeSubtitle}</p>
+              <p className="text-xs text-text-secondary">{t.shopModeSubtitle}</p>
             </div>
           </div>
 
-          <button
+          <IconButton
+            label={currentUser.language === 'en' ? 'Close' : 'Cerrar'}
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
           >
             <X className="w-6 h-6" />
-          </button>
+          </IconButton>
         </div>
 
-        {/* Live Progress Bar */}
+        {/* Progress */}
         <div className="max-w-4xl mx-auto mt-3">
           <div className="flex justify-between items-center text-xs font-bold mb-1">
-            <span className="text-slate-300">{t.cartProgress}</span>
-            <span className="text-emerald-400">
+            <span className="text-text-secondary">{t.cartProgress}</span>
+            <span className="text-accent">
               {purchasedCount} / {totalItems} {t.cartMarked} ({progressPct}%)
             </span>
           </div>
-          <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+          <div
+            className="w-full bg-elevated rounded-full h-3 overflow-hidden border border-border-default"
+            role="progressbar"
+            aria-valuenow={progressPct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <div
-              className="bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 h-3 rounded-full transition-all duration-300"
+              className="bg-accent h-3 rounded-full transition-all duration-[var(--duration-base)]"
               style={{ width: `${progressPct}%` }}
             />
           </div>
         </div>
 
-        {/* Supplier Filter Strip */}
-        <div className="max-w-4xl mx-auto mt-3 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1 flex-shrink-0">
-            <Store className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{t.storeFilterLabel}</span>
+        {/* Supplier filter */}
+        <div className="max-w-4xl mx-auto mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1 flex-shrink-0">
+            <Store className="w-3.5 h-3.5 text-accent" />
+            {t.storeFilterLabel}
           </span>
-
-          <button
-            onClick={() => setSelectedSupplierFilter('TODOS')}
-            className={`px-3 py-1 rounded-full text-xs font-bold transition whitespace-nowrap ${
-              selectedSupplierFilter === 'TODOS'
-                ? 'bg-emerald-500 text-slate-950'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-750'
-            }`}
-          >
-            {t.storeAll} ({request.items.length})
-          </button>
-
-          {suppliers.map((sup) => {
-            const count = request.items.filter(
-              (i) => (i.suggestedSupplier || supplierFallback) === sup
-            ).length;
-            return (
-              <button
-                key={sup}
-                onClick={() => setSelectedSupplierFilter(sup)}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition whitespace-nowrap ${
-                  selectedSupplierFilter === sup
-                    ? 'bg-emerald-500 text-slate-950'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-750'
-                }`}
-              >
-                {sup} ({count})
-              </button>
-            );
-          })}
+          {supplierChip('TODOS', t.storeAll, request.items.length)}
+          {suppliers.map((sup) =>
+            supplierChip(
+              sup,
+              sup,
+              request.items.filter((i) => (i.suggestedSupplier || supplierFallback) === sup).length
+            )
+          )}
         </div>
       </div>
 
-      {/* Main Checklist Body */}
+      {/* Checklist body */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-4xl mx-auto w-full space-y-3">
         {filteredItems.map((item) => (
           <div
             key={item.id}
             onClick={() => handleCheck(item)}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer select-none flex items-start space-x-3.5 ${
+            className={cn(
+              'p-4 rounded-card border transition-all cursor-pointer select-none flex items-start gap-3.5',
               item.purchased
-                ? 'bg-emerald-950/20 border-emerald-700/60 opacity-80'
-                : 'bg-slate-900 border-slate-800 hover:border-slate-700 shadow-md'
-            }`}
+                ? 'bg-success/10 border-success/40 opacity-80'
+                : 'bg-surface border-border-default hover:border-border-strong shadow-md'
+            )}
           >
-            {/* Custom Checkbox */}
-            <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all flex-shrink-0 mt-0.5 ${
+            {/* Checkbox (keyboard-operable) */}
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={item.purchased}
+              aria-label={item.productName}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCheck(item);
+              }}
+              className={cn(
+                'w-7 h-7 rounded-control flex items-center justify-center transition-all flex-shrink-0 mt-0.5',
                 item.purchased
-                  ? 'bg-emerald-500 text-slate-950 ring-2 ring-emerald-400'
-                  : 'bg-slate-800 border-2 border-slate-600 text-transparent'
-              }`}
+                  ? 'bg-accent text-accent-contrast ring-2 ring-accent/60'
+                  : 'bg-elevated border-2 border-border-strong text-transparent'
+              )}
             >
               <Check className="w-5 h-5 stroke-[3]" />
-            </div>
+            </button>
 
-            {/* Item Info */}
+            {/* Item info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <span
-                  className={`font-black text-base ${
-                    item.purchased ? 'text-emerald-300 line-through' : 'text-slate-100'
-                  }`}
+                  className={cn(
+                    'font-black text-base',
+                    item.purchased ? 'text-success line-through' : 'text-text-primary'
+                  )}
                 >
                   {item.productName}
                 </span>
-
-                <span className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-emerald-400 font-extrabold text-xs">
+                <Badge tone="accent" className="flex-shrink-0">
                   {item.requestedQty} {item.unit}s
-                </span>
+                </Badge>
               </div>
 
-              <div className="flex items-center space-x-3 text-xs text-slate-400 mt-1">
-                <span className="bg-slate-800 px-1.5 py-0.5 rounded text-[10px] uppercase font-mono">
+              <div className="flex items-center gap-3 text-xs text-text-secondary mt-1">
+                <span className="bg-elevated px-1.5 py-0.5 rounded-chip text-[10px] uppercase font-mono">
                   {item.category}
                 </span>
-                <span>•</span>
-                <span>{t.storeFilterLabel} {item.suggestedSupplier || t.storeAny}</span>
+                <span aria-hidden="true">•</span>
+                <span>
+                  {t.storeFilterLabel} {item.suggestedSupplier || t.storeAny}
+                </span>
               </div>
 
-              {/* Item Note */}
               {item.itemNote && (
-                <div className="mt-2 text-xs text-amber-300 bg-amber-950/40 p-2 rounded-lg border border-amber-800/50">
+                <div className="mt-2 text-xs text-warning bg-warning/10 p-2 rounded-control border border-warning/30">
                   {t.noteLabel} {item.itemNote}
                 </div>
               )}
 
-              {/* Add / Edit Note */}
-              <div className="mt-2 flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="mt-2 flex items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {editingNoteItemId === item.id ? (
-                  <div className="flex items-center space-x-2 w-full mt-1">
+                  <div className="flex items-center gap-2 w-full mt-1">
                     <input
                       type="text"
+                      autoFocus
                       value={itemNotes[item.id] || ''}
                       onChange={(e) =>
                         setItemNotes((prev) => ({ ...prev, [item.id]: e.target.value }))
                       }
+                      onKeyDown={(e) => e.key === 'Enter' && handleSaveNote(item.id)}
                       placeholder={t.notePlaceholder}
-                      className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      aria-label={t.noteAdd}
+                      className="flex-1 bg-inset border border-border-default rounded-control px-2.5 py-1.5 text-xs text-text-primary focus:outline-none"
                     />
-                    <button
-                      onClick={() => handleSaveNote(item.id)}
-                      className="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-xs font-bold"
-                    >
+                    <Button size="sm" variant="primary" onClick={() => handleSaveNote(item.id)}>
                       {t.noteSave}
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <button
                     onClick={() => setEditingNoteItemId(item.id)}
-                    className="text-[11px] text-slate-400 hover:text-emerald-400 flex items-center space-x-1"
+                    className="text-[11px] text-text-secondary hover:text-accent flex items-center gap-1"
                   >
                     <MessageSquare className="w-3 h-3" />
                     <span>{item.itemNote ? t.noteEdit : t.noteAdd}</span>
@@ -253,24 +274,25 @@ export const ShoppingModeModal: React.FC<ShoppingModeModalProps> = ({
         ))}
       </div>
 
-      {/* Bottom Sticky Action Footer */}
-      <div className="bg-slate-900 border-t border-slate-800 p-4 shadow-2xl">
+      {/* Sticky footer */}
+      <div className="bg-surface border-t border-border-default p-4 shadow-2xl">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center space-x-2 text-xs text-slate-300">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <div className="flex items-center gap-2 text-xs text-text-secondary">
+            <CheckCircle2 className="w-5 h-5 text-accent" />
             <span>{t.shopNotifyMsg}</span>
           </div>
 
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <button
-              onClick={handleFinish}
-              disabled={isSubmitting}
-              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/50 hover:brightness-110 transition flex items-center justify-center space-x-2"
-            >
-              <Truck className="w-4 h-4" />
-              <span>{isSubmitting ? t.shopProcessing : t.shopConfirmDelivery}</span>
-            </button>
-          </div>
+          <Button
+            variant="success"
+            size="lg"
+            fullWidth
+            className="sm:w-auto sm:px-8"
+            onClick={handleFinish}
+            loading={isSubmitting}
+            leftIcon={<Truck className="w-4 h-4" />}
+          >
+            {isSubmitting ? t.shopProcessing : t.shopConfirmDelivery}
+          </Button>
         </div>
       </div>
     </div>
