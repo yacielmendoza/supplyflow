@@ -1,4 +1,5 @@
 import { getTranslation, type Language } from './translations';
+import { formatUnitName } from './formatters';
 
 // Web Audio API Sound Synthesizer for alerts without external audio files
 export function playAlertSound(type: 'urgent' | 'success' | 'click' = 'urgent') {
@@ -150,7 +151,7 @@ export function generateRequestWhatsAppSummary(
   msg += `📦 *${t.waSummaryProducts}*\n`;
 
   req.items.forEach((item, idx) => {
-    msg += `${idx + 1}. *${item.productName}* - ${item.requestedQty} ${item.unit} (${item.suggestedSupplier || t.waSummaryGeneral})\n`;
+    msg += `${idx + 1}. *${item.productName}* - ${item.requestedQty} ${formatUnitName(item.unit, t, item.requestedQty)} (${item.suggestedSupplier || t.waSummaryGeneral})\n`;
   });
 
   msg += `\n⚡ *${t.waSummaryFooter}* ${window.location.origin}`;
