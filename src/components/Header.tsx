@@ -41,6 +41,12 @@ const HeaderComponent: React.FC<HeaderProps> = ({
 
   const selected = restaurants.find((r) => r.id === selectedRestaurantId) || restaurants[0];
 
+  // Same broken-avatar fallback AccountView already has — without it a
+  // failed image load shows the browser's broken-image icon in the most
+  // visible spot in the chrome instead of the user's initials.
+  const [avatarError, setAvatarError] = useState(false);
+  useEffect(() => { setAvatarError(false); }, [currentUser.avatarUrl]);
+
   const closePopover = (returnFocus: boolean) => {
     setOpen(false);
     if (returnFocus) triggerRef.current?.focus();
@@ -52,11 +58,23 @@ const HeaderComponent: React.FC<HeaderProps> = ({
       if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closePopover(true);
+    // Tabbing out of the listbox previously left it open and interactive
+    // while keyboard focus had already moved to the next control (the
+    // notification bell) — a screen reader user tabbing linearly would find
+    // an "open" listbox with focus somewhere else entirely. No focus trap is
+    // added (Tab should be allowed to leave), just a close on the way out.
+    const onFocusOut = (e: FocusEvent) => {
+      const next = e.relatedTarget as Node | null;
+      if (next && selectorRef.current && !selectorRef.current.contains(next)) setOpen(false);
+    };
+    const container = selectorRef.current;
     document.addEventListener('mousedown', onDoc);
     document.addEventListener('keydown', onKey);
+    container?.addEventListener('focusout', onFocusOut);
     return () => {
       document.removeEventListener('mousedown', onDoc);
       document.removeEventListener('keydown', onKey);
+      container?.removeEventListener('focusout', onFocusOut);
     };
   }, [open]);
 
@@ -206,12 +224,13 @@ const HeaderComponent: React.FC<HeaderProps> = ({
               aria-label={`${t.tabSettings}: ${formatCleanName(currentUser.name)} — ${sseConnected ? t.online : t.reconnecting}`}
             >
               <span className="block w-full h-full rounded-full overflow-hidden">
-                {currentUser.avatarUrl ? (
+                {currentUser.avatarUrl && !avatarError ? (
                   <img
                     src={currentUser.avatarUrl}
                     alt={currentUser.name}
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
+                    onError={() => setAvatarError(true)}
                   />
                 ) : (
                   <span
