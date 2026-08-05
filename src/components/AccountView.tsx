@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserProfile } from '../types';
 import { getTranslation, Language } from '../lib/translations';
 import { formatCleanName } from '../lib/formatters';
+import { tint } from '../lib/colors';
 import {
   User,
   Mail,
@@ -18,6 +19,7 @@ import {
   Download,
   Share,
   PlusSquare,
+  UserRound,
 } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
 import { ViewHeader } from './ViewHeader';
@@ -72,6 +74,12 @@ export const AccountView: React.FC<AccountViewProps> = ({
   const [phone, setPhone] = useState(currentUser.phone);
   const [avatarUrl, setAvatarUrl] = useState(currentUser.avatarUrl || '');
   const [savedFlash, setSavedFlash] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+  const [presetImgError, setPresetImgError] = useState<Record<string, boolean>>({});
+
+  // A new avatar URL deserves a fresh chance to load before we fall back.
+  useEffect(() => setAvatarError(false), [avatarUrl]);
 
   const dirty =
     name !== currentUser.name ||
@@ -80,17 +88,29 @@ export const AccountView: React.FC<AccountViewProps> = ({
     avatarUrl !== (currentUser.avatarUrl || '');
 
   const saveProfile = () => {
-    onSaveProfile({ ...currentUser, name, email, phone, avatarUrl });
-    playAlertSound('success');
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 1600);
+    setSaveError(false);
+    try {
+      onSaveProfile({ ...currentUser, name, email, phone, avatarUrl });
+      playAlertSound('success');
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 1600);
+    } catch {
+      setSaveError(true);
+    }
   };
 
   // Theme/language apply instantly, so users reasonably expect the rest of the
   // form to behave the same way — auto-save any unsaved edits before leaving
   // instead of discarding them silently.
   const handleBack = () => {
-    if (dirty) onSaveProfile({ ...currentUser, name, email, phone, avatarUrl });
+    if (dirty) {
+      try {
+        onSaveProfile({ ...currentUser, name, email, phone, avatarUrl });
+      } catch {
+        // Navigation still proceeds; the user can retry the edit via Save
+        // once they're back on the account screen.
+      }
+    }
     onBack();
   };
 
@@ -119,8 +139,8 @@ export const AccountView: React.FC<AccountViewProps> = ({
               className="w-20 h-20 rounded-3xl overflow-hidden flex items-center justify-center flex-shrink-0"
               style={{ background: 'var(--sf-accent-soft)' }}
             >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={name} className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setAvatarUrl('')} />
+              {avatarUrl && !avatarError ? (
+                <img src={avatarUrl} alt={name} className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setAvatarError(true)} />
               ) : (
                 <span className="text-3xl font-black" style={{ color: 'var(--sf-accent)' }}>
                   {name.charAt(0).toUpperCase()}
@@ -144,22 +164,32 @@ export const AccountView: React.FC<AccountViewProps> = ({
             <div className="flex gap-2">
               {AVATAR_PRESETS.map((p) => {
                 const active = avatarUrl === p.url;
+                const broken = presetImgError[p.id];
                 return (
                   <button
                     key={p.id}
                     onClick={() => setAvatarUrl(p.url)}
                     aria-label={avatarPresetLabel(p.id, t)}
-                    aria-pressed={active}
+                    aria-current={active ? 'true' : undefined}
                     className="w-11 h-11 rounded-xl overflow-hidden transition"
                     style={{ outline: active ? '2px solid var(--sf-accent)' : '1px solid var(--sf-border)', outlineOffset: '1px' }}
                   >
-                    <img
-                      src={p.url}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
-                    />
+                    {broken ? (
+                      <span
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ background: 'var(--sf-accent-soft)' }}
+                      >
+                        <UserRound className="w-5 h-5" style={{ color: 'var(--sf-accent)' }} />
+                      </span>
+                    ) : (
+                      <img
+                        src={p.url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                        onError={() => setPresetImgError((prev) => ({ ...prev, [p.id]: true }))}
+                      />
+                    )}
                   </button>
                 );
               })}
@@ -172,6 +202,12 @@ export const AccountView: React.FC<AccountViewProps> = ({
             <Field id="account-email" icon={Mail} value={email} onChange={setEmail} placeholder={t.email} type="email" inputStyle={inputStyle} />
             <Field id="account-phone" icon={Phone} value={phone} onChange={setPhone} placeholder={t.phoneWhatsApp} type="tel" inputStyle={inputStyle} />
           </div>
+
+          {saveError && (
+            <div role="status" aria-live="polite" className="text-xs font-bold px-3 py-2.5 rounded-xl" style={{ background: tint('var(--sf-rose)', 14), color: 'var(--sf-rose)' }}>
+              {t.adminSaveError}
+            </div>
+          )}
 
           <button
             onClick={saveProfile}
@@ -257,9 +293,11 @@ export const AccountView: React.FC<AccountViewProps> = ({
                 <button
                   key={u.id}
                   onClick={() => {
-                    if (!active) onSelectUser(u);
+                    if (active) return;
+                    onSelectUser(u);
                     playAlertSound('click');
                   }}
+                  aria-current={active ? 'true' : undefined}
                   className="w-full flex items-center gap-3 sf-inset px-3 py-2.5 text-left transition hover:brightness-95"
                 >
                   <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style={{ background: 'var(--sf-accent-soft)' }}>
@@ -326,7 +364,7 @@ const ToggleBtn: React.FC<{ active: boolean; icon: React.ElementType; label: str
 }) => (
   <button
     onClick={onClick}
-    aria-pressed={active}
+    aria-current={active ? 'true' : undefined}
     className="flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-sm transition"
     style={{
       background: active ? 'var(--sf-accent-soft)' : 'var(--sf-surface-2)',
