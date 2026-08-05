@@ -55,15 +55,16 @@ export function LoginScreen({ users, onSelectUser, language, onChangeLanguage }:
     if (loadingUserId) return;
     playAlertSound('click');
     setLoadingUserId(user.id);
-    setTimeout(() => {
-      try {
-        onSelectUser(user);
-      } catch {
-        /* onSelectUser only persists local session state; nothing to surface to the user */
-      } finally {
-        setLoadingUserId(null);
-      }
-    }, 500);
+    // onSelectUser is synchronous (local session state only) — no real async
+    // work to wait on, so navigate immediately instead of padding the tap
+    // with an artificial delay.
+    try {
+      onSelectUser(user);
+    } catch {
+      /* onSelectUser only persists local session state; nothing to surface to the user */
+    } finally {
+      setLoadingUserId(null);
+    }
   };
 
   const sections: Array<{ key: Role; label: string; users: UserProfile[] }> = [
