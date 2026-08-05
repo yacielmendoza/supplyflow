@@ -13,15 +13,17 @@ interface BottomNavProps {
   tabs: BottomNavTab[];
   activeTab: string;
   onChange: (id: string) => void;
+  ariaLabel: string;
 }
 
 /**
  * Native-style bottom tab bar. Big touch targets, single active accent pill,
  * safe-area aware. Themed entirely through design tokens.
  */
-const BottomNavComponent: React.FC<BottomNavProps> = ({ tabs, activeTab, onChange }) => {
+const BottomNavComponent: React.FC<BottomNavProps> = ({ tabs, activeTab, onChange, ariaLabel }) => {
   return (
     <nav
+      aria-label={ariaLabel}
       className="fixed bottom-0 inset-x-0 z-40 safe-bottom"
       style={{
         background: 'color-mix(in srgb, var(--sf-surface) 92%, transparent)',

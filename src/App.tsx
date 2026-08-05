@@ -145,6 +145,7 @@ export default function App() {
     if (updatedProfile.language) safeSetItem(LANGUAGE_KEY, updatedProfile.language);
   };
 
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleSelectRequestFromNotification = (requestId: string) => {
     const req = supplyRequests.find((r) => r.id === requestId);
     if (req) {
@@ -153,8 +154,13 @@ export default function App() {
     setActiveTab('REQUESTS');
     setScreen('NONE');
     setHighlightedRequestId(requestId);
-    setTimeout(() => {
+    // Cancel any still-pending un-highlight from a previous notification —
+    // without this, opening a second notification within 5s of the first
+    // lets the first timeout clear the second request's highlight early.
+    if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    highlightTimeoutRef.current = setTimeout(() => {
       setHighlightedRequestId(null);
+      highlightTimeoutRef.current = null;
     }, 5000);
   };
 
@@ -651,6 +657,16 @@ export default function App() {
     }
   }, [isLight]);
 
+  // Sync the document's lang attribute with the active language (WCAG 3.1.1)
+  // — index.html hardcodes lang="es" as a static fallback for pre-hydration
+  // paint; screen readers need this kept current or they read translated
+  // content with the wrong pronunciation.
+  const activeLanguage = currentUser?.language || appLanguage;
+  useEffect(() => {
+    document.documentElement.lang = activeLanguage;
+    document.title = t.docTitle;
+  }, [activeLanguage, t.docTitle]);
+
   // Show login screen when no user is selected
   if (!currentUser) {
     return (
@@ -800,6 +816,7 @@ export default function App() {
         tabs={currentNavTabs}
         activeTab={activeTab}
         onChange={handleChangeTab}
+        ariaLabel={t.navLandmarkLabel}
       />
     </div>
   );
