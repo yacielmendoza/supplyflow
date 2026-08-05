@@ -50,7 +50,7 @@ const BottomNavComponent: React.FC<BottomNavProps> = ({ tabs, activeTab, onChang
                     : tab.label
                 }
                 aria-current={isActive ? 'page' : undefined}
-                className="relative flex-1 flex flex-col items-center justify-center gap-1 py-1.5 rounded-2xl transition active:scale-95"
+                className="relative flex-1 min-h-11 flex flex-col items-center justify-center gap-1 py-1.5 rounded-2xl transition active:scale-95"
                 style={{ color: isActive ? 'var(--sf-accent)' : 'var(--sf-text-subtle)' }}
               >
                 <span
@@ -67,7 +67,7 @@ const BottomNavComponent: React.FC<BottomNavProps> = ({ tabs, activeTab, onChang
                     </span>
                   )}
                 </span>
-                <span className="text-[11px] font-bold tracking-tight leading-none">
+                <span className="text-[11px] font-bold tracking-tight leading-none whitespace-nowrap">
                   {tab.label}
                 </span>
               </button>

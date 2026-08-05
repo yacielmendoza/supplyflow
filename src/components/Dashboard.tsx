@@ -121,7 +121,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     [scoped]
   );
 
-  const statusLabels = getStatusLabels(t);
+  const statusLabels = useMemo(() => getStatusLabels(t), [t]);
 
   return (
     <div className="space-y-6 animate-fadeIn">
