@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SupplyRequest, RequestItem, UserProfile } from '../types';
 import { getTranslation } from '../lib/translations';
+import { formatCategoryName, formatUnitName } from '../lib/formatters';
 import {
   CheckCircle2,
   Check,
@@ -201,12 +202,12 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                   {item.productName}
                 </span>
                 <span className="sf-pill px-2.5 py-1 rounded-lg font-extrabold text-xs sf-accent flex-shrink-0">
-                  {item.requestedQty} {item.unit}s
+                  {item.requestedQty} {formatUnitName(item.unit, t)}s
                 </span>
               </div>
 
               <div className="flex items-center gap-2 text-xs sf-muted mt-1">
-                <span className="sf-inset px-1.5 py-0.5 rounded-lg text-[10px] uppercase font-mono">{item.category}</span>
+                <span className="sf-inset px-1.5 py-0.5 rounded-lg text-[10px] uppercase font-mono">{formatCategoryName(item.category, t)}</span>
                 <span>•</span>
                 <span className="truncate">{item.suggestedSupplier || t.storeAny}</span>
               </div>
@@ -232,6 +233,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                       }}
                       onBlur={() => handleSaveNote(item.id)}
                       placeholder={t.notePlaceholder}
+                      aria-label={`${t.notePlaceholder} — ${item.productName}`}
                       autoFocus
                       className="flex-1 sf-inset px-2.5 min-h-11 text-xs focus:outline-none"
                       style={{ color: 'var(--sf-text)' }}
