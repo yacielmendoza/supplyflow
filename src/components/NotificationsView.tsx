@@ -354,14 +354,18 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                 <Zap className="w-4 h-4" style={{ color: 'var(--sf-amber)' }} />
                 {t.notifSimulateLabel}
               </div>
+              <label htmlFor="notif-test-title" className="sr-only">{t.notifTestTitleFieldLabel}</label>
               <input
+                id="notif-test-title"
                 type="text"
                 value={testTitle}
                 onChange={(e) => setTestTitle(e.target.value)}
                 className="w-full sf-inset px-3 py-2.5 text-sm focus:outline-none"
                 style={{ color: 'var(--sf-text)' }}
               />
+              <label htmlFor="notif-test-body" className="sr-only">{t.notifTestBodyFieldLabel}</label>
               <input
+                id="notif-test-body"
                 type="text"
                 value={testBody}
                 onChange={(e) => setTestBody(e.target.value)}
