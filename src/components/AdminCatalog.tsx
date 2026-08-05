@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Product, Restaurant, Supplier, Category, UnitType, UserProfile } from '../types';
 import { getTranslation } from '../lib/translations';
-import { PRODUCT_CATEGORIES, formatRestaurantType } from '../lib/formatters';
+import { PRODUCT_CATEGORIES, formatRestaurantType, formatCategoryName, formatUnitName } from '../lib/formatters';
 import { tint, RESTAURANT_COLOR_TOKENS } from '../lib/colors';
 import { Plus, Edit2, Trash2, Save, X, Search, SlidersHorizontal, Clock, Flame } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
@@ -63,11 +63,15 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
   const categories: Category[] = PRODUCT_CATEGORIES;
   const unitOptions: UnitType[] = ['Paquete', 'Caja', 'Tubo', 'Bolsa', 'Libra', 'Galón', 'Botella', 'Lata', 'Unidad', 'Tanque', 'Rollo', 'Atado', 'Cubeta', 'Caja / Cartón'];
 
-  const filteredProducts = products.filter((p) => {
-    const matchRest = !selectedRestFilter || p.restaurantId === selectedRestFilter;
-    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchRest && matchSearch;
-  });
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((p) => {
+        const matchRest = !selectedRestFilter || p.restaurantId === selectedRestFilter;
+        const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchRest && matchSearch;
+      }),
+    [products, selectedRestFilter, searchQuery]
+  );
 
   const handleStartEdit = (p: Product) => {
     setEditingProdId(p.id);
@@ -191,36 +195,36 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                 <button type="button" onClick={() => setShowAddForm(false)} aria-label={t.adminCancel} className="sf-btn-ghost w-11 h-11 rounded-lg flex items-center justify-center"><X className="w-4 h-4" /></button>
               </div>
               <div>
-                <label className="block sf-muted font-bold mb-1">{t.adminProductName}</label>
-                <input type="text" required value={newProdName} onChange={(e) => setNewProdName(e.target.value)} placeholder={t.adminProductNamePlaceholder} className={inputCls} style={inputStyle} />
+                <label htmlFor="admin-new-prod-name" className="block sf-muted font-bold mb-1">{t.adminProductName}</label>
+                <input id="admin-new-prod-name" type="text" required value={newProdName} onChange={(e) => setNewProdName(e.target.value)} placeholder={t.adminProductNamePlaceholder} className={inputCls} style={inputStyle} />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block sf-muted font-bold mb-1">{t.adminCategory}</label>
-                  <select value={newProdCategory} onChange={(e) => setNewProdCategory(e.target.value as any)} className={inputCls} style={inputStyle}>
-                    {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                  <label htmlFor="admin-new-prod-category" className="block sf-muted font-bold mb-1">{t.adminCategory}</label>
+                  <select id="admin-new-prod-category" value={newProdCategory} onChange={(e) => setNewProdCategory(e.target.value as any)} className={inputCls} style={inputStyle}>
+                    {categories.map((c) => <option key={c} value={c}>{formatCategoryName(c, t)}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block sf-muted font-bold mb-1">{t.adminDynamicUnit}</label>
-                  <select value={newProdUnit} onChange={(e) => setNewProdUnit(e.target.value as any)} className={inputCls} style={inputStyle}>
-                    {unitOptions.map((u) => <option key={u} value={u}>{u}</option>)}
+                  <label htmlFor="admin-new-prod-unit" className="block sf-muted font-bold mb-1">{t.adminDynamicUnit}</label>
+                  <select id="admin-new-prod-unit" value={newProdUnit} onChange={(e) => setNewProdUnit(e.target.value as any)} className={inputCls} style={inputStyle}>
+                    {unitOptions.map((u) => <option key={u} value={u}>{formatUnitName(u, t)}</option>)}
                   </select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block sf-muted font-bold mb-1">{t.adminMinThreshold}</label>
-                  <input type="number" min="1" value={newProdMin} onChange={(e) => setNewProdMin(Number(e.target.value))} className={inputCls} style={inputStyle} />
+                  <label htmlFor="admin-new-prod-min" className="block sf-muted font-bold mb-1">{t.adminMinThreshold}</label>
+                  <input id="admin-new-prod-min" type="number" min="1" value={newProdMin} onChange={(e) => setNewProdMin(Number(e.target.value))} className={inputCls} style={inputStyle} />
                 </div>
                 <div>
-                  <label className="block sf-muted font-bold mb-1">{t.adminStdPurchase}</label>
-                  <input type="number" min="1" value={newProdSuggested} onChange={(e) => setNewProdSuggested(Number(e.target.value))} className={inputCls} style={inputStyle} />
+                  <label htmlFor="admin-new-prod-suggested" className="block sf-muted font-bold mb-1">{t.adminStdPurchase}</label>
+                  <input id="admin-new-prod-suggested" type="number" min="1" value={newProdSuggested} onChange={(e) => setNewProdSuggested(Number(e.target.value))} className={inputCls} style={inputStyle} />
                 </div>
               </div>
               <div>
-                <label className="block sf-muted font-bold mb-1">{t.adminUsualSupplier}</label>
-                <input type="text" value={newProdSupplier} onChange={(e) => setNewProdSupplier(e.target.value)} className={inputCls} style={inputStyle} />
+                <label htmlFor="admin-new-prod-supplier" className="block sf-muted font-bold mb-1">{t.adminUsualSupplier}</label>
+                <input id="admin-new-prod-supplier" type="text" value={newProdSupplier} onChange={(e) => setNewProdSupplier(e.target.value)} className={inputCls} style={inputStyle} />
               </div>
               <div className="pt-1 flex justify-end gap-2">
                 <button type="button" onClick={() => setShowAddForm(false)} className="px-4 min-h-11 sf-btn-ghost rounded-xl font-bold">{t.adminCancel}</button>
@@ -244,8 +248,8 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                     <div>
                       <div className="font-extrabold text-sm" style={{ color: 'var(--sf-text)' }}>{p.name}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="sf-inset px-2 py-0.5 rounded-lg font-mono text-[10px] sf-muted">{p.category}</span>
-                        <span className="text-[11px] sf-muted">• {t.adminUnitLabel} {p.unit}</span>
+                        <span className="sf-inset px-2 py-0.5 rounded-lg font-mono text-[10px] sf-muted">{formatCategoryName(p.category, t)}</span>
+                        <span className="text-[11px] sf-muted">• {t.adminUnitLabel} {formatUnitName(p.unit, t)}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
@@ -256,11 +260,11 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                   <div className="grid grid-cols-2 gap-2 pt-1.5 text-xs" style={{ borderTop: '1px solid var(--sf-border)' }}>
                     <div className="sf-inset px-2.5 py-1.5">
                       <span className="text-[9px] sf-subtle block font-bold uppercase">{t.adminMinOpShort}</span>
-                      <span className="font-black" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {p.unit}s</span>
+                      <span className="font-black" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {formatUnitName(p.unit, t)}s</span>
                     </div>
                     <div className="sf-inset px-2.5 py-1.5">
                       <span className="text-[9px] sf-subtle block font-bold uppercase">{t.adminStdPackage}</span>
-                      <span className="font-bold" style={{ color: 'var(--sf-text)' }}>{p.suggestedQuantity} {p.unit}s</span>
+                      <span className="font-bold" style={{ color: 'var(--sf-text)' }}>{p.suggestedQuantity} {formatUnitName(p.unit, t)}s</span>
                     </div>
                   </div>
                   {p.suggestedSupplier && (
@@ -300,24 +304,24 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                         <td className="p-3">
                           {isEditing ? (
                             <select value={editForm.category} onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value as any }))} className="sf-inset px-2 py-1 text-xs" style={inputStyle}>
-                              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                              {categories.map((c) => <option key={c} value={c}>{formatCategoryName(c, t)}</option>)}
                             </select>
-                          ) : <span className="sf-inset px-2 py-0.5 rounded-lg font-mono text-[10px] sf-muted">{p.category}</span>}
+                          ) : <span className="sf-inset px-2 py-0.5 rounded-lg font-mono text-[10px] sf-muted">{formatCategoryName(p.category, t)}</span>}
                         </td>
                         <td className="p-3">
                           {isEditing ? (
                             <select value={editForm.unit} onChange={(e) => setEditForm((prev) => ({ ...prev, unit: e.target.value as any }))} className="sf-inset px-2 py-1 text-xs" style={inputStyle}>
-                              {unitOptions.map((u) => <option key={u} value={u}>{u}</option>)}
+                              {unitOptions.map((u) => <option key={u} value={u}>{formatUnitName(u, t)}</option>)}
                             </select>
-                          ) : <span className="sf-muted">{p.unit}</span>}
+                          ) : <span className="sf-muted">{formatUnitName(p.unit, t)}</span>}
                         </td>
                         <td className="p-3">
                           {isEditing ? <input type="number" min="1" value={editForm.minThreshold || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, minThreshold: Number(e.target.value) }))} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : (
-                            <span className="sf-inset font-extrabold px-2 py-0.5" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {p.unit}s</span>
+                            <span className="sf-inset font-extrabold px-2 py-0.5" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {formatUnitName(p.unit, t)}s</span>
                           )}
                         </td>
                         <td className="p-3">
-                          {isEditing ? <input type="number" min="1" value={editForm.suggestedQuantity || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedQuantity: Number(e.target.value) }))} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : <span>{p.suggestedQuantity} {p.unit}s</span>}
+                          {isEditing ? <input type="number" min="1" value={editForm.suggestedQuantity || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedQuantity: Number(e.target.value) }))} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : <span>{p.suggestedQuantity} {formatUnitName(p.unit, t)}s</span>}
                         </td>
                         <td className="p-3">
                           {isEditing ? <input type="text" value={editForm.suggestedSupplier || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedSupplier: e.target.value }))} className="sf-inset px-2 py-1 text-xs w-full" style={inputStyle} /> : <span className="sf-muted">{p.suggestedSupplier || '-'}</span>}
@@ -363,12 +367,12 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                 <button type="button" onClick={() => setShowAddRestForm(false)} aria-label={t.adminCancel} className="sf-btn-ghost w-11 h-11 rounded-lg flex items-center justify-center"><X className="w-4 h-4" /></button>
               </div>
               <div>
-                <label className="block sf-muted font-bold mb-1">{t.adminCommercialName}</label>
-                <input type="text" required value={newRestName} onChange={(e) => setNewRestName(e.target.value)} placeholder={t.adminRestNamePlaceholder} className={inputCls} style={inputStyle} />
+                <label htmlFor="admin-new-rest-name" className="block sf-muted font-bold mb-1">{t.adminCommercialName}</label>
+                <input id="admin-new-rest-name" type="text" required value={newRestName} onChange={(e) => setNewRestName(e.target.value)} placeholder={t.adminRestNamePlaceholder} className={inputCls} style={inputStyle} />
               </div>
               <div>
-                <label className="block sf-muted font-bold mb-1">{t.adminEstablishmentType}</label>
-                <select value={newRestType} onChange={(e) => setNewRestType(e.target.value as any)} className={inputCls} style={inputStyle}>
+                <label htmlFor="admin-new-rest-type" className="block sf-muted font-bold mb-1">{t.adminEstablishmentType}</label>
+                <select id="admin-new-rest-type" value={newRestType} onChange={(e) => setNewRestType(e.target.value as any)} className={inputCls} style={inputStyle}>
                   <option value="Food Truck">{t.adminTypeFoodTruck}</option>
                   <option value="Restaurante">{t.adminTypeRestaurant}</option>
                   <option value="Cafe">{t.adminTypeCafe}</option>
@@ -376,8 +380,8 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                 </select>
               </div>
               <div>
-                <label className="block sf-muted font-bold mb-1">{t.adminAddressCity}</label>
-                <input type="text" value={newRestAddress} onChange={(e) => setNewRestAddress(e.target.value)} className={inputCls} style={inputStyle} />
+                <label htmlFor="admin-new-rest-address" className="block sf-muted font-bold mb-1">{t.adminAddressCity}</label>
+                <input id="admin-new-rest-address" type="text" value={newRestAddress} onChange={(e) => setNewRestAddress(e.target.value)} className={inputCls} style={inputStyle} />
               </div>
               <div className="pt-1 flex justify-end gap-2">
                 <button type="button" onClick={() => setShowAddRestForm(false)} className="px-4 min-h-11 sf-btn-ghost rounded-xl font-bold">{t.adminCancel}</button>
@@ -435,36 +439,36 @@ const EditCard: React.FC<{
     <div className="font-bold text-xs sf-accent">{t.adminEditingLabel}</div>
     <div className="space-y-2 text-xs">
       <div>
-        <label className="text-[10px] sf-muted block font-bold">{t.adminProductName}</label>
-        <input type="text" value={editForm.name || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} className={inputCls} style={inputStyle} />
+        <label htmlFor={`admin-edit-name-${p.id}`} className="text-[10px] sf-muted block font-bold">{t.adminProductName}</label>
+        <input id={`admin-edit-name-${p.id}`} type="text" value={editForm.name || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} className={inputCls} style={inputStyle} />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[10px] sf-muted block font-bold">{t.adminCategory}</label>
-          <select value={editForm.category} onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value as any }))} className={inputCls} style={inputStyle}>
-            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+          <label htmlFor={`admin-edit-category-${p.id}`} className="text-[10px] sf-muted block font-bold">{t.adminCategory}</label>
+          <select id={`admin-edit-category-${p.id}`} value={editForm.category} onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value as any }))} className={inputCls} style={inputStyle}>
+            {categories.map((c) => <option key={c} value={c}>{formatCategoryName(c, t)}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-[10px] sf-muted block font-bold">{t.adminUnit}</label>
-          <select value={editForm.unit} onChange={(e) => setEditForm((prev) => ({ ...prev, unit: e.target.value as any }))} className={inputCls} style={inputStyle}>
-            {unitOptions.map((u) => <option key={u} value={u}>{u}</option>)}
+          <label htmlFor={`admin-edit-unit-${p.id}`} className="text-[10px] sf-muted block font-bold">{t.adminUnit}</label>
+          <select id={`admin-edit-unit-${p.id}`} value={editForm.unit} onChange={(e) => setEditForm((prev) => ({ ...prev, unit: e.target.value as any }))} className={inputCls} style={inputStyle}>
+            {unitOptions.map((u) => <option key={u} value={u}>{formatUnitName(u, t)}</option>)}
           </select>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[10px] sf-muted block font-bold">{t.adminMinOpShort}</label>
-          <input type="number" min="1" value={editForm.minThreshold || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, minThreshold: Number(e.target.value) }))} className={inputCls} style={inputStyle} />
+          <label htmlFor={`admin-edit-min-${p.id}`} className="text-[10px] sf-muted block font-bold">{t.adminMinOpShort}</label>
+          <input id={`admin-edit-min-${p.id}`} type="number" min="1" value={editForm.minThreshold || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, minThreshold: Number(e.target.value) }))} className={inputCls} style={inputStyle} />
         </div>
         <div>
-          <label className="text-[10px] sf-muted block font-bold">{t.adminStdPurchase}</label>
-          <input type="number" min="1" value={editForm.suggestedQuantity || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedQuantity: Number(e.target.value) }))} className={inputCls} style={inputStyle} />
+          <label htmlFor={`admin-edit-suggested-${p.id}`} className="text-[10px] sf-muted block font-bold">{t.adminStdPurchase}</label>
+          <input id={`admin-edit-suggested-${p.id}`} type="number" min="1" value={editForm.suggestedQuantity || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedQuantity: Number(e.target.value) }))} className={inputCls} style={inputStyle} />
         </div>
       </div>
       <div>
-        <label className="text-[10px] sf-muted block font-bold">{t.adminUsualSupplier}</label>
-        <input type="text" value={editForm.suggestedSupplier || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedSupplier: e.target.value }))} className={inputCls} style={inputStyle} />
+        <label htmlFor={`admin-edit-supplier-${p.id}`} className="text-[10px] sf-muted block font-bold">{t.adminUsualSupplier}</label>
+        <input id={`admin-edit-supplier-${p.id}`} type="text" value={editForm.suggestedSupplier || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedSupplier: e.target.value }))} className={inputCls} style={inputStyle} />
       </div>
       <div className="flex justify-end gap-2 pt-1">
         <button onClick={onCancel} className="px-3 min-h-11 sf-btn-ghost font-bold rounded-lg">{t.adminCancel}</button>
@@ -514,16 +518,16 @@ function OverdueSettingsPanel({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="block sf-muted font-bold text-xs uppercase tracking-wider">{t.adminOverdueNormalLabel}</label>
-            <input type="number" min={1} max={240} value={normal} onChange={(e) => setNormal(e.target.value)} className="w-full sf-inset px-3 py-2.5 text-sm font-bold text-center focus:outline-none" style={inputStyle} />
+            <label htmlFor="admin-overdue-normal" className="block sf-muted font-bold text-xs uppercase tracking-wider">{t.adminOverdueNormalLabel}</label>
+            <input id="admin-overdue-normal" type="number" min={1} max={240} value={normal} onChange={(e) => setNormal(e.target.value)} className="w-full sf-inset px-3 py-2.5 text-sm font-bold text-center focus:outline-none" style={inputStyle} />
             <p className="text-xs sf-subtle">{t.adminOverdueNormalHint}</p>
           </div>
           <div className="space-y-1.5">
-            <label className="font-bold text-xs uppercase tracking-wider flex items-center gap-1" style={{ color: 'var(--sf-rose)' }}>
+            <label htmlFor="admin-overdue-urgent" className="font-bold text-xs uppercase tracking-wider flex items-center gap-1" style={{ color: 'var(--sf-rose)' }}>
               <Flame className="w-3.5 h-3.5" />
               {t.adminOverdueUrgentLabel}
             </label>
-            <input type="number" min={1} max={60} value={urgent} onChange={(e) => setUrgent(e.target.value)} className="w-full sf-inset px-3 py-2.5 text-sm font-bold text-center focus:outline-none" style={{ ...inputStyle, borderColor: tint('var(--sf-rose)', 40) }} />
+            <input id="admin-overdue-urgent" type="number" min={1} max={60} value={urgent} onChange={(e) => setUrgent(e.target.value)} className="w-full sf-inset px-3 py-2.5 text-sm font-bold text-center focus:outline-none" style={{ ...inputStyle, borderColor: tint('var(--sf-rose)', 40) }} />
             <p className="text-xs sf-subtle">{t.adminOverdueUrgentHint}</p>
           </div>
         </div>
