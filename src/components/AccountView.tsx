@@ -168,9 +168,9 @@ export const AccountView: React.FC<AccountViewProps> = ({
 
           {/* Fields */}
           <div className="space-y-2.5">
-            <Field icon={User} value={name} onChange={setName} placeholder={t.fullName} inputStyle={inputStyle} />
-            <Field icon={Mail} value={email} onChange={setEmail} placeholder={t.email} type="email" inputStyle={inputStyle} />
-            <Field icon={Phone} value={phone} onChange={setPhone} placeholder={t.phoneWhatsApp} type="tel" inputStyle={inputStyle} />
+            <Field id="account-name" icon={User} value={name} onChange={setName} placeholder={t.fullName} inputStyle={inputStyle} />
+            <Field id="account-email" icon={Mail} value={email} onChange={setEmail} placeholder={t.email} type="email" inputStyle={inputStyle} />
+            <Field id="account-phone" icon={Phone} value={phone} onChange={setPhone} placeholder={t.phoneWhatsApp} type="tel" inputStyle={inputStyle} />
           </div>
 
           <button
@@ -295,16 +295,19 @@ export const AccountView: React.FC<AccountViewProps> = ({
 };
 
 const Field: React.FC<{
+  id: string;
   icon: React.ElementType;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   type?: string;
   inputStyle: React.CSSProperties;
-}> = ({ icon: Icon, value, onChange, placeholder, type = 'text', inputStyle }) => (
+}> = ({ id, icon: Icon, value, onChange, placeholder, type = 'text', inputStyle }) => (
   <div className="relative">
+    <label htmlFor={id} className="sr-only">{placeholder}</label>
     <Icon className="w-4 h-4 sf-subtle absolute left-3 top-1/2 -translate-y-1/2" />
     <input
+      id={id}
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
