@@ -29,8 +29,17 @@ form `onSubmit`, or similar UI trigger in the touched/reviewed files:
 5. Flag fire-and-forget async calls with no `await`/`.catch()` at the call
    site — same defect class, no loading flag to observe but still an
    unhandled rejection with no user-visible outcome.
+6. Confirm the triggering control (button `onClick`, `onBlur` save) is
+   disabled/blocked for the full duration of the `await`, not just reverted
+   to non-loading in `catch`. A loading flag that resets on error is not
+   sufficient if the control was clickable *during* the pending call — a
+   double-tap on mobile (common on slow connections) can fire the same
+   mutation twice before the first response updates the UI. Check that the
+   disabled state is set synchronously in the same handler that starts the
+   `await`.
 
 Report file:line findings, each naming the handler, what happens today on
-rejection, and the concrete `try/catch/finally` + error-message fix. Do
-not edit files — read-only review role. If everything already handles
-rejection correctly, say so explicitly.
+rejection (or on a double-tap while pending), and the concrete
+`try/catch/finally` + disabled-state + error-message fix. Do not edit
+files — read-only review role. If everything already handles rejection
+and double-submit correctly, say so explicitly.

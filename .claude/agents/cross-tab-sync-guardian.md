@@ -94,12 +94,37 @@ feed it:
    advances from the max value any tab has observed is the correct
    ordering signal; a bare timestamp is only safe for human-readable
    display, never as the sole gate for applying an update.
+9. **Check whether focus-based protection is being credited as if it
+   were recency-window protection.** For every field of the synced
+   draft/object, name which mechanism actually protects it:
+   `document.activeElement`/a focus ref only protects while the control
+   has focus, and stops the instant the user blurs — even if the
+   persistence write for that edit hasn't landed yet (it's typically
+   scheduled after paint). A recency-of-interaction window (a per-field
+   timestamp checked against a short grace period, e.g.
+   `recentLocalChangeRef`) keeps protecting through that gap. A
+   continuous field the user blurs to move on (a stock/quantity input
+   reviewed item-by-item) needs the recency window, not just focus —
+   flag any field that only has the weaker guarantee, even if an
+   earlier review already confirmed it has "some" protection; "some"
+   is not "the right kind for this interaction pattern."
+10. **Check a local `seq`/monotonic-counter ordering signal for
+   concurrent-writer collisions.** If ordering is
+   `seq = lastKnownSeqRef.current + 1` computed independently per tab
+   from only what that tab has itself observed, trace: two tabs that
+   haven't yet seen each other's latest write can compute the identical
+   `seq`; whichever write's `storage` event arrives second fails
+   `incoming.seq <= lastKnownSeqRef.current` (true for equal values)
+   and is discarded — silently and permanently, reproducing the same
+   data-loss symptom check 8 exists to catch, via a different gap.
+   Flag any `seq` comparison with no per-tab/per-device disambiguator
+   baked into the actual ordering key, not just "no `Date.now()`."
 
 Report file:line findings, each naming: the storage key, the writer
-effect and the listener, which failure mode (1–8 above) applies, the
+effect and the listener, which failure mode (1–10 above) applies, the
 concrete two-tabs user action that triggers it, and the specific fix
-(ref guard, `seq`/version comparison, focus check, explicit `null`
-handling). Do not edit files — read-only review role. If every
-cross-tab listener in scope correctly handles all eight checks, say so
-explicitly, and confirm you traced the two-different-users scenario
+(ref guard, `seq`/version comparison, focus-vs-recency-window check,
+explicit `null` handling). Do not edit files — read-only review role. If
+every cross-tab listener in scope correctly handles all ten checks, say
+so explicitly, and confirm you traced the two-different-users scenario
 by hand for each one rather than only the single-user flow.

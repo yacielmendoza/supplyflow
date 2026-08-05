@@ -65,6 +65,19 @@ description: Use to audit a SupplyFlow screen or component for WCAG 2.2 AA compl
    don't stop at the first form in the file, check every repeated/generated
    instance (inline "add" forms, per-row edit cards, settings panels) since
    the same missing-label bug tends to be copy-pasted across all of them.
+10. **A pattern migration reported for one file is not closed until you've
+   grepped the whole repo for the same interaction shape.** When migrating
+   one instance of a UI pattern (e.g. `aria-pressed` → `aria-current` for a
+   single-select group of mutually-exclusive buttons) based on a finding
+   reported in ONE file, grep the entire repo for the same interaction
+   shape — a group of buttons where exactly one represents the current
+   selection (avatar pickers, theme/language toggles, filter chips, "active
+   account" lists) — before considering the finding closed. Don't scope the
+   fix to just the file where it was originally reported. This is a real
+   recurrence, not a hypothetical: the same defect was fixed this cycle in
+   two files but reappeared, un-migrated, in two other files with
+   structurally identical controls that were never re-checked with the same
+   criterion.
 
 ## Method
 

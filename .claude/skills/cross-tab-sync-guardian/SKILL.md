@@ -127,6 +127,48 @@ another part of the UI also writes to `localStorage`:
    clock) over a raw timestamp for ordering decisions; keep the
    timestamp, if wanted, only for human-readable "saved N minutes ago"
    display, never as the sole gate for whether an update is applied.
+9. **Focus-based protection and recency-window protection are not the
+   same guarantee — name which one a field actually has.** A field
+   protected only by checking `document.activeElement`/a focus ref
+   (`focusedFieldRef`) stops protecting the instant the user blurs it —
+   even if the local persistence write triggered by that edit hasn't
+   completed yet, because the persistence effect is scheduled after
+   paint. A remote update arriving in that gap silently overwrites the
+   value the user just finished editing. A field protected by a
+   recency-of-interaction window instead (`recentLocalChangeRef`, a
+   per-field timestamp compared against a short grace period) keeps
+   protecting through that gap, because it doesn't depend on the
+   control still having focus. For **every** field of a shared
+   draft/object being synced across tabs, explicitly verify **which of
+   the two mechanisms it has** — not just whether it has "some"
+   protection — and match the mechanism to the interaction pattern: a
+   continuous field the user blurs to move to the next item (a stock
+   count reviewed product-by-product) needs the recency window, not
+   just focus; a discrete control (a checkbox, a toggle) that changes
+   and settles in one tap is usually fine with focus alone. This is not
+   hypothetical: `readings` in `DailyChecklist.tsx` had focus-based
+   protection since before the previous reinforcement of this skill,
+   but never received the same recency-window protection given to the
+   other three shared fields — the prior reinforcement's check #7 asked
+   "do the N fields have protection?" but didn't distinguish which
+   *type* of protection is sufficient for which interaction pattern.
+10. **A local monotonic counter needs a per-writer disambiguator, not
+   just "no wall clock."** If ordering/freshness is decided by a
+   counter computed as `seq = lastKnownSeqRef.current + 1` — derived
+   only from the last value this tab has itself observed — explicitly
+   verify what happens when two tabs compute the **same** `seq` before
+   either has observed the other's write (a concurrent-writer
+   collision): both tabs persist with `seq = N`, and whichever
+   `storage` event arrives second fails the freshness check
+   (`incoming.seq <= lastKnownSeqRef.current` is true for equal values)
+   and is discarded — silently and permanently, with no retry and no
+   error surfaced. This reproduces the exact wall-clock-drift symptom a
+   `seq` counter is typically introduced to fix (item 8 above), by a
+   different mechanism. A `seq` with no per-tab/per-device
+   disambiguator baked into the actual ordering key (e.g.
+   `` `${seq}.${tabInstanceId}` `` compared lexicographically/tuple-wise,
+   not a bare integer) is not a safe total order, even once it no
+   longer depends on `Date.now()`.
 
 ## Method
 
@@ -134,14 +176,14 @@ Grep for `window.addEventListener('storage'` and every `localStorage`
 `setItem`/`removeItem` call reachable from the same component. For each
 pair: trace what triggers the listener (which writer, from which other
 part of the UI, under which user action), what state it touches, and
-walk through steps 1–6 above against the actual current code — not
+walk through steps 1–10 above against the actual current code — not
 against what an earlier commit message or `CORRECCIONES_APLICADAS.md`
 entry claims was fixed.
 
 ## Output
 
 File:line findings, each naming: the storage key, the writer effect and
-the listener, which of the six failure modes applies, the concrete
+the listener, which of the ten failure modes applies, the concrete
 two-tabs user action that triggers it, and the specific code change
-(ref guard, `savedAt` comparison, focus check, explicit `null` handling)
-that closes it.
+(ref guard, `savedAt`/`seq` comparison, focus vs. recency-window check,
+explicit `null` handling) that closes it.

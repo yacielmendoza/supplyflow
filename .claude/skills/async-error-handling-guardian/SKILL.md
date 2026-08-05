@@ -46,6 +46,23 @@ For every `async` function invoked from a button `onClick`, form
    call site produces an unhandled promise rejection that never reaches
    any UI state at all — flag these as the same defect class, even though
    there's no loading flag to get stuck.
+7. **The triggering control must be disabled/blocked for the full duration
+   of the `await`, not just reverted in `catch`.** Every async handler
+   triggered by an interactive control (a button `onClick`, an `onBlur`
+   save) must disable or block that control while its `await` is pending —
+   a loading flag that only gets *reset* on success/error is not the same
+   thing as the control being unavailable *during* the pending call. A
+   double-tap on mobile (common on a slow connection, where the first tap's
+   visual feedback hasn't landed yet) can fire the same mutation twice
+   before the first response ever updates the UI, producing two real writes
+   from one user action. Check that `disabled={isSubmitting}` (or
+   equivalent) is applied synchronously in the same handler that starts the
+   `await`, not only inferred from a loading spinner that may not render in
+   time. Real-world evidence: an audit found 3 async save/create handlers in
+   one admin form component with no double-submit guard, plus a known
+   duplicate-save bug in a shopping/note-editing component where `blur` and
+   `click` both fire the same save call — the same repeatable bug class in
+   unrelated files.
 
 ## Method
 
