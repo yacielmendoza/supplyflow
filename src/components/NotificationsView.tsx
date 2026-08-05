@@ -137,7 +137,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
   const sampleWhatsAppText = t.notifWhatsAppSampleText.replace('{url}', window.location.href);
 
   const statusColors = STATUS_COLORS;
-  const statusLabels = getStatusLabels(t);
+  const statusLabels = useMemo(() => getStatusLabels(t), [t]);
 
   return (
     <div className="min-h-screen sf-page">
@@ -231,81 +231,88 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                 return (
                   <li key={req.id}>
                     <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => onSelectRequest?.(req.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onSelectRequest?.(req.id);
-                        }
-                      }}
-                      className="sf-card p-4 space-y-2.5 cursor-pointer transition hover:brightness-[0.98]"
+                      className="sf-card p-4 space-y-2.5 relative transition hover:brightness-[0.98]"
                       style={req.urgent ? { borderColor: 'var(--sf-rose)' } : undefined}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>
-                              #{req.requestNumber}
+                      {/* Stretched primary action: a real <button> covering the
+                          whole card, behind the visible content. The visible
+                          content below is pointer-events-none so clicks pass
+                          through to this button, except the dismiss button,
+                          which re-enables pointer-events on itself — this
+                          keeps a single focusable "open request" control
+                          instead of nesting one inside a role="button" card
+                          (invalid per the ARIA content model; a role="button"
+                          may not contain other focusable descendants). */}
+                      <button
+                        type="button"
+                        onClick={() => onSelectRequest?.(req.id)}
+                        aria-label={`#${req.requestNumber} — ${req.restaurantName}`}
+                        className="absolute inset-0 rounded-[inherit]"
+                      />
+                      <div className="relative space-y-2.5 pointer-events-none">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-black text-sm" style={{ color: 'var(--sf-text)' }}>
+                                #{req.requestNumber}
+                              </span>
+                              <span className="sf-subtle text-xs truncate">{req.restaurantName}</span>
+                              {req.urgent && <Flame className="w-3.5 h-3.5" role="img" aria-label={t.tagUrgent} style={{ color: 'var(--sf-rose)' }} />}
+                            </div>
+                            <div className="sf-muted text-xs mt-0.5">
+                              {t.notifCreatedBy} <strong style={{ color: 'var(--sf-text)' }}>{formatCleanName(req.createdByUserName)}</strong>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase"
+                              style={{ background: 'var(--sf-surface-2)', color: statusColors[req.status], border: '1px solid var(--sf-border)' }}>
+                              {statusLabels[req.status] ?? req.status}
                             </span>
-                            <span className="sf-subtle text-xs truncate">{req.restaurantName}</span>
-                            {req.urgent && <Flame className="w-3.5 h-3.5" style={{ color: 'var(--sf-rose)' }} />}
+                            <button
+                              onClick={(e) => handleDismiss(req.id, e)}
+                              title={t.notifMarkReadTitle}
+                              aria-label={t.notifMarkReadTitle}
+                              className="w-11 h-11 flex items-center justify-center rounded-lg sf-btn-ghost transition pointer-events-auto"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
                           </div>
-                          <div className="sf-muted text-xs mt-0.5">
-                            {t.notifCreatedBy} <strong style={{ color: 'var(--sf-text)' }}>{formatCleanName(req.createdByUserName)}</strong>
+                        </div>
+
+                        <div className="sf-inset px-3 py-2 text-xs sf-muted">
+                          <strong style={{ color: 'var(--sf-text)' }}>{req.items.length} {t.notifItemCount}</strong> {itemSummary}{extraCount}
+                        </div>
+
+                        {req.notes && (
+                          <div className="flex items-start gap-1.5 text-xs italic px-3 py-2 rounded-xl"
+                            style={{ background: 'var(--sf-accent-soft)', color: 'var(--sf-accent)' }}>
+                            <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                            <span className="min-w-0">&ldquo;{req.notes}&rdquo;</span>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase"
-                            style={{ background: 'var(--sf-surface-2)', color: statusColors[req.status], border: '1px solid var(--sf-border)' }}>
-                            {statusLabels[req.status] ?? req.status}
-                          </span>
-                          <button
-                            onClick={(e) => handleDismiss(req.id, e)}
-                            onKeyDown={(e) => e.stopPropagation()}
-                            title={t.notifMarkReadTitle}
-                            aria-label={t.notifMarkReadTitle}
-                            className="w-11 h-11 flex items-center justify-center rounded-lg sf-btn-ghost transition"
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="sf-inset px-3 py-2 text-xs sf-muted">
-                        <strong style={{ color: 'var(--sf-text)' }}>{req.items.length} {t.notifItemCount}</strong> {itemSummary}{extraCount}
-                      </div>
-
-                      {req.notes && (
-                        <div className="flex items-start gap-1.5 text-xs italic px-3 py-2 rounded-xl"
-                          style={{ background: 'var(--sf-accent-soft)', color: 'var(--sf-accent)' }}>
-                          <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                          <span className="min-w-0">&ldquo;{req.notes}&rdquo;</span>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between pt-1 text-xs" style={{ borderTop: '1px solid var(--sf-border)' }}>
-                        <span className="sf-subtle flex items-center gap-1 pt-1">
-                          <Clock className="w-3 h-3" />
-                          {time}
-                        </span>
-                        {cookNeedsAction ? (
-                          <span className="font-black flex items-center gap-1 pt-1" style={{ color: 'var(--sf-accent)' }}>
-                            <PackageCheck className="w-3.5 h-3.5" />
-                            {t.notifActionConfirmReceipt}
-                          </span>
-                        ) : buyerNeedsAction ? (
-                          <span className="font-black flex items-center gap-1 pt-1" style={{ color: 'var(--sf-amber)' }}>
-                            <User className="w-3.5 h-3.5" />
-                            {t.notifActionTakeOrder}
-                          </span>
-                        ) : (
-                          <span className="sf-muted font-bold flex items-center gap-1 pt-1">
-                            {t.notifViewRequests}
-                            <ArrowRight className="w-3 h-3" />
-                          </span>
                         )}
+
+                        <div className="flex items-center justify-between pt-1 text-xs" style={{ borderTop: '1px solid var(--sf-border)' }}>
+                          <span className="sf-subtle flex items-center gap-1 pt-1">
+                            <Clock className="w-3 h-3" />
+                            {time}
+                          </span>
+                          {cookNeedsAction ? (
+                            <span className="font-black flex items-center gap-1 pt-1" style={{ color: 'var(--sf-accent)' }}>
+                              <PackageCheck className="w-3.5 h-3.5" />
+                              {t.notifActionConfirmReceipt}
+                            </span>
+                          ) : buyerNeedsAction ? (
+                            <span className="font-black flex items-center gap-1 pt-1" style={{ color: 'var(--sf-amber)' }}>
+                              <User className="w-3.5 h-3.5" />
+                              {t.notifActionTakeOrder}
+                            </span>
+                          ) : (
+                            <span className="sf-muted font-bold flex items-center gap-1 pt-1">
+                              {t.notifViewRequests}
+                              <ArrowRight className="w-3 h-3" />
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </li>

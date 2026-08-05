@@ -166,59 +166,63 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
         {filteredItems.map((item) => (
           <div
             key={item.id}
-            role="button"
-            tabIndex={0}
-            aria-pressed={item.purchased}
-            onClick={() => handleCheck(item)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleCheck(item);
-              }
-            }}
-            className="sf-card p-4 flex items-start gap-3.5 cursor-pointer select-none transition"
+            className="sf-card p-4 transition"
             style={item.purchased ? { borderColor: 'var(--sf-accent)', background: 'var(--sf-accent-soft)' } : undefined}
           >
-            <div
-              className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 transition"
-              style={
-                item.purchased
-                  ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' }
-                  : { background: 'var(--sf-surface-2)', border: '2px solid var(--sf-border-strong)', color: 'transparent' }
-              }
+            {/* The primary "mark purchased" action is this real <button>, not a
+                role="button" wrapper around the whole card — the note editor
+                below has its own focusable input/button, and ARIA forbids
+                focusable descendants inside a button widget. */}
+            <button
+              type="button"
+              aria-pressed={item.purchased}
+              aria-label={item.productName}
+              onClick={() => handleCheck(item)}
+              className="flex items-start gap-3.5 w-full text-left cursor-pointer select-none"
             >
-              <Check className="w-5 h-5 stroke-[3]" />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <span
-                  className="font-black text-base"
-                  style={{
-                    color: item.purchased ? 'var(--sf-accent)' : 'var(--sf-text)',
-                    textDecoration: item.purchased ? 'line-through' : 'none',
-                  }}
-                >
-                  {item.productName}
-                </span>
-                <span className="sf-pill px-2.5 py-1 rounded-lg font-extrabold text-xs sf-accent flex-shrink-0">
-                  {item.requestedQty} {formatUnitName(item.unit, t)}s
-                </span>
+              <div
+                className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 transition"
+                style={
+                  item.purchased
+                    ? { background: 'var(--sf-accent)', color: 'var(--sf-accent-contrast)' }
+                    : { background: 'var(--sf-surface-2)', border: '2px solid var(--sf-border-strong)', color: 'transparent' }
+                }
+              >
+                <Check className="w-5 h-5 stroke-[3]" />
               </div>
 
-              <div className="flex items-center gap-2 text-xs sf-muted mt-1">
-                <span className="sf-inset px-1.5 py-0.5 rounded-lg text-[10px] uppercase font-mono">{formatCategoryName(item.category, t)}</span>
-                <span>•</span>
-                <span className="truncate">{item.suggestedSupplier || t.storeAny}</span>
-              </div>
-
-              {item.itemNote && (
-                <div className="mt-2 text-xs px-2 py-1.5 rounded-lg" style={{ background: 'var(--sf-surface-2)', color: 'var(--sf-amber)' }}>
-                  {t.noteLabel} {item.itemNote}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className="font-black text-base"
+                    style={{
+                      color: item.purchased ? 'var(--sf-accent)' : 'var(--sf-text)',
+                      textDecoration: item.purchased ? 'line-through' : 'none',
+                    }}
+                  >
+                    {item.productName}
+                  </span>
+                  <span className="sf-pill px-2.5 py-1 rounded-lg font-extrabold text-xs sf-accent flex-shrink-0">
+                    {item.requestedQty} {formatUnitName(item.unit, t, item.requestedQty)}
+                  </span>
                 </div>
-              )}
 
-              <div className="mt-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-2 text-xs sf-muted mt-1">
+                  <span className="sf-inset px-1.5 py-0.5 rounded-lg text-[10px] uppercase font-mono">{formatCategoryName(item.category, t)}</span>
+                  <span>•</span>
+                  <span className="truncate">{item.suggestedSupplier || t.storeAny}</span>
+                </div>
+
+                {item.itemNote && (
+                  <div className="mt-2 text-xs px-2 py-1.5 rounded-lg" style={{ background: 'var(--sf-surface-2)', color: 'var(--sf-amber)' }}>
+                    {t.noteLabel} {item.itemNote}
+                  </div>
+                )}
+              </div>
+            </button>
+
+            <div className="pl-[2.625rem]">
+              <div className="mt-2 flex items-center gap-2">
                 {editingNoteItemId === item.id ? (
                   <div className="flex items-center gap-2 w-full mt-1">
                     <input
