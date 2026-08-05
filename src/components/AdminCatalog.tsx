@@ -260,11 +260,11 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                   <div className="grid grid-cols-2 gap-2 pt-1.5 text-xs" style={{ borderTop: '1px solid var(--sf-border)' }}>
                     <div className="sf-inset px-2.5 py-1.5">
                       <span className="text-[9px] sf-subtle block font-bold uppercase">{t.adminMinOpShort}</span>
-                      <span className="font-black" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {formatUnitName(p.unit, t)}s</span>
+                      <span className="font-black" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {formatUnitName(p.unit, t, p.minThreshold)}</span>
                     </div>
                     <div className="sf-inset px-2.5 py-1.5">
                       <span className="text-[9px] sf-subtle block font-bold uppercase">{t.adminStdPackage}</span>
-                      <span className="font-bold" style={{ color: 'var(--sf-text)' }}>{p.suggestedQuantity} {formatUnitName(p.unit, t)}s</span>
+                      <span className="font-bold" style={{ color: 'var(--sf-text)' }}>{p.suggestedQuantity} {formatUnitName(p.unit, t, p.suggestedQuantity)}</span>
                     </div>
                   </div>
                   {p.suggestedSupplier && (
@@ -299,32 +299,32 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
                     return (
                       <tr key={p.id} style={{ borderTop: '1px solid var(--sf-border)' }}>
                         <td className="p-3 font-bold">
-                          {isEditing ? <input type="text" value={editForm.name || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} className="sf-inset px-2 py-1 text-xs w-full" style={inputStyle} /> : p.name}
+                          {isEditing ? <input type="text" value={editForm.name || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} aria-label={`${t.adminTableProduct} — ${p.name}`} className="sf-inset px-2 py-1 text-xs w-full" style={inputStyle} /> : p.name}
                         </td>
                         <td className="p-3">
                           {isEditing ? (
-                            <select value={editForm.category} onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value as any }))} className="sf-inset px-2 py-1 text-xs" style={inputStyle}>
+                            <select value={editForm.category} onChange={(e) => setEditForm((prev) => ({ ...prev, category: e.target.value as any }))} aria-label={`${t.adminCategory} — ${p.name}`} className="sf-inset px-2 py-1 text-xs" style={inputStyle}>
                               {categories.map((c) => <option key={c} value={c}>{formatCategoryName(c, t)}</option>)}
                             </select>
                           ) : <span className="sf-inset px-2 py-0.5 rounded-lg font-mono text-[10px] sf-muted">{formatCategoryName(p.category, t)}</span>}
                         </td>
                         <td className="p-3">
                           {isEditing ? (
-                            <select value={editForm.unit} onChange={(e) => setEditForm((prev) => ({ ...prev, unit: e.target.value as any }))} className="sf-inset px-2 py-1 text-xs" style={inputStyle}>
+                            <select value={editForm.unit} onChange={(e) => setEditForm((prev) => ({ ...prev, unit: e.target.value as any }))} aria-label={`${t.adminUnit} — ${p.name}`} className="sf-inset px-2 py-1 text-xs" style={inputStyle}>
                               {unitOptions.map((u) => <option key={u} value={u}>{formatUnitName(u, t)}</option>)}
                             </select>
                           ) : <span className="sf-muted">{formatUnitName(p.unit, t)}</span>}
                         </td>
                         <td className="p-3">
-                          {isEditing ? <input type="number" min="1" value={editForm.minThreshold || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, minThreshold: Number(e.target.value) }))} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : (
-                            <span className="sf-inset font-extrabold px-2 py-0.5" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {formatUnitName(p.unit, t)}s</span>
+                          {isEditing ? <input type="number" min="1" value={editForm.minThreshold || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, minThreshold: Number(e.target.value) }))} aria-label={`${t.adminMinThreshold} — ${p.name}`} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : (
+                            <span className="sf-inset font-extrabold px-2 py-0.5" style={{ color: 'var(--sf-amber)' }}>{p.minThreshold} {formatUnitName(p.unit, t, p.minThreshold)}</span>
                           )}
                         </td>
                         <td className="p-3">
-                          {isEditing ? <input type="number" min="1" value={editForm.suggestedQuantity || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedQuantity: Number(e.target.value) }))} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : <span>{p.suggestedQuantity} {formatUnitName(p.unit, t)}s</span>}
+                          {isEditing ? <input type="number" min="1" value={editForm.suggestedQuantity || 1} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedQuantity: Number(e.target.value) }))} aria-label={`${t.adminSuggestedQty} — ${p.name}`} className="sf-inset px-2 py-1 text-xs w-16" style={inputStyle} /> : <span>{p.suggestedQuantity} {formatUnitName(p.unit, t, p.suggestedQuantity)}</span>}
                         </td>
                         <td className="p-3">
-                          {isEditing ? <input type="text" value={editForm.suggestedSupplier || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedSupplier: e.target.value }))} className="sf-inset px-2 py-1 text-xs w-full" style={inputStyle} /> : <span className="sf-muted">{p.suggestedSupplier || '-'}</span>}
+                          {isEditing ? <input type="text" value={editForm.suggestedSupplier || ''} onChange={(e) => setEditForm((prev) => ({ ...prev, suggestedSupplier: e.target.value }))} aria-label={`${t.adminSuggestedSupplier} — ${p.name}`} className="sf-inset px-2 py-1 text-xs w-full" style={inputStyle} /> : <span className="sf-muted">{p.suggestedSupplier || '-'}</span>}
                         </td>
                         <td className="p-3 text-right">
                           {isEditing ? (
@@ -408,7 +408,11 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
 
       {/* SUPPLIERS */}
       {activeTab === 'SUPPLIERS' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-3">
+          <div role="status" className="sf-inset px-3.5 py-2.5 text-xs font-medium sf-muted">
+            {t.adminSuppliersReadOnlyNotice}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {suppliers.map((s) => (
             <div key={s.id} className="sf-card p-4">
               <div className="font-bold text-sm" style={{ color: 'var(--sf-text)' }}>{s.name}</div>
@@ -416,6 +420,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
               <p className="text-xs sf-subtle mt-0.5">{t.adminPhoneLabel} {s.phone}</p>
             </div>
           ))}
+          </div>
         </div>
       )}
 
