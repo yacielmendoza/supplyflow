@@ -52,12 +52,13 @@ type TabId = 'DASHBOARD' | 'REQUESTS' | 'CHECKLIST' | 'ADMIN';
 type Screen = 'NONE' | 'NOTIFICATIONS' | 'ACCOUNT';
 
 // Lightweight, theme-aware placeholder shown while a lazy-loaded view's chunk fetches.
-const ViewFallback: React.FC = () => (
-  <div className="flex items-center justify-center py-24">
+const ViewFallback: React.FC<{ label: string }> = ({ label }) => (
+  <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
     <div
       className="w-8 h-8 rounded-full border-2 animate-spin"
       style={{ borderColor: 'var(--sf-border)', borderTopColor: 'var(--sf-accent)' }}
     />
+    <span className="sr-only">{label}</span>
   </div>
 );
 
@@ -293,8 +294,9 @@ export default function App() {
       colorBadge: 'emerald',
     };
 
-  const currentRestaurantProducts = products.filter(
-    (p) => p.restaurantId === selectedRestaurantId
+  const currentRestaurantProducts = useMemo(
+    () => products.filter((p) => p.restaurantId === selectedRestaurantId),
+    [products, selectedRestaurantId]
   );
 
   const handleSubmitChecklist = async (
@@ -628,6 +630,27 @@ export default function App() {
     }
   }, [currentUser?.role, t, activePendingRequestsCount]);
 
+  // Sync html root class + PWA chrome color for theme. A DOM side effect must
+  // live in useEffect, not the render body — the render body runs on every
+  // Realtime-triggered re-render, which would otherwise re-run a
+  // querySelector + DOM write far more often than the theme actually changes,
+  // and would violate render purity under Strict Mode / concurrent features.
+  // Declared before the early "no session" return below (Rules of Hooks).
+  const isLight = currentUser?.theme === 'light';
+  useEffect(() => {
+    if (isLight) {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    }
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
+    }
+  }, [isLight]);
+
   // Show login screen when no user is selected
   if (!currentUser) {
     return (
@@ -643,27 +666,10 @@ export default function App() {
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
-  const isLight = currentUser.theme === 'light';
-
-  // Sync html root class for theme
-  if (isLight) {
-    document.documentElement.classList.add('light');
-    document.documentElement.classList.remove('dark');
-  } else {
-    document.documentElement.classList.add('dark');
-    document.documentElement.classList.remove('light');
-  }
-
-  // Keep the PWA/browser chrome (status bar, task switcher) color matching the active theme
-  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeColorMeta) {
-    themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
-  }
-
   // Shopping mode is a full-screen view (no modal), takes priority when active
   if (shoppingModalRequest) {
     return (
-      <Suspense fallback={<ViewFallback />}>
+      <Suspense fallback={<ViewFallback label={t.loading} />}>
         <ShoppingView
           request={shoppingModalRequest}
           currentUser={currentUser}
@@ -678,7 +684,7 @@ export default function App() {
   // Drill-in full-screen views (no modals): notifications & account
   if (screen === 'NOTIFICATIONS') {
     return (
-      <Suspense fallback={<ViewFallback />}>
+      <Suspense fallback={<ViewFallback label={t.loading} />}>
         <NotificationsView
           onBack={() => setScreen('NONE')}
           sseConnected={sseConnected}
@@ -694,7 +700,7 @@ export default function App() {
 
   if (screen === 'ACCOUNT') {
     return (
-      <Suspense fallback={<ViewFallback />}>
+      <Suspense fallback={<ViewFallback label={t.loading} />}>
         <AccountView
           currentUser={currentUser}
           users={users}
@@ -744,7 +750,7 @@ export default function App() {
         )}
 
         {activeTab === 'CHECKLIST' && (
-          <Suspense fallback={<ViewFallback />}>
+          <Suspense fallback={<ViewFallback label={t.loading} />}>
             <DailyChecklist
               key={selectedRestaurant.id}
               products={currentRestaurantProducts}
@@ -757,7 +763,7 @@ export default function App() {
         )}
 
         {activeTab === 'REQUESTS' && (
-          <Suspense fallback={<ViewFallback />}>
+          <Suspense fallback={<ViewFallback label={t.loading} />}>
             <RequestsList
               requests={supplyRequests}
               currentUser={currentUser}
@@ -772,7 +778,7 @@ export default function App() {
         )}
 
         {activeTab === 'ADMIN' && (
-          <Suspense fallback={<ViewFallback />}>
+          <Suspense fallback={<ViewFallback label={t.loading} />}>
             <AdminCatalog
               products={products}
               restaurants={restaurants}
