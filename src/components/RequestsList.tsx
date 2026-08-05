@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SupplyRequest, RequestStatus, UserProfile } from '../types';
 import { formatCleanName } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
@@ -19,7 +19,22 @@ import {
   FileText,
   Lock,
 } from 'lucide-react';
-import { playAlertSound, generateWhatsAppLink, generateRequestWhatsAppSummary } from '../lib/notifications';
+import {
+  playAlertSound,
+  generateWhatsAppLink,
+  generateRequestWhatsAppSummary,
+} from '../lib/notifications';
+import { cn } from '../lib/cn';
+import {
+  Badge,
+  Button,
+  Chip,
+  EmptyState,
+  StatusPill,
+  Tabs,
+  type TabItem,
+  type Tone,
+} from './ui';
 
 interface RequestsListProps {
   requests: SupplyRequest[];
@@ -31,6 +46,24 @@ interface RequestsListProps {
   highlightedRequestId?: string | null;
   overdueRequestIds?: Set<string>;
 }
+
+type FilterTab = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ALL';
+
+// Consolidated status → semantic tone (replaces the ad-hoc per-file color set).
+const statusTone = (status: RequestStatus): Tone => {
+  switch (status) {
+    case 'Pendiente':
+      return 'warning';
+    case 'Asignada':
+    case 'En Compra':
+      return 'info';
+    case 'Comprada':
+      return 'accent';
+    case 'Entregada':
+    case 'Completada':
+      return 'success';
+  }
+};
 
 export const RequestsList: React.FC<RequestsListProps> = ({
   requests,
@@ -44,10 +77,10 @@ export const RequestsList: React.FC<RequestsListProps> = ({
 }) => {
   const t = getTranslation(currentUser.language ?? 'es');
 
-  const [filterTab, setFilterTab] = useState<'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ALL'>('ALL');
+  const [filterTab, setFilterTab] = useState<FilterTab>('ALL');
   const [expandedRequestIds, setExpandedRequestIds] = useState<Set<string>>(new Set());
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (highlightedRequestId) {
       setExpandedRequestIds((prev) => new Set(prev).add(highlightedRequestId));
       setFilterTab('ALL');
@@ -57,43 +90,34 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   const toggleExpand = (id: string) => {
     setExpandedRequestIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
 
+  const inThisRestaurant = (r: SupplyRequest) =>
+    !selectedRestaurantId || r.restaurantId === selectedRestaurantId;
+
   const filteredRequests = requests.filter((r) => {
-    if (selectedRestaurantId && r.restaurantId !== selectedRestaurantId) return false;
+    if (!inThisRestaurant(r)) return false;
     if (filterTab === 'PENDING') return r.status === 'Pendiente';
-    if (filterTab === 'IN_PROGRESS') return ['Asignada', 'En Compra', 'Comprada'].includes(r.status);
+    if (filterTab === 'IN_PROGRESS')
+      return ['Asignada', 'En Compra', 'Comprada'].includes(r.status);
     if (filterTab === 'COMPLETED') return ['Entregada', 'Completada'].includes(r.status);
     return true;
   });
 
-  const countPending = requests.filter((r) => (!selectedRestaurantId || r.restaurantId === selectedRestaurantId) && r.status === 'Pendiente').length;
-  const countInProgress = requests.filter((r) => (!selectedRestaurantId || r.restaurantId === selectedRestaurantId) && ['Asignada', 'En Compra', 'Comprada'].includes(r.status)).length;
-  const countCompleted = requests.filter((r) => (!selectedRestaurantId || r.restaurantId === selectedRestaurantId) && ['Entregada', 'Completada'].includes(r.status)).length;
-  const countAll = requests.filter((r) => !selectedRestaurantId || r.restaurantId === selectedRestaurantId).length;
-
-  const getStatusBadge = (status: RequestStatus) => {
-    switch (status) {
-      case 'Pendiente':
-        return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
-      case 'Asignada':
-        return 'bg-blue-500/15 text-blue-300 border-blue-500/30';
-      case 'En Compra':
-        return 'bg-orange-500/15 text-orange-300 border-orange-500/30';
-      case 'Comprada':
-        return 'bg-purple-500/15 text-purple-300 border-purple-500/30';
-      case 'Entregada':
-      case 'Completada':
-        return 'bg-slate-800/80 text-emerald-400/90 border-slate-700/60 font-medium';
-    }
-  };
+  const countPending = requests.filter(
+    (r) => inThisRestaurant(r) && r.status === 'Pendiente'
+  ).length;
+  const countInProgress = requests.filter(
+    (r) => inThisRestaurant(r) && ['Asignada', 'En Compra', 'Comprada'].includes(r.status)
+  ).length;
+  const countCompleted = requests.filter(
+    (r) => inThisRestaurant(r) && ['Entregada', 'Completada'].includes(r.status)
+  ).length;
+  const countAll = requests.filter(inThisRestaurant).length;
 
   const getStatusLabel = (status: RequestStatus): string => {
     const map: Record<RequestStatus, string> = {
@@ -121,144 +145,95 @@ export const RequestsList: React.FC<RequestsListProps> = ({
   const isBuyer = currentUser.role === 'comprador';
   const isAdmin = currentUser.role === 'admin';
 
-  const getRoleHeaderTitle = () => {
-    if (isCook) return t.requestsTitleCook;
-    if (isBuyer) return t.requestsTitleBuyer;
-    return t.requestsTitleAdmin;
-  };
+  const roleTitle = isCook
+    ? t.requestsTitleCook
+    : isBuyer
+    ? t.requestsTitleBuyer
+    : t.requestsTitleAdmin;
+  const roleSubtitle = isCook
+    ? t.requestsSubCook
+    : isBuyer
+    ? t.requestsSubBuyer
+    : t.requestsSubAdmin;
 
-  const getRoleSubtitle = () => {
-    if (isCook) return t.requestsSubCook;
-    if (isBuyer) return t.requestsSubBuyer;
-    return t.requestsSubAdmin;
-  };
+  const filterItems: TabItem<FilterTab>[] = [
+    { id: 'ALL', label: t.filterAll, badge: countAll, badgeTone: 'neutral' },
+    { id: 'PENDING', label: t.filterPending, badge: countPending, badgeTone: 'warning' },
+    { id: 'IN_PROGRESS', label: t.filterInProgress, badge: countInProgress, badgeTone: 'info' },
+    { id: 'COMPLETED', label: t.filterCompleted, badge: countCompleted, badgeTone: 'success' },
+  ];
 
-  const isLight = currentUser.theme === 'light';
+  // Card shell styling by state (token-based, theme-adaptive, deterministic).
+  const cardShell = (state: {
+    highlighted: boolean;
+    completed: boolean;
+    overdue: boolean;
+    pending: boolean;
+    active: boolean;
+    urgent: boolean;
+  }) => {
+    const { highlighted, completed, overdue, pending, active, urgent } = state;
+    if (highlighted)
+      return 'bg-accent/5 border-accent ring-4 ring-accent/40 shadow-xl';
+    if (completed)
+      return 'bg-surface/60 border-border-default opacity-80 hover:opacity-100';
+    if (overdue) return 'bg-danger/5 border-danger shadow-md';
+    if (pending) return 'bg-warning/5 border-warning/70 shadow-sm';
+    if (active) return 'bg-info/5 border-info/60 shadow-sm';
+    if (urgent) return 'bg-danger/5 border-danger/60 shadow-sm';
+    return 'bg-surface border-border-default hover:border-border-strong';
+  };
 
   return (
     <div className="space-y-4">
-      {/* Header & Status Grouping Navigation Tabs */}
-      <div className={`border p-3.5 sm:p-5 rounded-2xl shadow-sm space-y-3.5 transition-colors ${
-        isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
-      }`}>
+      {/* Header & filter tabs */}
+      <div className="rounded-card border border-border-default bg-surface p-3.5 sm:p-5 shadow-sm space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div>
-            <h2 className={`text-lg sm:text-xl font-black flex items-center space-x-2 ${
-              isLight ? 'text-slate-900' : 'text-white'
-            }`}>
-              <ShoppingBag className="w-5 h-5 text-emerald-600" />
-              <span>{getRoleHeaderTitle()} ({filteredRequests.length})</span>
+            <h2 className="text-lg sm:text-xl font-black flex items-center gap-2 text-text-primary">
+              <ShoppingBag className="w-5 h-5 text-accent" />
+              <span>
+                {roleTitle} ({filteredRequests.length})
+              </span>
             </h2>
-            <p className={`text-xs sm:text-sm mt-0.5 ${
-              isLight ? 'text-slate-600' : 'text-slate-400'
-            }`}>
-              {getRoleSubtitle()}
-            </p>
+            <p className="text-xs sm:text-sm mt-0.5 text-text-secondary">{roleSubtitle}</p>
           </div>
 
-          <span className={`self-start sm:self-auto px-3 py-1 rounded-lg border text-xs font-bold uppercase tracking-wider ${
-            isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-950 border-slate-800 text-slate-300'
-          }`}>
+          <Badge tone="neutral" className="self-start sm:self-auto uppercase tracking-wider">
             {t.headerRolePrefix}: {currentUser.role}
-          </span>
+          </Badge>
         </div>
 
-        {/* Grouping Filter Tabs */}
-        <div className={`grid grid-cols-4 gap-1.5 sm:gap-2 p-1.5 rounded-xl border text-center ${
-          isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-950 border-slate-800'
-        }`}>
-          <button
-            onClick={() => setFilterTab('ALL')}
-            className={`py-2 px-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition flex items-center justify-center space-x-1.5 ${
-              filterTab === 'ALL'
-                ? isLight ? 'bg-white text-slate-900 shadow-xs' : 'bg-slate-800 text-white shadow-sm'
-                : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <span>{t.filterAll}</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-              isLight ? 'bg-slate-200 text-slate-800' : 'bg-slate-900 text-slate-300'
-            }`}>
-              {countAll}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setFilterTab('PENDING')}
-            className={`py-2 px-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition flex items-center justify-center space-x-1.5 ${
-              filterTab === 'PENDING'
-                ? 'bg-amber-500/20 text-amber-700 border border-amber-400 font-black'
-                : isLight ? 'text-slate-600 hover:text-amber-700' : 'text-slate-400 hover:text-amber-300'
-            }`}
-          >
-            <span className="truncate">{t.filterPending}</span>
-            {countPending > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-xs font-black">
-                {countPending}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setFilterTab('IN_PROGRESS')}
-            className={`py-2 px-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition flex items-center justify-center space-x-1.5 ${
-              filterTab === 'IN_PROGRESS'
-                ? 'bg-orange-500/20 text-orange-700 border border-orange-400 font-black'
-                : isLight ? 'text-slate-600 hover:text-orange-700' : 'text-slate-400 hover:text-orange-300'
-            }`}
-          >
-            <span className="truncate">{t.filterInProgress}</span>
-            {countInProgress > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-orange-500 text-slate-950 text-xs font-black">
-                {countInProgress}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setFilterTab('COMPLETED')}
-            className={`py-2 px-1.5 rounded-lg text-xs sm:text-sm font-extrabold transition flex items-center justify-center space-x-1.5 ${
-              filterTab === 'COMPLETED'
-                ? 'bg-emerald-500/20 text-emerald-800 border border-emerald-400 font-black'
-                : isLight ? 'text-slate-600 hover:text-emerald-700' : 'text-slate-400 hover:text-emerald-300'
-            }`}
-          >
-            <span className="truncate">{t.filterCompleted}</span>
-            {countCompleted > 0 && (
-              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/30 text-emerald-300'
-              }`}>
-                {countCompleted}
-              </span>
-            )}
-          </button>
-        </div>
+        <Tabs
+          items={filterItems}
+          value={filterTab}
+          onChange={setFilterTab}
+          aria-label={roleTitle}
+          className="w-full flex-wrap"
+        />
       </div>
 
-      {/* Requests Feed */}
+      {/* Feed */}
       {filteredRequests.length === 0 ? (
-        <div className={`border rounded-2xl p-8 text-center space-y-2 ${
-          isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-800/80'
-        }`}>
-          <CheckCircle2 className={`w-10 h-10 mx-auto ${isLight ? 'text-slate-400' : 'text-slate-600'}`} />
-          <div className={`font-bold text-base ${isLight ? 'text-slate-800' : 'text-slate-300'}`}>{t.noRequests}</div>
-          <p className={`text-xs sm:text-sm max-w-sm mx-auto ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-            {t.selectTabHint}
-          </p>
-        </div>
+        <EmptyState
+          icon={<CheckCircle2 />}
+          title={t.noRequests}
+          description={t.selectTabHint}
+        />
       ) : (
         <div className="space-y-3">
           {filteredRequests.map((req) => {
             const totalItems = req.items.length;
             const purchasedItems = req.items.filter((i) => i.purchased).length;
-            const progressPct = totalItems > 0 ? Math.round((purchasedItems / totalItems) * 100) : 0;
+            const progressPct =
+              totalItems > 0 ? Math.round((purchasedItems / totalItems) * 100) : 0;
             const isExpanded = expandedRequestIds.has(req.id);
             const isCompleted = ['Entregada', 'Completada'].includes(req.status);
             const isPending = req.status === 'Pendiente';
+            const isActive = ['Asignada', 'En Compra'].includes(req.status);
             const isUrgentActive = req.urgent && !isCompleted;
             const isAssignedToOtherBuyer =
               isBuyer && Boolean(req.assignedBuyerId) && req.assignedBuyerId !== currentUser.id;
-
             const isHighlighted = req.id === highlightedRequestId;
             const isOverdue = overdueRequestIds?.has(req.id) ?? false;
             const cleanCookName = formatCleanName(req.createdByUserName);
@@ -268,167 +243,131 @@ export const RequestsList: React.FC<RequestsListProps> = ({
               <div
                 key={req.id}
                 id={`request-card-${req.id}`}
-                className={`border rounded-2xl p-3.5 sm:p-4 transition-all ${
-                  isHighlighted
-                    ? isLight
-                      ? 'bg-emerald-50 border-2 border-emerald-500 ring-4 ring-emerald-300 shadow-xl'
-                      : 'bg-slate-900 border-2 border-emerald-400 ring-4 ring-emerald-400/70 shadow-2xl shadow-emerald-500/30'
-                    : isCompleted
-                    ? isLight
-                      ? 'bg-slate-50/80 border-slate-200 opacity-80 hover:opacity-100 shadow-none'
-                      : 'bg-slate-900/40 border-slate-800/60 opacity-80 hover:opacity-100 shadow-none'
-                    : isOverdue
-                    ? isLight
-                      ? 'bg-red-50/90 border-2 border-red-500 shadow-md shadow-red-100 ring-1 ring-red-300'
-                      : 'bg-gradient-to-r from-red-950/40 via-slate-900 to-slate-900 border-2 border-red-500/80 shadow-md shadow-red-950/30 ring-1 ring-red-500/20'
-                    : isPending
-                    ? isLight
-                      ? 'bg-amber-50/80 border-2 border-amber-400 shadow-sm'
-                      : 'bg-gradient-to-r from-amber-950/30 via-slate-900 to-slate-900 border-2 border-amber-500/80 shadow-md shadow-amber-950/20 ring-1 ring-amber-500/20'
-                    : req.status === 'En Compra' || req.status === 'Asignada'
-                    ? isLight
-                      ? 'bg-orange-50/80 border-2 border-orange-400 shadow-sm'
-                      : 'bg-slate-900 border-2 border-orange-500/60 shadow-orange-950/10'
-                    : isUrgentActive
-                    ? isLight
-                      ? 'bg-rose-50/80 border-2 border-rose-400 shadow-sm'
-                      : 'bg-slate-900 border-2 border-rose-500/60 shadow-rose-950/10'
-                    : isLight
-                      ? 'bg-white border-slate-200 shadow-xs hover:border-slate-300'
-                      : 'bg-slate-900 border-slate-800 hover:border-slate-700 shadow-sm'
-                }`}
+                className={cn(
+                  'rounded-card border p-3.5 sm:p-4 transition-all',
+                  cardShell({
+                    highlighted: isHighlighted,
+                    completed: isCompleted && !isHighlighted,
+                    overdue: isOverdue && !isHighlighted && !isCompleted,
+                    pending: isPending && !isOverdue && !isHighlighted,
+                    active: isActive && !isHighlighted && !isCompleted,
+                    urgent: isUrgentActive && !isPending && !isActive && !isHighlighted,
+                  })
+                )}
               >
-                {/* Card Header */}
+                {/* Card header */}
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2 min-w-0 flex-wrap">
-                    <span className={`font-black text-base sm:text-lg whitespace-nowrap ${
-                      isLight ? 'text-slate-900' : 'text-slate-100'
-                    }`}>
+                  <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                    <span className="font-black text-base sm:text-lg whitespace-nowrap text-text-primary">
                       #{req.requestNumber}
                     </span>
 
-                    <span className={`px-2.5 py-1 rounded-lg border font-extrabold text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[220px] ${
-                      isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-950 border-slate-800 text-emerald-400'
-                    }`}>
+                    <Badge tone="accent" className="max-w-[150px] sm:max-w-[220px] truncate">
                       {req.restaurantName}
-                    </span>
+                    </Badge>
 
                     {isPending && (
-                      <span className="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-black text-xs uppercase flex items-center space-x-1 animate-pulse">
-                        <Clock className="w-3.5 h-3.5 text-slate-950" />
-                        <span>{t.pending.toUpperCase()}</span>
-                      </span>
+                      <Badge tone="warning" solid className="uppercase">
+                        <Clock className="w-3.5 h-3.5" />
+                        {t.pending.toUpperCase()}
+                      </Badge>
                     )}
 
                     {req.urgent && (
-                      <span
-                        className={`px-2 py-0.5 rounded-lg text-xs font-black uppercase flex items-center space-x-1 flex-shrink-0 ${
-                          isCompleted
-                            ? isLight ? 'bg-slate-100 text-slate-500 border border-slate-200' : 'bg-slate-800/80 text-slate-400 border border-slate-700/60'
-                            : 'bg-rose-500/20 text-rose-700 border border-rose-300 animate-pulse font-extrabold'
-                        }`}
+                      <Badge
+                        tone={isCompleted ? 'neutral' : 'danger'}
+                        className="uppercase"
                       >
-                        <Flame className={`w-3.5 h-3.5 ${isCompleted ? (isLight ? 'text-slate-500' : 'text-slate-400') : 'text-rose-600'}`} />
-                        <span>{t.tagUrgent}</span>
-                      </span>
+                        <Flame className="w-3.5 h-3.5" />
+                        {t.tagUrgent}
+                      </Badge>
                     )}
 
                     {isOverdue && (
-                      <span className="px-2.5 py-1 rounded-lg bg-red-600 text-white font-black text-xs uppercase flex items-center space-x-1 flex-shrink-0 animate-pulse">
+                      <Badge tone="danger" solid className="uppercase animate-pulse">
                         <AlertCircle className="w-3.5 h-3.5" />
-                        <span>ATRASADO</span>
-                      </span>
+                        ATRASADO
+                      </Badge>
                     )}
                   </div>
 
-                  {/* Status Badge */}
-                  <div className="flex items-center space-x-1.5 flex-shrink-0">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-black uppercase border tracking-wide ${getStatusBadge(req.status)}`}
-                    >
-                      {getStatusLabel(req.status)}
-                    </span>
-                  </div>
+                  <StatusPill tone={statusTone(req.status)} className="flex-shrink-0">
+                    {getStatusLabel(req.status)}
+                  </StatusPill>
                 </div>
 
-                {/* Subtitle Line */}
-                <div className={`mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs sm:text-sm border-b pb-2.5 ${
-                  isLight ? 'text-slate-600 border-slate-200' : 'text-slate-300 border-slate-800/60'
-                }`}>
-                  <div className="flex items-center space-x-2 flex-wrap">
-                    <span className={`flex items-center space-x-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      <Clock className={`w-3.5 h-3.5 ${isLight ? 'text-slate-400' : 'text-slate-500'}`} />
+                {/* Subtitle line */}
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 text-xs sm:text-sm border-b border-border-default pb-2.5 text-text-secondary">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="flex items-center gap-1 text-text-muted">
+                      <Clock className="w-3.5 h-3.5" />
                       <span>{getTimeAgo(req.createdAt)}</span>
                     </span>
-                    <span>•</span>
-                    <span>{t.labelRequestedBy}: <strong className={isLight ? 'text-slate-900 font-bold' : 'text-slate-100'}>{cleanCookName}</strong></span>
+                    <span aria-hidden="true">•</span>
+                    <span>
+                      {t.labelRequestedBy}:{' '}
+                      <strong className="text-text-primary font-bold">{cleanCookName}</strong>
+                    </span>
                     {cleanBuyerName && (
                       <>
-                        <span>•</span>
-                        <span>{t.labelBuyer}: <strong className={isLight ? 'text-emerald-800 font-bold' : 'text-emerald-300'}>{cleanBuyerName}</strong></span>
+                        <span aria-hidden="true">•</span>
+                        <span>
+                          {t.labelBuyer}:{' '}
+                          <strong className="text-accent font-bold">{cleanBuyerName}</strong>
+                        </span>
                       </>
                     )}
                   </div>
 
-                  {/* Item count tag */}
-                  <div className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${
-                    isLight ? 'bg-slate-100 text-slate-800 border-slate-200' : 'bg-slate-950 text-slate-200 border-slate-800'
-                  }`}>
+                  <Badge tone="neutral">
                     {totalItems} {totalItems === 1 ? t.labelItemSingular : t.labelItems}
                     {purchasedItems > 0 && ` (${purchasedItems}/${totalItems} ${t.labelReady})`}
-                  </div>
+                  </Badge>
                 </div>
 
-                {/* Progress Bar for active purchases */}
+                {/* Progress bar */}
                 {['Asignada', 'En Compra', 'Comprada'].includes(req.status) && (
-                  <div className={`mt-2.5 p-2.5 sm:p-3 rounded-xl border ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800/80'
-                  }`}>
+                  <div className="mt-2.5 p-2.5 sm:p-3 rounded-control border border-border-default bg-inset">
                     <div className="flex justify-between items-center text-xs sm:text-sm font-bold mb-1.5">
-                      <span className={`flex items-center space-x-1.5 truncate ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>
-                        <Store className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                      <span className="flex items-center gap-1.5 truncate text-text-primary">
+                        <Store className="w-4 h-4 text-accent flex-shrink-0" />
                         <span className="truncate">
                           {req.status === 'Comprada'
                             ? t.shopPurchasedMsg
                             : `${t.shopActiveMsg} (${cleanBuyerName || t.labelBuyer})`}
                         </span>
                       </span>
-                      <span className="text-emerald-600 font-black ml-2 flex-shrink-0">
+                      <span className="text-accent font-black ml-2 flex-shrink-0">
                         {progressPct}%
                       </span>
                     </div>
-                    <div className={`w-full rounded-full h-2 overflow-hidden ${isLight ? 'bg-slate-200' : 'bg-slate-800'}`}>
+                    <div
+                      className="w-full rounded-full h-2 overflow-hidden bg-elevated"
+                      role="progressbar"
+                      aria-valuenow={progressPct}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                    >
                       <div
-                        className="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-500"
+                        className="bg-accent h-2 rounded-full transition-all duration-[var(--duration-slow)]"
                         style={{ width: `${progressPct}%` }}
                       />
                     </div>
                   </div>
                 )}
 
-                {/* Compact Product Chips (collapsed) */}
+                {/* Compact chips (collapsed) */}
                 {!isExpanded && (
                   <div className="mt-2.5 flex flex-wrap gap-1.5 items-center">
                     {req.items.slice(0, 3).map((item) => (
-                      <span
-                        key={item.id}
-                        className={`text-xs px-2.5 py-1 rounded-lg border truncate max-w-[220px] ${
-                          item.purchased
-                            ? isLight
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-800 line-through'
-                              : 'bg-emerald-950/30 border-emerald-800/40 text-emerald-300/80 line-through'
-                            : isLight
-                              ? 'bg-slate-50 border-slate-200 text-slate-800 font-medium'
-                              : 'bg-slate-950 border-slate-800 text-slate-200 font-medium'
-                        }`}
-                      >
+                      <Chip key={item.id} done={item.purchased} className="max-w-[220px]">
                         {item.productName} ({item.requestedQty} {item.unit})
-                      </span>
+                      </Chip>
                     ))}
                     {req.items.length > 3 && (
                       <button
                         onClick={() => toggleExpand(req.id)}
-                        className="text-xs text-emerald-600 hover:underline font-extrabold px-2 py-1"
+                        className="text-xs text-accent hover:underline font-extrabold px-2 py-1"
                       >
                         +{req.items.length - 3} {t.labelMore}...
                       </button>
@@ -436,52 +375,42 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                   </div>
                 )}
 
-                {/* Expanded Details */}
+                {/* Expanded details */}
                 {isExpanded && (
-                  <div className={`mt-3 pt-3 border-t space-y-3 animate-fadeIn ${
-                    isLight ? 'border-slate-200' : 'border-slate-800'
-                  }`}>
+                  <div className="mt-3 pt-3 border-t border-border-default space-y-3 animate-fadeIn">
                     {req.notes && (
-                      <div className={`px-3.5 py-2 border rounded-xl text-xs sm:text-sm italic flex items-start space-x-2 ${
-                        isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-slate-950/80 border-slate-800 text-slate-200'
-                      }`}>
-                        <FileText className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <div className="px-3.5 py-2 border border-border-default rounded-control bg-inset text-xs sm:text-sm italic flex items-start gap-2 text-text-primary">
+                        <FileText className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
                         <span>"{req.notes}"</span>
                       </div>
                     )}
 
                     <div className="space-y-2">
-                      <div className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      <div className="text-xs font-black uppercase tracking-wider text-text-secondary">
                         {t.labelRequiredItems} ({totalItems}):
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {req.items.map((item) => (
                           <div
                             key={item.id}
-                            className={`px-3 py-2 rounded-xl text-xs sm:text-sm border flex items-center justify-between gap-2 ${
+                            className={cn(
+                              'px-3 py-2 rounded-control text-xs sm:text-sm border flex items-center justify-between gap-2',
                               item.purchased
-                                ? isLight
-                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900 line-through'
-                                  : 'bg-emerald-950/20 border-emerald-800/40 text-emerald-300/90 line-through'
-                                : isLight
-                                  ? 'bg-slate-50 border-slate-200 text-slate-900'
-                                  : 'bg-slate-950 border-slate-800 text-slate-100'
-                            }`}
+                                ? 'bg-success/10 border-success/30 text-success line-through'
+                                : 'bg-inset border-border-default text-text-primary'
+                            )}
                           >
-                            <div className="flex items-center space-x-2 min-w-0 truncate">
+                            <div className="flex items-center gap-2 min-w-0 truncate">
                               {item.purchased ? (
-                                <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                                <Check className="w-4 h-4 text-success flex-shrink-0" />
                               ) : (
-                                <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+                                <span className="w-2 h-2 rounded-full bg-warning flex-shrink-0" />
                               )}
                               <span className="truncate font-bold">{item.productName}</span>
                             </div>
-
-                            <span className={`font-black px-2 py-0.5 rounded-lg border text-xs flex-shrink-0 ${
-                              isLight ? 'bg-white text-slate-900 border-slate-200' : 'bg-slate-900 text-slate-100 border-slate-800'
-                            }`}>
+                            <Badge tone="neutral" className="flex-shrink-0">
                               {item.requestedQty} {item.unit}
-                            </span>
+                            </Badge>
                           </div>
                         ))}
                       </div>
@@ -489,182 +418,177 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                   </div>
                 )}
 
-                {/* Card Action Footer */}
-                <div className={`mt-3 pt-2.5 border-t flex items-center justify-between gap-2 flex-wrap ${
-                  isLight ? 'border-slate-200' : 'border-slate-800/80'
-                }`}>
-                  {/* Toggle Details Button */}
-                  <button
+                {/* Action footer */}
+                <div className="mt-3 pt-2.5 border-t border-border-default flex items-center justify-between gap-2 flex-wrap">
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => toggleExpand(req.id)}
-                    className={`px-3 py-1.5 rounded-xl border text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition ${
-                      isLight
-                        ? 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800'
-                        : 'bg-slate-950 hover:bg-slate-800 border-slate-800 text-slate-200'
-                    }`}
+                    aria-expanded={isExpanded}
+                    aria-controls={`request-card-${req.id}`}
+                    rightIcon={
+                      isExpanded ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )
+                    }
                   >
-                    <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
-                    {isExpanded ? (
-                      <ChevronUp className={`w-4 h-4 ${isLight ? 'text-slate-600' : 'text-slate-400'}`} />
-                    ) : (
-                      <ChevronDown className={`w-4 h-4 ${isLight ? 'text-slate-600' : 'text-slate-400'}`} />
-                    )}
-                  </button>
+                    {isExpanded ? t.btnHideDetails : t.btnViewDetails}
+                  </Button>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center space-x-2 ml-auto">
-                    {/* WhatsApp Share */}
+                  <div className="flex items-center gap-2 ml-auto">
+                    {/* WhatsApp share */}
                     <a
-                      href={generateWhatsAppLink(currentUser.phone, generateRequestWhatsAppSummary(req))}
+                      href={generateWhatsAppLink(
+                        currentUser.phone,
+                        generateRequestWhatsAppSummary(req)
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`p-2 rounded-xl border text-emerald-600 text-xs font-bold transition flex items-center ${
-                        isLight ? 'bg-slate-100 hover:bg-slate-200 border-slate-200' : 'bg-slate-950 hover:bg-slate-800 border-slate-800'
-                      }`}
+                      aria-label={t.labelShareWhatsApp}
                       title={t.labelShareWhatsApp}
+                      className="inline-flex items-center justify-center w-10 h-10 rounded-control border border-border-default bg-elevated text-accent hover:text-accent-contrast hover:bg-accent transition"
                     >
                       <Share2 className="w-4 h-4" />
                     </a>
 
-                    {/* COCINERO ACTIONS */}
+                    {/* COCINERO */}
                     {isCook && (
                       <>
                         {['Comprada', 'Entregada'].includes(req.status) && (
-                          <button
+                          <Button
+                            variant="success"
+                            size="sm"
                             onClick={() => {
                               playAlertSound('success');
                               onUpdateStatus(req.id, 'Completada');
                             }}
-                            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm flex items-center space-x-1.5 shadow-xl shadow-emerald-500/40 animate-pulse ring-4 ring-emerald-400/80 transition scale-105"
+                            leftIcon={<PackageCheck className="w-4 h-4" />}
                           >
-                            <PackageCheck className="w-4 h-4 text-slate-950" />
-                            <span>{t.btnConfirmReceipt}</span>
-                          </button>
+                            {t.btnConfirmReceipt}
+                          </Button>
                         )}
-
                         {req.status === 'Pendiente' && (
-                          <div className="px-3 py-1.5 rounded-xl bg-amber-950/40 border border-amber-800/50 text-amber-300 text-xs font-bold flex items-center space-x-1">
-                            <AlertCircle className="w-4 h-4 text-amber-400" />
-                            <span>{t.statusWaiting}</span>
-                          </div>
+                          <StatusPill tone="warning" icon={<AlertCircle />}>
+                            {t.statusWaiting}
+                          </StatusPill>
                         )}
-
                         {req.status === 'Asignada' && (
-                          <div className="px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs font-bold flex items-center space-x-1">
-                            <Truck className="w-4 h-4 text-emerald-400 animate-pulse" />
-                            <span>{t.statusOnTheWay} ({cleanBuyerName || t.labelBuyer})</span>
-                          </div>
+                          <StatusPill tone="info" icon={<Truck />}>
+                            {t.statusOnTheWay} ({cleanBuyerName || t.labelBuyer})
+                          </StatusPill>
                         )}
-
                         {req.status === 'En Compra' && (
-                          <div className="px-3 py-1.5 rounded-xl bg-orange-950/40 border border-orange-800/50 text-orange-300 text-xs font-bold flex items-center space-x-1">
-                            <ShoppingBag className="w-4 h-4 text-orange-400 animate-pulse" />
-                            <span>{t.statusAtStore} ({cleanBuyerName || t.labelBuyer})</span>
-                          </div>
+                          <StatusPill tone="info" icon={<ShoppingBag />}>
+                            {t.statusAtStore} ({cleanBuyerName || t.labelBuyer})
+                          </StatusPill>
                         )}
-
                         {req.status === 'Completada' && (
-                          <div className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-emerald-400 text-xs font-extrabold flex items-center space-x-1">
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span>{t.statusReceived}</span>
-                          </div>
+                          <StatusPill tone="success" icon={<CheckCircle2 />}>
+                            {t.statusReceived}
+                          </StatusPill>
                         )}
                       </>
                     )}
 
-                    {/* COMPRADOR ACTIONS */}
+                    {/* COMPRADOR */}
                     {isBuyer && (
                       <>
                         {isAssignedToOtherBuyer ? (
-                          <div
-                            className="px-3 py-1.5 rounded-xl bg-slate-950/90 border border-slate-800 text-slate-400 font-bold text-xs flex items-center space-x-1.5 opacity-80 cursor-not-allowed select-none"
+                          <StatusPill
+                            tone="neutral"
+                            icon={<Lock className="text-warning" />}
+                            className="opacity-80"
                             title={`${t.labelTakenBy} ${cleanBuyerName || t.labelOtherBuyer}`}
                           >
-                            <Lock className="w-4 h-4 text-amber-400" />
-                            <span>{t.labelTakenBy} {cleanBuyerName || t.labelOtherBuyer}</span>
-                          </div>
+                            {t.labelTakenBy} {cleanBuyerName || t.labelOtherBuyer}
+                          </StatusPill>
                         ) : (
                           <>
                             {req.status === 'Pendiente' && (
-                              <button
+                              <Button
+                                variant="primary"
+                                size="sm"
                                 onClick={() => {
                                   playAlertSound('success');
                                   onClaimRequest(req.id);
                                 }}
-                                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center space-x-1 shadow-md transition"
+                                leftIcon={<User className="w-4 h-4" />}
                               >
-                                <User className="w-4 h-4" />
-                                <span>{t.btnTakeOrder}</span>
-                              </button>
+                                {t.btnTakeOrder}
+                              </Button>
                             )}
-
                             {['Asignada', 'En Compra', 'Pendiente'].includes(req.status) && (
-                              <button
+                              <Button
+                                variant="success"
+                                size="sm"
                                 onClick={() => {
                                   playAlertSound('click');
                                   onOpenShoppingMode(req);
                                 }}
-                                className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center space-x-1 shadow-md transition"
+                                leftIcon={<ShoppingBag className="w-3.5 h-3.5" />}
                               >
-                                <ShoppingBag className="w-3.5 h-3.5 text-slate-950" />
-                                <span>{t.btnShopMode}</span>
-                              </button>
+                                {t.btnShopMode}
+                              </Button>
                             )}
-
                             {req.status === 'Comprada' && (
-                              <button
+                              <Button
+                                variant="success"
+                                size="sm"
                                 onClick={() => {
                                   playAlertSound('success');
                                   onUpdateStatus(req.id, 'Entregada');
                                 }}
-                                className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center space-x-1 shadow-md transition"
+                                leftIcon={<Truck className="w-3.5 h-3.5" />}
                               >
-                                <Truck className="w-3.5 h-3.5" />
-                                <span>{t.btnDelivered}</span>
-                              </button>
+                                {t.btnDelivered}
+                              </Button>
                             )}
                           </>
                         )}
                       </>
                     )}
 
-                    {/* ADMIN ACTIONS */}
+                    {/* ADMIN */}
                     {isAdmin && (
                       <>
                         {req.status === 'Pendiente' && (
-                          <button
+                          <Button
+                            variant="success"
+                            size="sm"
                             onClick={() => {
                               playAlertSound('success');
                               onClaimRequest(req.id);
                             }}
-                            className="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center space-x-1 shadow-md transition"
+                            leftIcon={<User className="w-3 h-3" />}
                           >
-                            <User className="w-3 h-3" />
-                            <span>{t.btnAssignMe}</span>
-                          </button>
+                            {t.btnAssignMe}
+                          </Button>
                         )}
-
-                        <button
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           onClick={() => {
                             playAlertSound('click');
                             onOpenShoppingMode(req);
                           }}
-                          className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-xs flex items-center space-x-1 border border-slate-700 transition"
+                          leftIcon={<ShoppingBag className="w-3.5 h-3.5" />}
                         >
-                          <ShoppingBag className="w-3.5 h-3.5" />
-                          <span>{t.btnShopMode}</span>
-                        </button>
-
+                          {t.btnShopMode}
+                        </Button>
                         {req.status === 'Comprada' && (
-                          <button
+                          <Button
+                            variant="success"
+                            size="sm"
                             onClick={() => {
                               playAlertSound('success');
                               onUpdateStatus(req.id, 'Completada');
                             }}
-                            className="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center space-x-1 transition"
+                            leftIcon={<CheckCircle2 className="w-3.5 h-3.5" />}
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>{t.btnComplete}</span>
-                          </button>
+                            {t.btnComplete}
+                          </Button>
                         )}
                       </>
                     )}
