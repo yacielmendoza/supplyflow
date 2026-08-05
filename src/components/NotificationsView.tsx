@@ -88,8 +88,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const handleDismiss = (id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleDismiss = (id: string) => {
     setDismissedIds((prev) => {
       const next = new Set<string>(prev);
       next.add(id);
@@ -164,7 +163,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                 <button
                   key={key}
                   onClick={() => setSegment(key)}
-                  aria-pressed={active}
+                  aria-current={active ? 'true' : undefined}
                   className="flex items-center justify-center gap-1.5 min-h-11 rounded-2xl font-black text-sm transition"
                   style={{
                     background: active ? 'var(--sf-surface)' : 'transparent',
@@ -269,9 +268,9 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                               {statusLabels[req.status] ?? req.status}
                             </span>
                             <button
-                              onClick={(e) => handleDismiss(req.id, e)}
+                              onClick={() => handleDismiss(req.id)}
                               title={t.notifMarkReadTitle}
-                              aria-label={t.notifMarkReadTitle}
+                              aria-label={`${t.notifMarkReadTitle} — #${req.requestNumber} ${req.restaurantName}`}
                               className="w-11 h-11 flex items-center justify-center rounded-lg sf-btn-ghost transition pointer-events-auto"
                             >
                               <Check className="w-4 h-4" />
@@ -341,7 +340,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
             </div>
 
             <div className="sf-card p-4 space-y-3">
-              <label className="text-xs font-black uppercase tracking-wider sf-muted">{t.notifSoundTestLabel}</label>
+              <div className="text-xs font-black uppercase tracking-wider sf-muted">{t.notifSoundTestLabel}</div>
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => playAlertSound('urgent')}
                   className="flex items-center justify-center gap-1.5 min-h-11 rounded-2xl text-xs font-bold sf-btn-ghost transition active:scale-95">

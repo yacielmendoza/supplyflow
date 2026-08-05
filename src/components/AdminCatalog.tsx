@@ -154,7 +154,7 @@ export const AdminCatalog: React.FC<AdminCatalogProps> = ({
           const active = activeTab === tab.key;
           return (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              aria-pressed={active}
+              aria-current={active ? 'true' : undefined}
               className="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1"
               style={active ? { background: 'var(--sf-surface)', color: 'var(--sf-accent)', boxShadow: 'var(--sf-shadow-sm)' } : { color: 'var(--sf-text-muted)' }}>
               {tab.key === 'TIEMPOS' && <Clock className="w-3.5 h-3.5" />}
