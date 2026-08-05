@@ -143,8 +143,8 @@ export const RequestsList: React.FC<RequestsListProps> = ({
             <button
               key={f.key}
               onClick={() => setFilterTab(f.key)}
-              aria-pressed={active}
-              className="py-2.5 px-1 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition"
+              aria-current={active ? 'true' : undefined}
+              className="min-h-11 px-1 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition"
               style={{
                 background: active ? tint(f.color, 16) : 'transparent',
                 color: active ? f.color : 'var(--sf-text-muted)',
@@ -284,7 +284,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     {req.items.slice(0, 3).map((item) => (
                       <span key={item.id} className="sf-inset text-xs px-2.5 py-1 rounded-lg truncate max-w-[220px]"
                         style={{ color: item.purchased ? 'var(--sf-accent)' : 'var(--sf-text)', textDecoration: item.purchased ? 'line-through' : 'none' }}>
-                        {item.productName} ({item.requestedQty} {formatUnitName(item.unit, t)})
+                        {item.productName} ({item.requestedQty} {formatUnitName(item.unit, t, item.requestedQty)})
                       </span>
                     ))}
                     {req.items.length > 3 && (
@@ -334,7 +334,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                                   </span>
                                 </div>
                                 <span className="sf-pill font-black px-2 py-0.5 rounded-lg text-xs flex-shrink-0" style={{ color: 'var(--sf-text)' }}>
-                                  {item.requestedQty} {formatUnitName(item.unit, t)}
+                                  {item.requestedQty} {formatUnitName(item.unit, t, item.requestedQty)}
                                 </span>
                               </div>
                             ))}
@@ -347,7 +347,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
 
                 {/* Footer actions */}
                 <div className="mt-3 pt-2.5 flex items-center justify-between gap-2 flex-wrap" style={{ borderTop: '1px solid var(--sf-border)' }}>
-                  <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0"
+                  <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 min-h-11 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0"
                     aria-expanded={isExpanded} aria-controls={isExpanded ? `request-details-${req.id}` : undefined}>
                     <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 sf-muted" /> : <ChevronDown className="w-4 h-4 sf-muted" />}
