@@ -30,12 +30,20 @@ absent from `en`, since the type comes from `es`.
    still a literal (e.g. one `<option>` translated, the next one hardcoded).
    These are easy to miss because the surrounding UI already looks
    localized.
-4. **Data-carried UI strings.** Values that flow from `src/data/*.ts` or
-   `src/types.ts` unions into rendered labels (e.g. a `type` or category
-   field shown directly as `{value}`) need a translation lookup
-   (`formatCategoryName`-style helper), not a raw pass-through — a raw
-   pass-through is a parity gap that lives in data, not in
-   `translations.ts`, and won't show up in a key-parity diff.
+4. **Data-carried UI strings / enum coverage.** Values that flow from
+   `src/data/*.ts` or `src/types.ts` unions (`Category`, `UnitType`,
+   restaurant `type`, `RequestStatus`, etc.) into rendered labels need a
+   translation lookup (a `formatXxx(value, t)` helper, mirroring
+   `formatCategoryName`/`formatRestaurantType`/`formatUnitName`), not a raw
+   `{value}` pass-through. Key-parity diffing (#1) will NOT catch this —
+   there's no missing key, the enum's raw literal is just never routed
+   through `t` at all. For every enumerated type that appears in the UI:
+   grep every raw usage of the field across the whole codebase (`p.category`,
+   `item.unit`, `r.type`, …), not just the first hit — the same field is
+   typically rendered in 3-6 places (mobile card, desktop table, `<select>`
+   options, badges/chips in other screens that reference the same data), and
+   a formatter fix that's only applied to some of those sites is a
+   half-closed finding, not a closed one.
 5. **Unreachable-but-latent defaults.** A component prop with a hardcoded
    English default (`backLabel = 'Back'`) is safe only as long as every
    caller overrides it. Prefer making such props required over trusting

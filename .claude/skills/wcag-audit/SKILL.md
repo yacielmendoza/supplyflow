@@ -38,6 +38,20 @@ description: Use to audit a SupplyFlow screen or component for WCAG 2.2 AA compl
    reader user wouldn't otherwise know.
 8. **Reduced motion (2.3.3)** — animations from `motion` must respect
    `prefers-reduced-motion` (reduce/skip non-essential transitions).
+9. **Programmatic label association (1.3.1 / 4.1.2 / 3.3.2)** — every
+   `<input>`/`<select>`/`<textarea>` needs a name a screen reader can read
+   *before* the user interacts with it: a `<label htmlFor>` pointing at a
+   matching `id`, a `<label>` wrapping the control, or `aria-label`/
+   `aria-labelledby`. Visual proximity to a `<label>` without `htmlFor`/`id`
+   is not sufficient — many screen reader/browser combinations announce the
+   control with no name at all. A bare `placeholder` is not a label either:
+   it vanishes the moment the user types, so it fails 3.3.2 for fields with
+   no other visible caption. Grep the file for `<label` and confirm each one
+   pairs with `htmlFor`/`id` or wraps its control; grep for `<input`/
+   `<select`/`<textarea` and confirm each one resolves to a label some way —
+   don't stop at the first form in the file, check every repeated/generated
+   instance (inline "add" forms, per-row edit cards, settings panels) since
+   the same missing-label bug tends to be copy-pasted across all of them.
 
 ## Method
 

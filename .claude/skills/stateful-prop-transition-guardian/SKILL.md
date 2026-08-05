@@ -65,6 +65,21 @@ commonly via a lazy initializer (`useState(() => ...prop...)`) or a
    is not evidence the "same component, new identifying prop, no
    remount" transition (e.g. a sibling selector changing the id prop)
    is safe — test/reason about it as a separate case explicitly.
+6. **A shared-device app has an identity dimension beyond restaurant/date:
+   the logged-in user.** This surfaced as a third variant of the same bug
+   family (tab switch → restaurant switch → now user switch): a
+   `localStorage` key scoped only by restaurant+date silently hands one
+   user's unsent draft to the next person who logs in on the same device,
+   because `handleLogout`/`handleSelectUser` don't reset the id the draft is
+   keyed by. When auditing a persisted-draft key, explicitly enumerate
+   *every* identity dimension actually in play for this app — restaurant,
+   date, AND current user — and check each one independently, not just the
+   ones a previous cycle already fixed. If the key intentionally omits a
+   dimension (e.g. restaurant+date is kept shared across users on purpose,
+   for shift handoff), that's a legitimate design choice only when the UI
+   makes the handoff explicit (e.g. an "resuming X's draft" banner with a
+   discard option) — an omitted dimension with no such disclosure is the bug,
+   not a design choice.
 
 ## Method
 
