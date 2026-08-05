@@ -57,8 +57,33 @@ const UNIT_KEY_MAP: Record<UnitType, keyof Translations> = {
   'Caja / Cartón': 'unitCajaCarton',
 };
 
-export function formatUnitName(unit: string, t: Translations): string {
-  const key = UNIT_KEY_MAP[unit as UnitType];
+// Dedicated plural keys, not a suffix rule — Spanish/English pluralization
+// (Galón→Galones, Box→Boxes) doesn't follow a blind "+s", which is exactly
+// the bug this replaces (formatUnitName(unit, t) + 's' produced "Unidads").
+const UNIT_PLURAL_KEY_MAP: Record<UnitType, keyof Translations> = {
+  Paquete: 'unitPaquetePlural',
+  Caja: 'unitCajaPlural',
+  Tubo: 'unitTuboPlural',
+  Bolsa: 'unitBolsaPlural',
+  Libra: 'unitLibraPlural',
+  Galón: 'unitGalonPlural',
+  Botella: 'unitBotellaPlural',
+  Lata: 'unitLataPlural',
+  Unidad: 'unitUnidadPlural',
+  Tanque: 'unitTanquePlural',
+  Rollo: 'unitRolloPlural',
+  Atado: 'unitAtadoPlural',
+  Cubeta: 'unitCubetaPlural',
+  'Caja / Cartón': 'unitCajaCartonPlural',
+};
+
+// `count` defaults to a value that renders the singular form, for call sites
+// that display a unit name with no specific quantity attached (e.g. a unit
+// picker option). Pass the real quantity wherever one is being formatted
+// alongside a number to get correct pluralization.
+export function formatUnitName(unit: string, t: Translations, count = 1): string {
+  const keyMap = count === 1 ? UNIT_KEY_MAP : UNIT_PLURAL_KEY_MAP;
+  const key = keyMap[unit as UnitType];
   return key ? t[key] : unit;
 }
 

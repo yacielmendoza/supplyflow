@@ -4,6 +4,7 @@ export const translations = {
   es: {
     // ── App / Brand ────────────────────────────────────────────────────────────
     appName: 'RestoSupply',
+    docTitle: 'SupplyFlow - Coordinación de Abastecimiento',
     back: 'Atrás',
 
     // ── Login Screen ───────────────────────────────────────────────────────────
@@ -33,6 +34,7 @@ export const translations = {
     navAdmin: 'Catálogo & Mínimos',
     navAnalytics: 'Métricas & Control',
     navPurchaseRequests: 'Solicitudes de Compra',
+    navLandmarkLabel: 'Navegación principal',
 
     // ── Bottom Nav (short labels) ────────────────────────────────────────────
     tabDashboard: 'Resumen',
@@ -180,6 +182,20 @@ export const translations = {
     unitAtado: 'Atado',
     unitCubeta: 'Cubeta',
     unitCajaCarton: 'Caja / Cartón',
+    unitPaquetePlural: 'Paquetes',
+    unitCajaPlural: 'Cajas',
+    unitTuboPlural: 'Tubos',
+    unitBolsaPlural: 'Bolsas',
+    unitLibraPlural: 'Libras',
+    unitGalonPlural: 'Galones',
+    unitBotellaPlural: 'Botellas',
+    unitLataPlural: 'Latas',
+    unitUnidadPlural: 'Unidades',
+    unitTanquePlural: 'Tanques',
+    unitRolloPlural: 'Rollos',
+    unitAtadoPlural: 'Atados',
+    unitCubetaPlural: 'Cubetas',
+    unitCajaCartonPlural: 'Cajas / Cartones',
     tagReviewed: 'REVISADO',
     tagUnreviewed: 'SIN REVISAR',
     tagEmpty: 'AGOTADO',
@@ -207,6 +223,9 @@ export const translations = {
     checklistDraftBannerSuffix: '. Revísalo antes de enviar.',
     checklistDraftDiscardBtn: 'Descartar y empezar de nuevo',
     checklistDraftKeepBtn: 'Continuar',
+    checklistDraftUnknownAuthor: 'otro usuario',
+    checklistRemoteClearedMsg: 'Este checklist ya fue enviado o descartado desde otro dispositivo.',
+    checklistRemoteClearedBtn: 'Empezar checklist nuevo',
     labelOf: 'de',
 
     // ── Admin Catalog ──────────────────────────────────────────────────────────
@@ -267,6 +286,7 @@ export const translations = {
     adminRestNamePlaceholder: 'Ej: Taquería El Caporal',
     adminUnitLabel: 'Unidad:',
     adminPhoneLabel: 'Tel:',
+    adminSuppliersReadOnlyNotice: 'Datos de demostración de solo lectura — la gestión de proveedores aún no está conectada.',
     adminTabOverdue: 'Tiempos',
     adminOverdueTitle: 'Tiempos de Espera Máximos',
     adminOverdueDesc: 'Si un pedido sin asignar supera este tiempo, se marcará como',
@@ -404,6 +424,7 @@ export const translations = {
     // ── Accessibility / misc additions ──────────────────────────────────────
     ariaDecreaseStock: 'Disminuir stock de',
     ariaIncreaseStock: 'Aumentar stock de',
+    ariaStockInput: 'Cantidad en stock de',
     adminTypeCafe: 'Cafe / Desayunos',
     adminTypeFoodTruck: 'Food Truck',
     adminTypeRestaurant: 'Restaurante',
@@ -444,6 +465,7 @@ export const translations = {
   en: {
     // ── App / Brand ────────────────────────────────────────────────────────────
     appName: 'RestoSupply',
+    docTitle: 'SupplyFlow - Supply Coordination',
     back: 'Back',
 
     // ── Login Screen ───────────────────────────────────────────────────────────
@@ -473,6 +495,7 @@ export const translations = {
     navAdmin: 'Catalog & Thresholds',
     navAnalytics: 'Metrics & Control',
     navPurchaseRequests: 'Purchase Requests',
+    navLandmarkLabel: 'Main navigation',
 
     // ── Bottom Nav (short labels) ────────────────────────────────────────────
     tabDashboard: 'Summary',
@@ -620,6 +643,20 @@ export const translations = {
     unitAtado: 'Bundle',
     unitCubeta: 'Bucket',
     unitCajaCarton: 'Box / Carton',
+    unitPaquetePlural: 'Packs',
+    unitCajaPlural: 'Boxes',
+    unitTuboPlural: 'Tubes',
+    unitBolsaPlural: 'Bags',
+    unitLibraPlural: 'Pounds',
+    unitGalonPlural: 'Gallons',
+    unitBotellaPlural: 'Bottles',
+    unitLataPlural: 'Cans',
+    unitUnidadPlural: 'Units',
+    unitTanquePlural: 'Tanks',
+    unitRolloPlural: 'Rolls',
+    unitAtadoPlural: 'Bundles',
+    unitCubetaPlural: 'Buckets',
+    unitCajaCartonPlural: 'Boxes / Cartons',
     tagReviewed: 'REVIEWED',
     tagUnreviewed: 'UNREVIEWED',
     tagEmpty: 'EMPTY',
@@ -647,6 +684,9 @@ export const translations = {
     checklistDraftBannerSuffix: '. Review it before submitting.',
     checklistDraftDiscardBtn: 'Discard and start over',
     checklistDraftKeepBtn: 'Continue',
+    checklistDraftUnknownAuthor: 'another user',
+    checklistRemoteClearedMsg: 'This checklist was already submitted or discarded from another device.',
+    checklistRemoteClearedBtn: 'Start a new checklist',
     labelOf: 'of',
 
     // ── Admin Catalog ──────────────────────────────────────────────────────────
@@ -707,6 +747,7 @@ export const translations = {
     adminRestNamePlaceholder: 'E.g.: El Caporal Taqueria',
     adminUnitLabel: 'Unit:',
     adminPhoneLabel: 'Phone:',
+    adminSuppliersReadOnlyNotice: 'Read-only demo data — supplier management isn\'t wired up yet.',
     adminTabOverdue: 'Timing',
     adminOverdueTitle: 'Maximum Wait Times',
     adminOverdueDesc: 'If an unassigned request exceeds this time, it will be marked as',
@@ -844,6 +885,7 @@ export const translations = {
     // ── Accessibility / misc additions ──────────────────────────────────────
     ariaDecreaseStock: 'Decrease stock of',
     ariaIncreaseStock: 'Increase stock of',
+    ariaStockInput: 'Stock count for',
     adminTypeCafe: 'Cafe / Breakfast',
     adminTypeFoodTruck: 'Food Truck',
     adminTypeRestaurant: 'Restaurant',
