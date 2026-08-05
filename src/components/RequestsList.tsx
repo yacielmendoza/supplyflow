@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { SupplyRequest, RequestStatus, UserProfile } from '../types';
-import { formatCleanName } from '../lib/formatters';
+import { formatCleanName, formatUnitName } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
 import {
   Clock,
@@ -84,7 +84,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requests, selectedRestaurantId, filterTab]);
 
-  const statusLabels = getStatusLabels(t);
+  const statusLabels = useMemo(() => getStatusLabels(t), [t]);
   const getStatusLabel = (status: RequestStatus): string => statusLabels[status] ?? status;
 
   // Ticks once a minute so relative timestamps ("5 min ago") advance without a prop change.
@@ -284,12 +284,12 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                     {req.items.slice(0, 3).map((item) => (
                       <span key={item.id} className="sf-inset text-xs px-2.5 py-1 rounded-lg truncate max-w-[220px]"
                         style={{ color: item.purchased ? 'var(--sf-accent)' : 'var(--sf-text)', textDecoration: item.purchased ? 'line-through' : 'none' }}>
-                        {item.productName} ({item.requestedQty} {item.unit})
+                        {item.productName} ({item.requestedQty} {formatUnitName(item.unit, t)})
                       </span>
                     ))}
                     {req.items.length > 3 && (
                       <button onClick={() => toggleExpand(req.id)} className="text-xs sf-accent font-extrabold px-2 py-1"
-                        aria-expanded={isExpanded} aria-controls={`request-details-${req.id}`}>
+                        aria-expanded={isExpanded} aria-controls={isExpanded ? `request-details-${req.id}` : undefined}>
                         +{req.items.length - 3} {t.labelMore}...
                       </button>
                     )}
@@ -334,7 +334,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                                   </span>
                                 </div>
                                 <span className="sf-pill font-black px-2 py-0.5 rounded-lg text-xs flex-shrink-0" style={{ color: 'var(--sf-text)' }}>
-                                  {item.requestedQty} {item.unit}
+                                  {item.requestedQty} {formatUnitName(item.unit, t)}
                                 </span>
                               </div>
                             ))}
@@ -348,7 +348,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                 {/* Footer actions */}
                 <div className="mt-3 pt-2.5 flex items-center justify-between gap-2 flex-wrap" style={{ borderTop: '1px solid var(--sf-border)' }}>
                   <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0"
-                    aria-expanded={isExpanded} aria-controls={`request-details-${req.id}`}>
+                    aria-expanded={isExpanded} aria-controls={isExpanded ? `request-details-${req.id}` : undefined}>
                     <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 sf-muted" /> : <ChevronDown className="w-4 h-4 sf-muted" />}
                   </button>
