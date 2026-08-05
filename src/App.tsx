@@ -551,11 +551,7 @@ export default function App() {
   const currentNavTabs = getNavTabs();
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
-      isLight
-        ? 'bg-slate-100 text-slate-900 selection:bg-emerald-500 selection:text-white'
-        : 'bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-slate-950'
-    }`}>
+    <div className="min-h-screen flex flex-col font-sans transition-colors duration-300 bg-app text-text-primary selection:bg-accent selection:text-accent-contrast">
       <Header
         restaurants={restaurants}
         selectedRestaurantId={selectedRestaurantId}
@@ -573,9 +569,7 @@ export default function App() {
       />
 
       <nav
-        className={`border-b sticky z-30 backdrop-blur-md ${
-          isLight ? 'bg-white/90 border-slate-200' : 'bg-slate-900/90 border-slate-800'
-        }`}
+        className="border-b border-border-default sticky z-30 backdrop-blur-md bg-surface/90"
         style={{ top: 'calc(52px + env(safe-area-inset-top))' }}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -591,20 +585,19 @@ export default function App() {
                     setActiveTab(tab.id);
                     playAlertSound('click');
                   }}
-                  className={`relative flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                  className={`relative flex items-center space-x-2 px-3 py-1.5 rounded-control text-xs font-bold transition whitespace-nowrap ${
                     isActive
-                      ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
-                      : isLight
-                      ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                      ? 'bg-accent text-accent-contrast shadow-md font-black scale-[1.02]'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-elevated'
                   }`}
+                  aria-current={isActive ? 'page' : undefined}
                 >
                   <Icon className="w-4 h-4 flex-shrink-0" />
                   <span>{tab.label}</span>
                   {tab.badge !== undefined && tab.badge > 0 && (
                     <span
                       className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                        isActive ? 'bg-slate-950 text-emerald-400' : 'bg-rose-500 text-white animate-pulse'
+                        isActive ? 'bg-app text-accent' : 'bg-danger text-white'
                       }`}
                     >
                       {tab.badge}
