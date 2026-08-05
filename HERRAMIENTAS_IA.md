@@ -91,3 +91,20 @@ humano los configure si se desea:
 Ninguno de estos es necesario para el flujo actual (skills + subagentes +
 `npm run dev`/Playwright local ya cubren el ciclo), se documentan solo como
 mejora futura opcional.
+
+## Ciclo corrector 2026-08-05 (contra `AUDITORIA_RESULTADOS.md`, commit `5b72904`)
+
+No se creó ningún skill/subagente nuevo — la propia auditoría de este ciclo
+concluyó que los 14 pares existentes ya cubren el espacio, y que los 3
+hallazgos Altos nuevos (A1/A2/A3) eran evidencia de checklists incompletos en
+skills ya existentes, no de un gap de especialización sin cubrir. Se
+fortalecieron 3 `SKILL.md` con ítems de checklist explícitos y accionables:
+
+| Skill fortalecido | Ítem añadido | Motivo (evidencia de esta auditoría) |
+|---|---|---|
+| `wcag-audit` | Ítem #9: todo `<input>`/`<select>`/`<textarea>` necesita nombre accesible programático (`htmlFor`/`id`, wrap, o `aria-label`) — proximidad visual y `placeholder` no bastan; revisar cada instancia repetida (formularios "add" inline, tarjetas de edición por fila), no solo la primera. | 17 `<label>` sin `htmlFor` en `AdminCatalog.tsx` (A2) + 3 campos de `AccountView.tsx` dependientes solo de `placeholder` (A3), tras 8+ ciclos de auditoría WCAG que no lo habían detectado explícitamente. |
+| `i18n-parity-guardian` | Ítem #4 ampliado: todo valor de un tipo enumerado (`Category`, `UnitType`, tipo de restaurante, `RequestStatus`) mostrado en UI debe pasar por un `formatXxx(valor, t)`; la paridad de claves (#1) NO detecta este caso porque no falta ninguna clave. Enumerar TODOS los sitios donde el campo se renderiza crudo, no solo el primero. | Categorías/unidades sin traducir en `AdminCatalog.tsx`/`ShoppingView.tsx` (M3/M4) pese a 380/380 de paridad de claves; `formatUnitName` nuevo aplicado en 4 archivos distintos que mostraban `p.unit`/`item.unit` crudo. |
+| `stateful-prop-transition-guardian` | Ítem #6: enumerar explícitamente TODAS las dimensiones de identidad en juego en esta app (restaurante + fecha + usuario actual) al auditar una clave de `localStorage`, no solo las que un ciclo anterior ya corrigió; una dimensión omitida a propósito solo es válida si el traspaso se hace explícito en la UI (banner + opción de descartar), no silencioso. | Fuga de datos entre usuarios en `DailyChecklist` (A1) — tercera variante del mismo bug (pestaña → restaurante → ahora usuario) que este skill fue creado para prevenir, pero cuyo alcance original no contemplaba la dimensión de usuario. |
+
+Sin cambios en los MCP recomendados (siguen sin ser instalables en este
+entorno headless).

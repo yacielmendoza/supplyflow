@@ -811,3 +811,136 @@ anteriores vienen documentando.
   del Header mientras la pestaña Checklist está abierta ahora remonta el
   componente (mismo mecanismo de persistencia ya verificado para cambio de
   pestaña) en vez de sobrescribir el draft del restaurante de destino.
+
+## Ciclo — respuesta a `AUDITORIA_RESULTADOS.md` (auditado `b38034d`, VEREDICTO: CON HALLAZGOS, 2026-08-01 12:17 UTC)
+
+Este ciclo implementó la lista de mejoras priorizadas de la sección (e) de
+esa auditoría: 3 Altos nuevos (A1–A3, ninguno introducido por el ciclo
+anterior — deuda preexistente que ninguna pasada anterior había detectado),
+los 6 Medios nuevos con recomendación de una línea/patrón conocido (M1–M5,
+M7–M8), y una selección de Bajos por relación esfuerzo/impacto. M6
+(indicadores de tendencia en Dashboard) se difiere explícitamente, tal como
+recomendaba la propia auditoría (requiere decidir fuente de datos
+históricos, no es un fix de una línea).
+
+### 🟠 Alto (3/3 cerrados)
+
+1. **A1 — Fuga de datos entre usuarios en `DailyChecklist` en dispositivo
+   compartido.** `ChecklistDraft` ahora incluye `authorId`/`authorName`/
+   `savedAt`. La clave de `localStorage` se mantiene por restaurante+fecha
+   (no +usuario) a propósito — el traspaso de turno dentro del mismo
+   restaurante/día es el flujo real de esta app — pero cuando el draft
+   cargado fue guardado por otro usuario se muestra un banner visible
+   ("Retomando borrador sin enviar de {nombre}, {hace X min}") con dos
+   acciones: continuar (usar el borrador tal cual) o descartar y empezar de
+   nuevo (limpia el draft y resetea lecturas/notas/urgencia a los valores
+   por defecto). El mismo patrón de sincronización entre pestañas (`storage`
+   event, ver M2) también actualiza el banner si otra pestaña/usuario
+   sobrescribe el draft mientras esta pestaña sigue abierta.
+2. **A2 — Formularios de `AdminCatalog.tsx` sin asociación programática
+   `<label>`↔control.** Los 17 `<label>` del archivo (alta inline de
+   producto, alta de restaurante, `EditCard` por fila, panel de tiempos de
+   atraso) ahora tienen pares `htmlFor`/`id` coincidentes — `id`s por
+   producto (`admin-edit-name-${p.id}`, etc.) en `EditCard` para evitar
+   colisión si en el futuro se editara más de un producto a la vez.
+3. **A3 — Campos de `AccountView.tsx` dependientes solo de `placeholder`.**
+   El componente `Field` ahora recibe un `id` y renderiza un
+   `<label htmlFor> sr-only` con el mismo texto que el `placeholder` —
+   nombre accesible que sobrevive a que el usuario escriba, en los 3 campos
+   de perfil (Nombre/Email/Teléfono).
+
+### 🟡 Medio (6/6 cerrados)
+
+4. **M1 —** `playAlertSound(isUrgent ? 'urgent' : 'success')` en
+   `DailyChecklist.handleSubmit` — el chime de alarma ya no suena en cada
+   envío exitoso sin urgencia real.
+5. **M2 —** `DailyChecklist.tsx` escucha el evento `storage` (mismo patrón
+   que `NotificationsView.tsx`) para reconciliar el draft si otra
+   pestaña/dispositivo del mismo restaurante/día lo sobrescribe — omite
+   los ecos del propio guardado de este mismo usuario.
+6. **M3/M4 —** Nuevo `formatUnitName(unit, t)` en `formatters.ts` (mismo
+   patrón que `formatCategoryName`/`formatRestaurantType`), más 14 claves
+   de traducción ES/EN para `UnitType`. Aplicado junto con
+   `formatCategoryName` en **todos** los sitios que mostraban `category`/
+   `unit` crudos, no solo los citados por la auditoría: `AdminCatalog.tsx`
+   (badges móvil/desktop, ambas `<option>` de categoría y unidad × 3
+   formularios), `ShoppingView.tsx`, `RequestsList.tsx` y
+   `DailyChecklist.tsx` (estas 2 últimas tenían el mismo defecto sin haber
+   sido citadas explícitamente por la auditoría, pero son la misma clase de
+   bug — se corrigieron por consistencia con el mismo helper ya creado).
+7. **M5 —** La sincronización de `html.classList`/`<meta name="theme-color">`
+   de `App.tsx` se movió del cuerpo del render a un `useEffect([isLight])`
+   declarado antes del `return` condicional de sesión (Rules of Hooks) —
+   ya no se ejecuta en cada re-render disparado por Realtime.
+8. **M7 —** `aria-controls` de los 2 triggers de "detalles" en
+   `RequestsList.tsx` ahora es `undefined` mientras el panel está
+   colapsado (y no desmontado en el DOM) — sin referencia colgante a un
+   `id` inexistente en reposo.
+9. **M8 —** Labels ocultos (`sr-only` + `htmlFor`/`id`) en los inputs de
+   título/cuerpo de la notificación de prueba de `NotificationsView.tsx`
+   (2 claves nuevas de traducción, paridad ES/EN).
+
+### 🟢 Bajo (selección por esfuerzo/impacto)
+
+10. **B1 —** `statusLabels` memoizado con `useMemo(() => getStatusLabels(t), [t])`
+    en `RequestsList.tsx` y `Dashboard.tsx`, consistente con `FILTERS` (ya
+    memoizado en ciclos previos).
+11. **B2 —** Segundo separador decorativo de `DailyChecklist.tsx` (junto a
+    "con nota") envuelto en `aria-hidden="true"`, cerrando el B10 del ciclo
+    anterior que había quedado parcial.
+12. **B3 —** `ViewFallback` de `App.tsx` ahora recibe `role="status"` +
+    `aria-live="polite"` + texto `sr-only` (`t.loading`), igual que el
+    patrón ya usado en `LoginScreen.tsx`.
+13. **B5 —** `min-h-11` explícito + `whitespace-nowrap` en los botones/labels
+    de `BottomNav.tsx`, como defensa si los tokens de padding cambian o el
+    texto localizado crece.
+14. **B9 —** Botón "Ocultar nota" de `DailyChecklist.tsx` con hit-area real
+    de 44px (`min-h-11` + padding), antes del tamaño del propio texto.
+15. **B11 —** `currentRestaurantProducts` de `App.tsx` envuelto en
+    `useMemo([products, selectedRestaurantId])`.
+16. **B12 —** `filteredProducts` de `AdminCatalog.tsx` envuelto en
+    `useMemo`, consistente con el resto del archivo.
+17. **B15 —** Nota de `ShoppingView.tsx` con `aria-label` distintivo por
+    ítem (`"{placeholder} — {nombre del producto}"`), no solo el
+    `placeholder` genérico compartido por todas las filas.
+
+### Diferido deliberadamente (tal como recomendaba la auditoría)
+
+M6 (indicadores de tendencia/delta en Dashboard — requiere decidir fuente de
+datos históricos, ciclo dedicado), y la deuda de arquitectura mayor ya
+documentada en ciclos previos sin cambios de prioridad: M1–M3 (formulario
+triplicado/doble render de `AdminCatalog`), M4 (canal Realtime sin filtrar
+por restaurante), M16 (virtualización de `NotificationsView`). Bajos no
+tocados este ciclo por relación esfuerzo/impacto menor: B4 (patrón
+`listbox` real en el popover de Header), B6/B7/B8 (tap targets residuales
+específicos — "+N más" de `RequestsList`, truncamiento a 375px, botones de
+tabla de escritorio de `AdminCatalog`), B10 (guardado duplicado idempotente
+de nota en `ShoppingView`), B13 (try/catch en `handleSubmit` de
+`DailyChecklist`, hoy latente porque el contrato actual siempre resuelve),
+B14 (TTL de borradores abandonados), B16 (footer de `LoginScreen` con
+mismo texto ES/EN — arquitectónicamente correcto, solo falta contenido
+distinto).
+
+### Skills fortalecidos (sin skills/subagentes nuevos)
+
+La propia auditoría concluyó que los 14 pares existentes cubren el espacio
+y que los 3 Altos nuevos eran evidencia de checklists incompletos, no de un
+gap de especialización. Se fortalecieron `wcag-audit`, `i18n-parity-guardian`
+y `stateful-prop-transition-guardian` con ítems de checklist explícitos —
+detalle completo en `HERRAMIENTAS_IA.md`.
+
+### Verificación
+
+- `npx tsc --noEmit`: **sin errores**.
+- `npm run build`: **build limpio**, sin aviso de tamaño de Vite (chunk
+  principal ~311.4 kB / 86.9 kB gzip, variación mínima esperada).
+- i18n: **400/400 claves** en ambos idiomas (380 previas + 20 nuevas: 14 de
+  `UnitType`, 4 del banner de traspaso de borrador, 2 de los inputs de
+  notificación de prueba), verificado por extracción programática de ambos
+  bloques `es`/`en`.
+- Cero modales nuevos, cero clases dark-only (`bg-slate-*`/`text-white`/
+  `text-slate-*`/`border-slate-*`) nuevas, cero `fixed inset-0` nuevos,
+  fallback público de Supabase sin tocar, funcionalidad existente sin
+  regresión (tabs, tema/idioma persistido, campana→Notificaciones,
+  avatar→Cuenta, Modo Compra, alta/edición de productos/locales, checklist
+  con envío y borrador multiusuario, badges).
