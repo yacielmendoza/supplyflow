@@ -73,12 +73,33 @@ feed it:
    browser contexts) through: two different user identities, two tabs
    open simultaneously, both on the same shared key, one submitting
    while the other still has unsaved edits.
+7. **Enumerate every field of the synced object, not just the ones the
+   original incident named.** If a `setState` applies an incoming
+   remote draft across N distinct pieces of local state, list all N and
+   check each one individually for the same protection discipline
+   (focus ref, recent-local-interaction timestamp, or an explicit,
+   named reason it's safe to always overwrite). A fix that protects
+   only the field(s) the bug report mentioned and leaves siblings in
+   the same object unconditionally overwritten has closed one instance
+   of the bug class, not the class — flag every unprotected sibling
+   field by name, even if it wasn't part of what you were asked to
+   check.
+8. **Check whether freshness is decided by a raw timestamp compared
+   across devices.** If "is this incoming write newer" is `incoming.
+   savedAt <= lastKnownSavedAtRef.current` (or equivalent) with no
+   logical/monotonic counter involved, flag it: two devices' wall
+   clocks can disagree, and a drifted-behind device's genuinely newer
+   edits will silently and permanently lose to this comparison with no
+   error surfaced to the user. A `seq`/Lamport-style counter that only
+   advances from the max value any tab has observed is the correct
+   ordering signal; a bare timestamp is only safe for human-readable
+   display, never as the sole gate for applying an update.
 
 Report file:line findings, each naming: the storage key, the writer
-effect and the listener, which failure mode (1–5 above) applies, the
+effect and the listener, which failure mode (1–8 above) applies, the
 concrete two-tabs user action that triggers it, and the specific fix
-(ref guard, `savedAt`/version comparison, focus check, explicit `null`
+(ref guard, `seq`/version comparison, focus check, explicit `null`
 handling). Do not edit files — read-only review role. If every
-cross-tab listener in scope correctly handles all six checks, say so
+cross-tab listener in scope correctly handles all eight checks, say so
 explicitly, and confirm you traced the two-different-users scenario
 by hand for each one rather than only the single-user flow.

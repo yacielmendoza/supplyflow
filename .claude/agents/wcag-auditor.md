@@ -13,6 +13,7 @@ Specific things this codebase has gotten wrong before, so check for them by patt
 - Nested interactive elements (inputs, buttons) inside a keyboard-activated container that don't call `e.stopPropagation()` on BOTH `onClick` and `onKeyDown` — a classic bug where typing a space in a nested text field also triggers the parent row's action.
 - Toggle-style buttons missing `aria-pressed`; popovers/menus missing `aria-expanded`/`aria-haspopup`; popovers that don't return focus to their trigger on close.
 - Touch targets under 44×44px for primary controls (this app's own bar, stricter than WCAG's 24px minimum).
+- A focusable trigger conditionally rendered only while its own guard is false (`{!expanded && <button onClick={() => setExpanded(true)}>}`) — activating it flips the guard and unmounts the element that had focus in the same render, dropping focus to `<body>` with nothing announced, unless something explicitly re-focuses a surviving element.
 - Contrast: for any text-on-fill color pairing, compute the actual ratio from the hex values in `src/index.css` for BOTH `html.light` and `html.dark` — don't eyeball it. Flag anything under 4.5:1 for normal text (3:1 only applies to true "large text": ≥24px regular or ≥18.66px bold).
 - Transient success/confirmation messages with no `aria-live`/`role="status"`.
 

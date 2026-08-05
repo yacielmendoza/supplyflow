@@ -98,6 +98,35 @@ another part of the UI also writes to `localStorage`:
    a cross-tab sync fix as complete. This exact gap — a fix verified
    only against the single-user flow — is what let both real bugs above
    ship in a cycle whose own audit initially reported them as "closed."
+7. **List every field in the synced object, not just the ones that
+   motivated the fix.** A `storage` fix that adds focus/recency
+   protection for the field(s) named in the incident report (e.g. a
+   stock reading, a note textarea) but applies every *other* field of
+   the same shared draft/object unconditionally has not actually closed
+   the bug class — it closed one instance of it. When a `setState` call
+   applies an incoming remote object across N pieces of local state,
+   write out all N explicitly and confirm each one has the same
+   protection discipline (focus ref, recent-local-interaction
+   timestamp, or an explicit "safe to always overwrite" justification).
+   A field added to the shared object later, or already present but not
+   named in the original incident, silently inherits zero protection by
+   default — this is not hypothetical: it is exactly how `isUrgent`,
+   `reviewedIds`, and `showOrderPreview` in `DailyChecklist.tsx` were
+   left unprotected after the `readings`/`notes` fix shipped.
+8. **A wall-clock timestamp is not a safe cross-device ordering
+   signal.** If "is this incoming write newer than what I have" is
+   decided by comparing `Date.now()`/`savedAt` captured on two
+   *different* devices, that comparison silently assumes the two
+   devices' clocks agree. They often don't — an unmanaged tablet's
+   clock can drift behind another device's by minutes or more. A
+   drifted-behind device's genuinely newer edits will compare as
+   "older" and be discarded at the freshness check, forever, with no
+   error and no way for the user to know why their edit didn't stick.
+   Prefer a monotonic logical counter (a `seq` that only ever advances
+   from the maximum value any tab has observed — a per-draft Lamport
+   clock) over a raw timestamp for ordering decisions; keep the
+   timestamp, if wanted, only for human-readable "saved N minutes ago"
+   display, never as the sole gate for whether an update is applied.
 
 ## Method
 

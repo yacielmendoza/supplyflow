@@ -38,6 +38,19 @@ description: Use to audit a SupplyFlow screen or component for WCAG 2.2 AA compl
    reader user wouldn't otherwise know.
 8. **Reduced motion (2.3.3)** — animations from `motion` must respect
    `prefers-reduced-motion` (reduce/skip non-essential transitions).
+9a. **Focus survival across activation-triggered unmount (2.4.3 / 2.4.7)**
+   — for every focusable trigger that is itself conditionally rendered
+   (`{!expanded && <button onClick={() => setExpanded(true)}>...}`), trace
+   what happens to keyboard/screen-reader focus the instant it's activated.
+   If activating it makes the condition false and the element itself
+   unmount in the same render, focus falls to `<body>` with nothing
+   announced, unless something explicitly moves it — either keep the
+   trigger element mounted (only its label/icon changes, the classic
+   disclosure-button pattern) or programmatically focus a specific
+   surviving element (a footer control, the newly revealed region) right
+   after triggering the state change. This is a generic pattern, not
+   specific to any one component — grep for `{!` / `{is\w+ &&` guarding a
+   `<button`/`<a` with an `onClick` that flips the same guarding boolean.
 9. **Programmatic label association (1.3.1 / 4.1.2 / 3.3.2)** — every
    `<input>`/`<select>`/`<textarea>` needs a name a screen reader can read
    *before* the user interacts with it: a `<label htmlFor>` pointing at a
