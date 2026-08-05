@@ -36,6 +36,8 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   const [open, setOpen] = useState(false);
   const selectorRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   const selected = restaurants.find((r) => r.id === selectedRestaurantId) || restaurants[0];
 
@@ -57,6 +59,38 @@ const HeaderComponent: React.FC<HeaderProps> = ({
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
+
+  // Move focus into the listbox on open (APG listbox pattern) — previously
+  // the popover only worked by mouse/tab proximity, degrading with more
+  // restaurants. Lands on the currently-selected option, or the first one.
+  useEffect(() => {
+    if (!open) return;
+    const idx = Math.max(0, restaurants.findIndex((r) => r.id === selectedRestaurantId));
+    setFocusedIndex(idx);
+    const raf = requestAnimationFrame(() => optionRefs.current[idx]?.focus());
+    return () => cancelAnimationFrame(raf);
+  }, [open, restaurants, selectedRestaurantId]);
+
+  const moveFocusTo = (index: number) => {
+    setFocusedIndex(index);
+    optionRefs.current[index]?.focus();
+  };
+
+  const handleListboxKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      moveFocusTo(Math.min(restaurants.length - 1, focusedIndex + 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      moveFocusTo(Math.max(0, focusedIndex - 1));
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      moveFocusTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      moveFocusTo(restaurants.length - 1);
+    }
+  };
 
   return (
     <header
@@ -85,7 +119,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
                   setOpen((o) => !o);
                   playAlertSound('click');
                 }}
-                aria-haspopup="true"
+                aria-haspopup="listbox"
                 aria-expanded={open}
                 aria-label={t.headerRestaurantSelector}
                 className="flex items-center sf-pill rounded-2xl pl-3 pr-2.5 h-11 min-w-0 transition"
@@ -103,14 +137,20 @@ const HeaderComponent: React.FC<HeaderProps> = ({
 
               {open && (
                 <div
+                  role="listbox"
+                  aria-label={t.headerRestaurantSelector}
+                  onKeyDown={handleListboxKeyDown}
                   className="sf-card absolute left-0 top-full mt-2 min-w-[220px] max-h-72 overflow-y-auto p-1.5 z-50 animate-fadeIn"
                 >
-                  {restaurants.map((r) => {
+                  {restaurants.map((r, index) => {
                     const active = r.id === selectedRestaurantId;
                     return (
                       <button
                         key={r.id}
-                        aria-current={active ? 'true' : undefined}
+                        ref={(el) => { optionRefs.current[index] = el; }}
+                        role="option"
+                        aria-selected={active}
+                        tabIndex={index === focusedIndex ? 0 : -1}
                         onClick={() => {
                           onSelectRestaurant(r.id);
                           closePopover(true);
