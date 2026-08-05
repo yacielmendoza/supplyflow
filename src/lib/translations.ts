@@ -226,6 +226,7 @@ export const translations = {
     checklistDraftUnknownAuthor: 'otro usuario',
     checklistRemoteClearedMsg: 'Este checklist ya fue enviado o descartado desde otro dispositivo.',
     checklistRemoteClearedBtn: 'Empezar checklist nuevo',
+    checklistRemoteClearedConfirmBtn: '¿Seguro? Perderás tus cambios sin enviar',
     labelOf: 'de',
 
     // ── Admin Catalog ──────────────────────────────────────────────────────────
@@ -687,6 +688,7 @@ export const translations = {
     checklistDraftUnknownAuthor: 'another user',
     checklistRemoteClearedMsg: 'This checklist was already submitted or discarded from another device.',
     checklistRemoteClearedBtn: 'Start a new checklist',
+    checklistRemoteClearedConfirmBtn: 'Are you sure? You’ll lose your unsent changes',
     labelOf: 'of',
 
     // ── Admin Catalog ──────────────────────────────────────────────────────────

@@ -29,6 +29,13 @@ interface ChecklistDraft {
   authorId?: string;
   authorName?: string;
   savedAt?: number;
+  // Monotonic per-draft write counter, independent of any device's wall
+  // clock. `savedAt` alone can't order writes from two different devices
+  // safely — if one tablet's clock is behind another's, a genuinely newer
+  // edit compares as "older" and gets silently (and permanently) dropped.
+  // `seq` only ever increases from the highest value any tab has observed,
+  // so ordering stays correct regardless of clock skew.
+  seq?: number;
 }
 
 // Local calendar date, not UTC — a restaurant on a night shift outside UTC+0
@@ -71,6 +78,7 @@ function parseDraft(raw: string | null): ChecklistDraft | null {
       authorId: typeof parsed.authorId === 'string' ? parsed.authorId : undefined,
       authorName: typeof parsed.authorName === 'string' ? parsed.authorName : undefined,
       savedAt: typeof parsed.savedAt === 'number' ? parsed.savedAt : undefined,
+      seq: typeof parsed.seq === 'number' ? parsed.seq : undefined,
     };
   } catch {
     return null;
@@ -118,14 +126,18 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   });
 
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set(draft?.reviewedIds ?? []));
-  const toggleReviewed = (id: string) =>
+  const toggleReviewed = (id: string) => {
+    recentLocalChangeRef.current.reviewedIds = Date.now();
     setReviewedIds((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  const markAsReviewed = (id: string) =>
+  };
+  const markAsReviewed = (id: string) => {
+    recentLocalChangeRef.current.reviewedIds = Date.now();
     setReviewedIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
+  };
 
   const [selectedCategory, setSelectedCategory] = useState<Category | 'TODAS'>('TODAS');
   const [reviewFilter, setReviewFilter] = useState<'ALL' | 'UNREVIEWED' | 'REVIEWED'>('ALL');
@@ -151,26 +163,54 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   // submitted or discarded elsewhere. Blocks local submit so a user looking
   // at now-stale local data can't fire a second real purchase request.
   const [remoteCleared, setRemoteCleared] = useState(false);
+  // "Empezar checklist nuevo" after a remote clear wipes local state — if the
+  // local user actually has real unsaved edits, require a second tap instead
+  // of discarding them on the first click with no way back.
+  const [confirmingFreshStart, setConfirmingFreshStart] = useState(false);
 
   // Guards the persistence effect below against two distinct false-positive
-  // "authorship" writes: (a) merely opening the screen with someone else's
-  // existing draft still on it (no edit happened yet — skipped once via
-  // skipInitialPersistRef), and (b) applying a draft that just arrived from
-  // another tab via the `storage` listener (that write already has its own
-  // authorId/savedAt on disk — re-persisting it under the local user's id
-  // is what caused the authorship ping-pong loop between two open tabs).
-  const skipInitialPersistRef = useRef(!!draft);
+  // "authorship" writes: (a) merely opening the screen — with or without a
+  // pre-existing draft, no edit happened yet — and (b) applying a draft that
+  // just arrived from another tab via the `storage` listener (that write
+  // already has its own authorId/savedAt on disk — re-persisting it under
+  // the local user's id is what caused the authorship ping-pong loop between
+  // two open tabs). Initialized to `true` unconditionally (not `!!draft`):
+  // opening a *blank* screen and having the mount effect fire once is just
+  // as much "no real edit yet" as opening on top of an existing draft — only
+  // a genuine subsequent state change from user interaction should release it.
+  const skipInitialPersistRef = useRef(true);
   const applyingRemoteUpdateRef = useRef(false);
   // Tracks the freshest `savedAt` this tab has observed (its own writes and
   // any accepted remote ones), so a `storage` event that re-delivers data
   // this tab already has (or is older than what it has) is a no-op instead
-  // of triggering another round of the same re-broadcast.
+  // of triggering another round of the same re-broadcast. Kept as a fallback
+  // for drafts written before `seq` existed; `seq` is authoritative once present.
   const lastKnownSavedAtRef = useRef<number>(draft?.savedAt ?? 0);
+  // Monotonic logical clock for this draft (see `ChecklistDraft.seq`) — the
+  // real ordering signal, immune to clock skew between devices.
+  const lastKnownSeqRef = useRef<number>(draft?.seq ?? 0);
   // Fields the local user is actively typing into must never be silently
   // overwritten by a remote update — that's the "keystrokes lost, no
   // warning" half of the cross-tab race.
   const noteFieldRef = useRef<HTMLTextAreaElement>(null);
   const focusedStockProductIdRef = useRef<string | null>(null);
+  // Discrete (non-focus-based) fields — a checkbox toggle or a button press
+  // has no "still focused" state to protect it the way a text field does, so
+  // instead we remember *when* each one was last changed locally and give it
+  // a short grace window during which an incoming remote value is ignored in
+  // favor of the local one. Same discipline as the focus guards above, just
+  // keyed by recency instead of DOM focus.
+  const recentLocalChangeRef = useRef<{ isUrgent: number; reviewedIds: number; showOrderPreview: number }>({
+    isUrgent: 0,
+    reviewedIds: 0,
+    showOrderPreview: 0,
+  });
+  const RECENT_LOCAL_INTERACTION_MS = 4000;
+  // Product ids whose stock input the user has cleared to type a new value
+  // (e.g. replacing "15" with "340" without selecting-all first). Rendered
+  // as an empty string instead of snapping the controlled input back to "0"
+  // on every keystroke, which made that exact re-entry flow impossible.
+  const [pendingEmptyStockIds, setPendingEmptyStockIds] = useState<Set<string>>(new Set());
 
   const resetToDefaults = () => {
     const defaults: Record<string, number> = {};
@@ -194,10 +234,26 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
     setDraftOwner(null);
   };
 
+  // If the remote-cleared condition resolves through any path other than
+  // the confirm button itself (e.g. another update arrives), don't leave a
+  // stale "are you sure?" armed for next time it appears.
+  useEffect(() => {
+    if (!remoteCleared) setConfirmingFreshStart(false);
+  }, [remoteCleared]);
+
+  const hasRealLocalEdits = reviewedIds.size > 0 || notes.trim() !== '' || isUrgent;
+
   const startFreshAfterRemoteClear = () => {
+    if (hasRealLocalEdits && !confirmingFreshStart) {
+      // First tap on a genuinely edited local state just arms the second
+      // tap — nothing is discarded yet.
+      setConfirmingFreshStart(true);
+      return;
+    }
     resetToDefaults();
     setDraftOwner(null);
     setRemoteCleared(false);
+    setConfirmingFreshStart(false);
   };
 
   useEffect(() => {
@@ -219,6 +275,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
     }
     const key = draftKeyFor(selectedRestaurant.id);
     const savedAt = Date.now();
+    const seq = lastKnownSeqRef.current + 1;
     try {
       localStorage.setItem(
         key,
@@ -231,9 +288,11 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           authorId: currentUser.id,
           authorName: currentUser.name,
           savedAt,
+          seq,
         } satisfies ChecklistDraft)
       );
       lastKnownSavedAtRef.current = savedAt;
+      lastKnownSeqRef.current = seq;
     } catch {
       /* storage unavailable — in-memory state still works for this session */
     }
@@ -247,9 +306,11 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   // remote write from a *different* user's tab landing while this tab has
   // unsaved edits of its own.
   useEffect(() => {
-    const key = draftKeyFor(selectedRestaurant.id);
     const onStorage = (e: StorageEvent) => {
-      if (e.key !== key) return;
+      // Computed fresh on every event (not once when the effect was set up)
+      // so a session that crosses local midnight keeps listening on
+      // *today's* key instead of a stale one captured at mount/last render.
+      if (e.key !== draftKeyFor(selectedRestaurant.id)) return;
       if (e.newValue === null) {
         // The draft was removed elsewhere — either submitted or discarded.
         // Silently ignoring this (as "no draft data to apply") is what let a
@@ -259,7 +320,13 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
       }
       const incoming = parseDraft(e.newValue);
       if (!incoming) return;
-      if (incoming.savedAt !== undefined && incoming.savedAt <= lastKnownSavedAtRef.current) {
+      // `seq` is a logical clock (increases only from the max any tab has
+      // observed) so it stays correct even if the two devices' wall clocks
+      // disagree; `savedAt` is only a fallback for drafts written before
+      // `seq` existed.
+      if (incoming.seq !== undefined) {
+        if (incoming.seq <= lastKnownSeqRef.current) return;
+      } else if (incoming.savedAt !== undefined && incoming.savedAt <= lastKnownSavedAtRef.current) {
         // Older than (or same as) what this tab already has — a duplicate
         // or out-of-order delivery, not a new edit to apply.
         return;
@@ -274,13 +341,26 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
         }
         return incoming.readings;
       });
-      setReviewedIds(new Set(incoming.reviewedIds));
+      const now = Date.now();
+      // isUrgent/reviewedIds/showOrderPreview have no DOM focus to protect
+      // them the way the stock input / note textarea do above — instead,
+      // a value changed locally within the last few seconds wins over the
+      // incoming remote one, same "don't clobber an in-flight local edit"
+      // discipline, just keyed by recency instead of focus.
+      setReviewedIds((prev) =>
+        now - recentLocalChangeRef.current.reviewedIds < RECENT_LOCAL_INTERACTION_MS ? prev : new Set(incoming.reviewedIds)
+      );
       setNotes((prev) => (document.activeElement === noteFieldRef.current ? prev : incoming.notes));
-      setIsUrgent(incoming.isUrgent);
-      setShowOrderPreview(incoming.showOrderPreview);
+      setIsUrgent((prev) =>
+        now - recentLocalChangeRef.current.isUrgent < RECENT_LOCAL_INTERACTION_MS ? prev : incoming.isUrgent
+      );
+      setShowOrderPreview((prev) =>
+        now - recentLocalChangeRef.current.showOrderPreview < RECENT_LOCAL_INTERACTION_MS ? prev : incoming.showOrderPreview
+      );
       setDraftOwner(incoming.authorId !== currentUser.id ? { name: incoming.authorName || '', savedAt: incoming.savedAt ?? 0 } : null);
       setRemoteCleared(false);
       lastKnownSavedAtRef.current = incoming.savedAt ?? Date.now();
+      lastKnownSeqRef.current = Math.max(lastKnownSeqRef.current, incoming.seq ?? lastKnownSeqRef.current + 1);
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
@@ -321,6 +401,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
     if (!showOrderPreview && !showNoteInput) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        recentLocalChangeRef.current.showOrderPreview = Date.now();
         setShowOrderPreview(false);
         setShowNoteInput(false);
       }
@@ -425,7 +506,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           <div className="min-w-0 flex-1 space-y-1.5">
             <p className="font-bold" style={{ color: 'var(--sf-text)' }}>{t.checklistRemoteClearedMsg}</p>
             <button type="button" onClick={startFreshAfterRemoteClear} className="font-extrabold min-h-11 px-1" style={{ color: 'var(--sf-rose)' }}>
-              {t.checklistRemoteClearedBtn}
+              {confirmingFreshStart ? t.checklistRemoteClearedConfirmBtn : t.checklistRemoteClearedBtn}
             </button>
           </div>
         </div>
@@ -571,11 +652,33 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                     type="number"
                     inputMode="numeric"
                     min={0}
-                    value={currentVal}
+                    value={pendingEmptyStockIds.has(p.id) ? '' : currentVal}
                     onFocus={() => { focusedStockProductIdRef.current = p.id; }}
-                    onBlur={() => { if (focusedStockProductIdRef.current === p.id) focusedStockProductIdRef.current = null; }}
+                    onBlur={() => {
+                      if (focusedStockProductIdRef.current === p.id) focusedStockProductIdRef.current = null;
+                      if (pendingEmptyStockIds.has(p.id)) {
+                        setPendingEmptyStockIds((prev) => {
+                          const next = new Set(prev);
+                          next.delete(p.id);
+                          return next;
+                        });
+                      }
+                    }}
                     onChange={(e) => {
-                      const parsed = Number(e.target.value);
+                      const raw = e.target.value;
+                      if (raw === '') {
+                        // Intermediate state while typing a new value — don't
+                        // commit "0" yet, just let the field read as empty.
+                        setPendingEmptyStockIds((prev) => new Set(prev).add(p.id));
+                        return;
+                      }
+                      setPendingEmptyStockIds((prev) => {
+                        if (!prev.has(p.id)) return prev;
+                        const next = new Set(prev);
+                        next.delete(p.id);
+                        return next;
+                      });
+                      const parsed = Number(raw);
                       handleStockChange(p.id, Number.isFinite(parsed) ? parsed : 0);
                     }}
                     aria-label={`${t.ariaStockInput} ${p.name}`}
@@ -620,7 +723,10 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           <div className="px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
             <button
               type="button"
-              onClick={() => setShowOrderPreview((v) => !v)}
+              onClick={() => {
+                recentLocalChangeRef.current.showOrderPreview = Date.now();
+                setShowOrderPreview((v) => !v);
+              }}
               aria-expanded={showOrderPreview}
               aria-controls="checklist-order-preview"
               aria-label={t.checklistOrderPreviewTitle}
@@ -653,7 +759,10 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
               </button>
 
               <label className="flex items-center gap-1 text-xs font-medium px-2.5 h-11 rounded-xl cursor-pointer sf-btn-ghost">
-                <input type="checkbox" checked={isUrgent} onChange={(e) => setIsUrgent(e.target.checked)} style={{ accentColor: 'var(--sf-rose)' }} />
+                <input type="checkbox" checked={isUrgent} onChange={(e) => {
+                  recentLocalChangeRef.current.isUrgent = Date.now();
+                  setIsUrgent(e.target.checked);
+                }} style={{ accentColor: 'var(--sf-rose)' }} />
                 <span className="font-extrabold text-[11px]" style={{ color: 'var(--sf-rose)' }}>{t.checklistUrgent}</span>
               </label>
 
