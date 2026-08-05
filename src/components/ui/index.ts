@@ -34,3 +34,5 @@ export { Skeleton } from './Skeleton';
 export type { SkeletonProps } from './Skeleton';
 
 export { Spinner } from './Spinner';
+
+export { useDialogA11y } from './useDialogA11y';

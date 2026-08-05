@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { IconButton } from './IconButton';
+import { useDialogA11y } from './useDialogA11y';
 
 export interface SheetProps {
   open: boolean;
@@ -20,14 +21,11 @@ export interface SheetProps {
 
 const sizes = { sm: 'sm:max-w-sm', md: 'sm:max-w-lg', lg: 'sm:max-w-2xl' };
 
-const FOCUSABLE =
-  'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])';
-
 /**
- * Accessible modal / bottom-sheet dialog. Handles focus trap, Escape-to-close,
- * focus restore, body scroll-lock, `aria-modal`, backdrop dismissal, and safe
- * areas. Rendered through a portal on document.body. Exit animation plays while
- * `open` is controlled by the parent.
+ * Accessible modal / bottom-sheet dialog. Focus trap, Escape-to-close, focus
+ * restore, body scroll-lock, `aria-modal`, backdrop dismissal, and safe areas
+ * (shared via useDialogA11y). Rendered through a portal on document.body. Exit
+ * animation plays while `open` is controlled by the parent.
  */
 export const Sheet: React.FC<SheetProps> = ({
   open,
@@ -40,57 +38,7 @@ export const Sheet: React.FC<SheetProps> = ({
   size = 'md',
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
-  const restoreRef = useRef<HTMLElement | null>(null);
-
-  // Save/restore focus and lock scroll while open.
-  useEffect(() => {
-    if (!open) return;
-    restoreRef.current = document.activeElement as HTMLElement | null;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    // Focus the first focusable element (or the panel) once mounted.
-    const id = window.setTimeout(() => {
-      const panel = panelRef.current;
-      const first = panel?.querySelector<HTMLElement>(FOCUSABLE);
-      (first ?? panel)?.focus();
-    }, 0);
-    return () => {
-      window.clearTimeout(id);
-      document.body.style.overflow = prevOverflow;
-      restoreRef.current?.focus?.();
-    };
-  }, [open]);
-
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        onClose();
-        return;
-      }
-      if (e.key !== 'Tab') return;
-      const panel = panelRef.current;
-      if (!panel) return;
-      const all = Array.from(panel.querySelectorAll(FOCUSABLE)) as HTMLElement[];
-      const nodes = all.filter((n) => n.offsetParent !== null);
-      if (nodes.length === 0) {
-        e.preventDefault();
-        panel.focus();
-        return;
-      }
-      const first = nodes[0];
-      const last = nodes[nodes.length - 1];
-      const active = document.activeElement;
-      if (e.shiftKey && active === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && active === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    },
-    [onClose]
-  );
+  const { onKeyDown } = useDialogA11y(open, onClose, panelRef);
 
   return createPortal(
     <AnimatePresence>
@@ -103,14 +51,12 @@ export const Sheet: React.FC<SheetProps> = ({
           transition={{ duration: 0.2 }}
           onKeyDown={onKeyDown}
         >
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
             aria-hidden="true"
           />
 
-          {/* Panel */}
           <motion.div
             ref={panelRef}
             role="dialog"
@@ -131,9 +77,7 @@ export const Sheet: React.FC<SheetProps> = ({
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between gap-3 p-4 border-b border-border-default">
-              <h2 className="text-base font-bold text-text-primary truncate">
-                {title}
-              </h2>
+              <h2 className="text-base font-bold text-text-primary truncate">{title}</h2>
               <IconButton label="Cerrar" variant="ghost" size="sm" onClick={onClose}>
                 <X className="w-5 h-5" />
               </IconButton>
