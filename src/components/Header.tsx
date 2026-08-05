@@ -65,7 +65,11 @@ const HeaderComponent: React.FC<HeaderProps> = ({
     // added (Tab should be allowed to leave), just a close on the way out.
     const onFocusOut = (e: FocusEvent) => {
       const next = e.relatedTarget as Node | null;
-      if (next && selectorRef.current && !selectorRef.current.contains(next)) setOpen(false);
+      // relatedTarget is null both when focus leaves the document entirely
+      // (e.g. Tab to the browser chrome/address bar) and in a few other
+      // browser-specific cases — treat it the same as "focus moved outside
+      // the selector" so the popover doesn't linger open with focus gone.
+      if (!next || (selectorRef.current && !selectorRef.current.contains(next))) setOpen(false);
     };
     const container = selectorRef.current;
     document.addEventListener('mousedown', onDoc);
@@ -139,6 +143,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
                 }}
                 aria-haspopup="listbox"
                 aria-expanded={open}
+                aria-controls="header-restaurant-listbox"
                 aria-label={t.headerRestaurantSelector}
                 className="flex items-center sf-pill rounded-2xl pl-3 pr-2.5 h-11 min-w-0 transition"
                 style={open ? { borderColor: 'var(--sf-accent)' } : undefined}
@@ -155,6 +160,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
 
               {open && (
                 <div
+                  id="header-restaurant-listbox"
                   role="listbox"
                   aria-label={t.headerRestaurantSelector}
                   onKeyDown={handleListboxKeyDown}
@@ -221,7 +227,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
               className="relative w-11 h-11 rounded-full flex-shrink-0 transition ring-2"
               style={{ ['--tw-ring-color' as string]: 'var(--sf-accent)' }}
               title={`${formatCleanName(currentUser.name)} — ${sseConnected ? t.online : t.reconnecting}`}
-              aria-label={`${t.tabSettings}: ${formatCleanName(currentUser.name)} — ${sseConnected ? t.online : t.reconnecting}`}
+              aria-label={`${t.accountTitle}: ${formatCleanName(currentUser.name)} — ${sseConnected ? t.online : t.reconnecting}`}
             >
               <span className="block w-full h-full rounded-full overflow-hidden">
                 {currentUser.avatarUrl && !avatarError ? (

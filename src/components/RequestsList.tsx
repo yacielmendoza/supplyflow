@@ -64,6 +64,27 @@ export const RequestsList: React.FC<RequestsListProps> = ({
     }
   }, [highlightedRequestId]);
 
+  // Scroll the highlighted card into view once the expansion above has had a
+  // chance to lay out — a single rAF (state -> DOM commit) is enough for the
+  // filter/expand state to be reflected, but the expanded content still needs
+  // a frame to grow before scrollIntoView measures a stable position, hence
+  // the nested rAF.
+  useEffect(() => {
+    if (!highlightedRequestId) return;
+    let inner = 0;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => {
+        document
+          .getElementById(`request-card-${highlightedRequestId}`)
+          ?.scrollIntoView({ behavior: shouldReduceMotion ? 'auto' : 'smooth', block: 'center' });
+      });
+    });
+    return () => {
+      cancelAnimationFrame(outer);
+      cancelAnimationFrame(inner);
+    };
+  }, [highlightedRequestId, shouldReduceMotion]);
+
   const toggleExpand = (id: string) => {
     setExpandedRequestIds((prev) => {
       const next = new Set(prev);
