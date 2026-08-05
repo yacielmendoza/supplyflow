@@ -2,10 +2,10 @@ import React, { useState, useMemo, useEffect, useLayoutEffect, useRef } from 're
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Product, Category, Restaurant, UserProfile } from '../types';
-import { formatCategoryName, PRODUCT_CATEGORIES } from '../lib/formatters';
+import { formatCategoryName, formatUnitName, formatCleanName, PRODUCT_CATEGORIES } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
 import { tint } from '../lib/colors';
-import { CheckCircle2, Send, Plus, Minus, Search, MessageSquare, ChevronUp, ChevronDown } from 'lucide-react';
+import { CheckCircle2, Send, Plus, Minus, Search, MessageSquare, ChevronUp, ChevronDown, UserRound } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
 
 interface DailyChecklistProps {
@@ -22,6 +22,13 @@ interface ChecklistDraft {
   notes: string;
   isUrgent: boolean;
   showOrderPreview: boolean;
+  // Who last saved this draft, and when — a shared kitchen device can have a
+  // second user open the same restaurant/day Checklist behind the first
+  // user's unsent draft; without these, it loads silently with no
+  // indication the data belongs to someone else.
+  authorId?: string;
+  authorName?: string;
+  savedAt?: number;
 }
 
 // Local calendar date, not UTC — a restaurant on a night shift outside UTC+0
@@ -33,13 +40,16 @@ function localDateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+// Keyed by restaurant+day (not +user) on purpose: shift handoff within the
+// same restaurant/day is the intended flow, so the draft itself is shared —
+// see the authorId/authorName banner below for making the handoff explicit
+// instead of silent.
 function draftKeyFor(restaurantId: string) {
   return `restosupply_checklist_draft_${restaurantId}_${localDateKey(new Date())}`;
 }
 
-function readDraft(restaurantId: string): ChecklistDraft | null {
+function parseDraft(raw: string | null): ChecklistDraft | null {
   try {
-    const raw = localStorage.getItem(draftKeyFor(restaurantId));
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (
@@ -58,10 +68,30 @@ function readDraft(restaurantId: string): ChecklistDraft | null {
       notes: parsed.notes,
       isUrgent: parsed.isUrgent,
       showOrderPreview: typeof parsed.showOrderPreview === 'boolean' ? parsed.showOrderPreview : false,
+      authorId: typeof parsed.authorId === 'string' ? parsed.authorId : undefined,
+      authorName: typeof parsed.authorName === 'string' ? parsed.authorName : undefined,
+      savedAt: typeof parsed.savedAt === 'number' ? parsed.savedAt : undefined,
     };
   } catch {
     return null;
   }
+}
+
+function readDraft(restaurantId: string): ChecklistDraft | null {
+  try {
+    return parseDraft(localStorage.getItem(draftKeyFor(restaurantId)));
+  } catch {
+    return null;
+  }
+}
+
+function formatDraftSavedAt(savedAt: number, t: ReturnType<typeof getTranslation>): string {
+  const mins = Math.max(0, Math.floor((Date.now() - savedAt) / 60000));
+  if (mins < 1) return t.timeJustNow;
+  if (mins < 60) return `${t.timePrefix}${mins} ${t.timeMin}${t.timeSuffix}`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${t.timePrefix}${hours} ${t.timeHour}${t.timeSuffix}`;
+  return `${t.timePrefix}${Math.floor(hours / 24)} ${t.timeDay}${t.timeSuffix}`;
 }
 
 export const DailyChecklist: React.FC<DailyChecklistProps> = ({
@@ -106,6 +136,33 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [showOrderPreview, setShowOrderPreview] = useState(draft?.showOrderPreview ?? false);
 
+  // Shown when the loaded draft was last saved by a different user — makes a
+  // shift handoff on a shared device explicit instead of silently showing
+  // someone else's unsent stock counts as if they were the current user's own.
+  const [draftOwner, setDraftOwner] = useState(() =>
+    draft?.authorId && draft.authorId !== currentUser.id
+      ? { name: draft.authorName || '', savedAt: draft.savedAt ?? 0 }
+      : null
+  );
+
+  const discardDraft = () => {
+    const defaults: Record<string, number> = {};
+    products.forEach((p) => {
+      defaults[p.id] = p.currentStock !== undefined ? p.currentStock : p.minThreshold + 2;
+    });
+    setReadings(defaults);
+    setReviewedIds(new Set());
+    setNotes('');
+    setIsUrgent(false);
+    setShowOrderPreview(false);
+    try {
+      localStorage.removeItem(draftKeyFor(selectedRestaurant.id));
+    } catch {
+      /* storage unavailable — in-memory reset above still applies */
+    }
+    setDraftOwner(null);
+  };
+
   useEffect(() => {
     const key = draftKeyFor(selectedRestaurant.id);
     try {
@@ -117,12 +174,36 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           notes,
           isUrgent,
           showOrderPreview,
+          authorId: currentUser.id,
+          authorName: currentUser.name,
+          savedAt: Date.now(),
         } satisfies ChecklistDraft)
       );
     } catch {
       /* storage unavailable — in-memory state still works for this session */
     }
-  }, [selectedRestaurant.id, readings, reviewedIds, notes, isUrgent, showOrderPreview]);
+  }, [selectedRestaurant.id, readings, reviewedIds, notes, isUrgent, showOrderPreview, currentUser.id, currentUser.name]);
+
+  // Another tab/device editing the same restaurant/day draft should reflect
+  // here too — same pattern as NotificationsView's `dismissedIds` sync.
+  // Skips drafts this same user just wrote (that's this tab's own save
+  // echoing back, or this user's other open tab, not a conflicting edit).
+  useEffect(() => {
+    const key = draftKeyFor(selectedRestaurant.id);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== key) return;
+      const incoming = parseDraft(e.newValue);
+      if (!incoming || incoming.authorId === currentUser.id) return;
+      setReadings(incoming.readings);
+      setReviewedIds(new Set(incoming.reviewedIds));
+      setNotes(incoming.notes);
+      setIsUrgent(incoming.isUrgent);
+      setShowOrderPreview(incoming.showOrderPreview);
+      setDraftOwner({ name: incoming.authorName || '', savedAt: incoming.savedAt ?? 0 });
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [selectedRestaurant.id, currentUser.id]);
 
   // Anchor the summary bar flush above the app's fixed BottomNav by measuring it.
   // useLayoutEffect (not useEffect) so the correct height is applied before
@@ -208,13 +289,14 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    playAlertSound('urgent');
+    playAlertSound(isUrgent ? 'urgent' : 'success');
     await onSubmitChecklist(readings, notes, isUrgent);
     try {
       localStorage.removeItem(draftKeyFor(selectedRestaurant.id));
     } catch {
       /* storage unavailable — nothing to clear */
     }
+    setDraftOwner(null);
     setSubmittedSuccess(true);
     setTimeout(() => setSubmittedSuccess(false), 4000);
   };
@@ -254,6 +336,27 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
           <div className="h-2 rounded-full transition-all duration-300" style={{ width: `${reviewProgressPct}%`, background: 'linear-gradient(90deg, var(--sf-accent), var(--sf-accent-2))' }} />
         </div>
       </div>
+
+      {draftOwner && (
+        <div role="status" className="p-3.5 rounded-2xl flex items-start gap-2.5 text-xs" style={{ background: tint('var(--sf-amber)', 14), border: `1px solid ${tint('var(--sf-amber)', 30)}` }}>
+          <UserRound className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--sf-amber)' }} />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <p className="font-bold" style={{ color: 'var(--sf-text)' }}>
+              {t.checklistDraftBannerPrefix} <strong style={{ color: 'var(--sf-amber)' }}>{formatCleanName(draftOwner.name)}</strong>
+              {draftOwner.savedAt ? `, ${formatDraftSavedAt(draftOwner.savedAt, t)}` : ''}
+              {t.checklistDraftBannerSuffix}
+            </p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button type="button" onClick={() => setDraftOwner(null)} className="font-extrabold sf-accent min-h-11 px-1">
+                {t.checklistDraftKeepBtn}
+              </button>
+              <button type="button" onClick={discardDraft} className="font-extrabold min-h-11 px-1" style={{ color: 'var(--sf-rose)' }}>
+                {t.checklistDraftDiscardBtn}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {submittedSuccess && (
         <div role="status" aria-live="polite" className="p-3 rounded-2xl flex items-center gap-2.5 text-xs font-bold" style={{ background: tint('var(--sf-accent)', 14), color: 'var(--sf-accent)' }}>
@@ -332,7 +435,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   <div className="text-xs mt-0.5 flex items-center gap-2 flex-wrap">
                     <span className="font-bold sf-accent whitespace-nowrap">{formatCategoryName(p.category, t)}</span>
                     <span className="sf-subtle" aria-hidden="true">•</span>
-                    <span className="sf-muted whitespace-nowrap">{t.minimum} <strong style={{ color: 'var(--sf-text)' }}>{p.minThreshold} {p.unit}s</strong></span>
+                    <span className="sf-muted whitespace-nowrap">{t.minimum} <strong style={{ color: 'var(--sf-text)' }}>{p.minThreshold} {formatUnitName(p.unit, t)}s</strong></span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -426,7 +529,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                 </div>
                 <div className="text-[10px] truncate flex items-center gap-1 sf-muted">
                   <span>{t.notifyBuyers}</span>
-                  {notes.trim() && <span className="sf-accent font-bold">• {t.withNote}</span>}
+                  {notes.trim() && <span className="sf-accent font-bold"><span aria-hidden="true">• </span>{t.withNote}</span>}
                 </div>
               </div>
             </button>
@@ -472,7 +575,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                       <MessageSquare className="w-3.5 h-3.5 sf-accent" />
                       {t.noteForBuyers}
                     </label>
-                    <button type="button" onClick={() => setShowNoteInput(false)} className="text-[11px] font-medium sf-muted">{t.hideNote}</button>
+                    <button type="button" onClick={() => setShowNoteInput(false)} className="text-[11px] font-medium sf-muted px-2 py-2 -mx-2 -my-1 min-h-11 flex items-center">{t.hideNote}</button>
                   </div>
                   <textarea
                     value={notes}
@@ -511,7 +614,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
                         <li key={p.id} className="sf-inset flex items-center justify-between gap-3 px-3 py-2">
                           <span className="font-bold text-sm truncate" style={{ color: 'var(--sf-text)' }}>{p.name}</span>
                           <span className="text-xs font-black flex-shrink-0 sf-accent whitespace-nowrap">
-                            {p.suggestedQuantity} {p.unit}
+                            {p.suggestedQuantity} {formatUnitName(p.unit, t)}
                           </span>
                         </li>
                       ))}
