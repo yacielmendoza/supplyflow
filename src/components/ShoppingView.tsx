@@ -244,6 +244,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                     />
                     <button
                       onClick={() => handleSaveNote(item.id)}
+                      aria-label={`${t.noteSave} — ${item.productName}`}
                       className="px-3 min-h-11 rounded-lg text-xs font-bold sf-btn-accent transition active:scale-95"
                     >
                       {t.noteSave}
@@ -257,6 +258,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                       setItemNotes((prev) => ({ ...prev, [item.id]: item.itemNote || '' }));
                       setEditingNoteItemId(item.id);
                     }}
+                    aria-label={`${item.itemNote ? t.noteEdit : t.noteAdd} — ${item.productName}`}
                     className="px-2 min-h-11 -mx-2 rounded-lg text-[11px] sf-muted flex items-center gap-1 hover:brightness-125 transition active:scale-95"
                   >
                     <MessageSquare className="w-3 h-3" />
