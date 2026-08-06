@@ -1,7 +1,29 @@
 # Auditoría — rediseno-ui-mobile (SupplyFlow V2)
 
-**Fecha:** 2026-08-05 23:31 UTC (pasada automatizada del ciclo de mejora continua)
-**Commit auditado:** `758e5d8` (HEAD de `rediseno-ui-mobile` al momento de esta pasada)
+**Fecha:** 2026-08-06 00:16 UTC (pasada automatizada del ciclo de mejora continua — ver nota de confirmación abajo)
+**Commit auditado:** `758e5d8` (código de `HEAD` en esta pasada: `d9bc044`, idéntico en `src/`/`public/`/`.claude/` a `758e5d8` — solo difiere en el propio `AUDITORIA_RESULTADOS.md`)
+
+## Nota de esta pasada (2026-08-06 00:16 UTC): confirmación, no re-auditoría completa
+
+Esta pasada del agente auditor arrancó **41 minutos** después de que la pasada
+anterior (2026-08-05 23:31 UTC) sobrescribiera este archivo. Antes de lanzar
+las 4 sub-auditorías delegadas de costumbre, se verificó el estado real del
+repositorio:
+
+- `git diff --stat 758e5d8 d9bc044` → **solo `AUDITORIA_RESULTADOS.md` cambió** entre el commit auditado la vez pasada y el `HEAD` actual; ningún archivo de `src/`, `public/` o `.claude/` tiene un solo byte de diferencia.
+- `git log --all --oneline --since="2026-08-05 23:35"` → **ningún commit nuevo** en ninguna rama del repo desde que se cerró la pasada anterior, salvo el propio commit que escribió este archivo.
+- PR #1 (`rediseno-ui-mobile` → `main`, aún draft/abierto) sigue apuntando a `d9bc044`: ningún commit corrector ha aterrizado desde la última auditoría.
+- No existe ningún otro branch/PR con trabajo corrector en curso sobre `rediseno-ui-mobile` (la única otra rama activa, `claude/mobile-app-audit-premium-qeiy7c`, es un esfuerzo independiente anterior basado en `main`, no en esta rama — PR #2, fuera del alcance de este ciclo).
+
+**Conclusión:** el ciclo corrector todavía no ha actuado sobre los hallazgos de la pasada anterior (H1–H8 Altos, M1–M10 Medios, B1–B16 Bajos, `VEREDICTO: CON HALLAZGOS`). Como el código de la aplicación es idéntico byte a byte al ya auditado, relanzar las 4 sub-auditorías delegadas para releer el mismo código y producir los mismos hallazgos con una fecha distinta no aporta información nueva — sería auditoría de vitrina, no auditoría real. En su lugar, esta pasada:
+
+1. Reconfirmó `tsc --noEmit` y `npm run build` de forma independiente sobre el `HEAD` actual (ver sección (b) actualizada) — ambos siguen limpios, salida idéntica a la pasada anterior.
+2. Verificó que no haya deriva de estado (working tree limpio salvo el diff incidental habitual de `package-lock.json`, revertido).
+3. **Deja el resto del informe (secciones (c)–(g)) sin modificar respecto a la pasada anterior**, porque describen fielmente el código que sigue en `HEAD` — no una instantánea obsoleta. `VEREDICTO: CON HALLAZGOS` se mantiene íntegro, con la misma prioridad #1 (H1 de `DailyChecklist`, riesgo de pérdida silenciosa de datos de un compañero).
+
+**Recomendación operativa para el ciclo:** que la próxima pasada del agente corrector tome la sección (e) de este informe (sin cambios) como su lista de trabajo — sigue siendo la más actual y verificada que existe. Si esta situación (auditor disparándose sin trabajo corrector nuevo que auditar) se repite en pasadas futuras consecutivas, valdría la pena revisar la cadencia/orquestación del ciclo auditor↔corrector, no el contenido de este informe.
+
+---
 **Alcance:** las 10 pantallas del encargo (LoginScreen, Dashboard, RequestsList, DailyChecklist, AdminCatalog, AccountView, NotificationsView, ShoppingView, Header, BottomNav) + ViewHeader, `App.tsx` (routing/wiring/sesión/tema/idioma), `public/sw.js`, sistema de tokens (`src/index.css`), i18n, compilación, y las skills/subagentes en `.claude/`.
 
 **Metodología:** desde el informe anterior (auditado sobre `9118b61`, VEREDICTO: CON HALLAZGOS, 5 Altos + 15 Medios + 23 Bajos) aterrizaron 7 commits correctores (`035b199..96481e2`) que `CORRECCIONES_APLICADAS.md` dice cerraron los 5 Altos (H1–H5) y 9 de los 15 Medios. Esta pasada **no da por buena ninguna de esas afirmaciones por el mensaje del commit ni por el propio `CORRECCIONES_APLICADAS.md`**: se releyó el código real contra `HEAD` con 4 sub-auditorías delegadas en paralelo, cada una con instrucciones explícitas de verificar cada claim línea por línea contra el código actual, trazar manualmente secuencias de eventos, y cazar activamente huecos adyacentes a la misma clase de bug reportada:
@@ -31,6 +53,8 @@ Compilación limpia, cero modales, cero clases dark-only, cero colores hardcodea
 
 ## (b) Estado de build/tsc
 
+**Reconfirmado de forma independiente en esta pasada (2026-08-06 00:16 UTC) sobre `HEAD` (`d9bc044`), tras `npm install` limpio:**
+
 ```
 $ npx tsc --noEmit
 (sin salida — exit 0, sin errores)
@@ -44,12 +68,14 @@ dist/assets/index-Cxx_-grH.css              32.23 kB │ gzip:  6.95 kB
 dist/assets/vendor-motion-BRJSaMgm.js       96.82 kB │ gzip: 32.02 kB
 dist/assets/vendor-supabase-CI_V8wt2.js    218.46 kB │ gzip: 56.99 kB
 dist/assets/index-DHhqmitZ.js              315.64 kB │ gzip: 88.11 kB
-✓ built in 4.65s
-dist/server.cjs 78.2kb / dist/server.cjs.map 126.6kb — Done in 10ms
+✓ built in 6.68s
+dist/server.cjs 78.2kb / dist/server.cjs.map 126.6kb — Done in 13ms
 ```
 
+Salida idéntica (bundle, hashes y tamaños) a la pasada anterior, como se espera dado que el código fuente no cambió.
+
 - **`tsc --noEmit`: PASA**, sin errores.
-- **`npm run build`: PASA**, sin errores ni avisos de tamaño de chunk. Chunk principal 315.64 kB (88.11 kB gzip), variación mínima respecto al ciclo anterior.
+- **`npm run build`: PASA**, sin errores ni avisos de tamaño de chunk. Chunk principal 315.64 kB (88.11 kB gzip), sin variación respecto al ciclo anterior (mismo código).
 - **i18n:** `src/lib/translations.ts` → **429/429 claves** en `es` y `en` (verificado por extracción programática propia, 0 huecos en cualquier dirección).
 - **Diseño de tokens:** grep propio de `bg-slate-*`/`text-white`/`text-slate-*`/`border-slate-*`/`fixed inset-0`/hex hardcodeado sobre los 10 componentes + `App.tsx` + `public/sw.js` + `index.css`: **0 coincidencias reales** (el único hex fuera de `index.css` sigue siendo el `<meta name="theme-color">` de `App.tsx:656`, legítimo; las cadenas `#125` en `translations.ts:444,913` son números de solicitud de ejemplo, no colores).
 - **Working tree:** se revirtió el mismo diff incidental de `package-lock.json` generado por `npm install` en este entorno (cambios de flag `"peer": true` por versión de npm del entorno, sin relación con el código auditado — mismo patrón documentado en todos los ciclos anteriores).
