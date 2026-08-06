@@ -26,6 +26,7 @@ import {
 } from './lib/api';
 import { getSupabaseClient, rowToRequest, supabaseConfiguration } from './lib/supabase';
 import { normalizeProfile, signInWithPassword, type AuthenticatedProfile } from './lib/auth';
+import { OperationsApp } from './components/OperationsApp';
 import { INITIAL_SUPPLIERS } from './data/caddyShackData';
 import { Header } from './components/Header';
 import { BottomNav, BottomNavTab } from './components/BottomNav';
@@ -903,20 +904,7 @@ export default function App() {
   }
 
   if (authState.status === 'ready') {
-    return (
-      <AuthLayout>
-        <h1 className="text-2xl font-black" style={{ color: 'var(--sf-text)' }}>SupplyFlow</h1>
-        <p className="sf-muted mt-2">Sesión verificada para {authState.profile.fullName || authState.profile.email}.</p>
-        <dl className="mt-6 space-y-3 text-sm">
-          <div><dt className="sf-subtle">Rol</dt><dd className="font-bold">{roleLabel(authState.profile.role)}</dd></div>
-          <div><dt className="sf-subtle">Organización</dt><dd className="font-mono text-xs">{authState.profile.organizationId}</dd></div>
-        </dl>
-        <p className="sf-muted mt-8 text-sm">La base de identidad y permisos está activa. El flujo operativo persistente llegará en las siguientes fases.</p>
-        <button type="button" onClick={() => void handleSignOut()} className="mt-8 w-full rounded-xl px-4 py-3 font-bold sf-btn-ghost">
-          Cerrar sesión
-        </button>
-      </AuthLayout>
-    );
+    return <OperationsApp profile={authState.profile} onSignOut={handleSignOut} />;
   }
 
   return (
