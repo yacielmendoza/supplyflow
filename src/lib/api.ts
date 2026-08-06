@@ -1,6 +1,17 @@
 import { Restaurant, Product, SupplyRequest, UserProfile, RequestStatus, RequestItem } from '../types';
-import { INITIAL_USERS, INITIAL_RESTAURANTS, INITIAL_PRODUCTS_WITH_IDS, INITIAL_SUPPLY_REQUESTS } from '../data/caddyShackData';
-import { supabase, rowToRequest, requestToRow } from './supabase';
+import { INITIAL_USERS, INITIAL_RESTAURANTS, INITIAL_PRODUCTS_WITH_IDS } from '../data/caddyShackData';
+import { getSupabaseClient, rowToRequest, requestToRow } from './supabase';
+
+export class OperationalDataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'OperationalDataError';
+  }
+}
+
+export function toOperationalDataError(_cause: unknown): OperationalDataError {
+  return new OperationalDataError('No fue posible cargar las solicitudes. Revisa tu conexión e inténtalo de nuevo.');
+}
 
 // ── Static data ─────────────────────────────────────────────────────────────
 
@@ -21,7 +32,7 @@ export async function fetchProducts(restaurantId?: string): Promise<Product[]> {
 
 export async function fetchSupplyRequests(restaurantId?: string, status?: string): Promise<SupplyRequest[]> {
   try {
-    let query = supabase
+    let query = getSupabaseClient()
       .from('sf_supply_requests')
       .select('*')
       .order('created_at', { ascending: false });
@@ -30,16 +41,13 @@ export async function fetchSupplyRequests(restaurantId?: string, status?: string
     const { data, error } = await query;
     if (error) throw error;
     return (data ?? []).map(rowToRequest);
-  } catch {
-    let fallback = INITIAL_SUPPLY_REQUESTS;
-    if (restaurantId) fallback = fallback.filter((r) => r.restaurantId === restaurantId);
-    if (status) fallback = fallback.filter((r) => r.status === status);
-    return fallback;
+  } catch (error) {
+    throw toOperationalDataError(error);
   }
 }
 
 export async function upsertSupplyRequest(req: SupplyRequest): Promise<SupplyRequest> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('sf_supply_requests')
     .upsert(requestToRow(req), { onConflict: 'id' })
     .select()
@@ -49,7 +57,7 @@ export async function upsertSupplyRequest(req: SupplyRequest): Promise<SupplyReq
 }
 
 export async function getNextRequestNumber(): Promise<number> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('sf_supply_requests')
     .select('request_number')
     .order('request_number', { ascending: false })
@@ -61,7 +69,7 @@ export async function getNextRequestNumber(): Promise<number> {
 
 export async function claimSupplyRequest(requestId: string, buyerId: string, buyerName: string): Promise<SupplyRequest> {
   const now = new Date().toISOString();
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('sf_supply_requests')
     .update({
       status: 'Asignada',
@@ -88,7 +96,7 @@ export async function updateRequestStatus(
   else if (status === 'Entregada') updates.delivered_at = now;
   else if (status === 'Completada') updates.completed_at = now;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('sf_supply_requests')
     .update(updates)
     .eq('id', requestId)
@@ -104,7 +112,7 @@ export async function toggleItemPurchased(
   purchased: boolean,
   itemNote?: string
 ): Promise<{ request: SupplyRequest }> {
-  const { data: current, error: fetchErr } = await supabase
+  const { data: current, error: fetchErr } = await getSupabaseClient()
     .from('sf_supply_requests')
     .select('items, status')
     .eq('id', requestId)
@@ -125,7 +133,7 @@ export async function toggleItemPurchased(
     updates.purchased_at = now;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('sf_supply_requests')
     .update(updates)
     .eq('id', requestId)
@@ -182,7 +190,7 @@ export async function submitDailyChecklist(
     createdAt: new Date().toISOString(),
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('sf_supply_requests')
     .insert(requestToRow(newReq))
     .select()

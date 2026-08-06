@@ -1,20 +1,31 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { resolveSupabaseConfig, type SupabaseConfigResult } from './supabase-config';
 
-// Public Supabase client credentials (publishable key + public project URL).
-// These are already shipped in the client bundle, so falling back to them keeps
-// preview/branch deployments working even when the VITE_* env vars are only set
-// for the Production environment on Vercel.
-const FALLBACK_SUPABASE_URL = 'https://ulzbzoixdnulfpjpiebb.supabase.co';
-const FALLBACK_SUPABASE_KEY = 'sb_publishable_aXLeJJHVnFTamrZ2Y2PmNg_mnN7QBC_';
-
-const supabaseUrl = ((import.meta.env.VITE_SUPABASE_URL as string) || FALLBACK_SUPABASE_URL).replace(/^﻿/, '');
-const supabaseKey = ((import.meta.env.VITE_SUPABASE_ANON_KEY as string) || FALLBACK_SUPABASE_KEY).replace(/^﻿/, '');
-
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  realtime: { params: { eventsPerSecond: 10 } },
+export const supabaseConfiguration = resolveSupabaseConfig({
+  VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+  VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
 });
 
-// Convert DB row (snake_case) → SupplyRequest (camelCase)
+let supabaseClient: SupabaseClient | null = null;
+
+export function createSupabaseClient(configuration: SupabaseConfigResult): SupabaseClient {
+  if (!configuration.available) {
+    throw new Error('SupplyFlow no está configurado para conectarse a Supabase.');
+  }
+
+  return createClient(configuration.config.url, configuration.config.publishableKey, {
+    realtime: { params: { eventsPerSecond: 10 } },
+  });
+}
+
+export function getSupabaseClient(): SupabaseClient {
+  if (!supabaseClient) {
+    supabaseClient = createSupabaseClient(supabaseConfiguration);
+  }
+
+  return supabaseClient;
+}
+
 export function rowToRequest(row: Record<string, unknown>) {
   return {
     id: row.id as string,
@@ -38,7 +49,6 @@ export function rowToRequest(row: Record<string, unknown>) {
   };
 }
 
-// Convert SupplyRequest → DB row
 export function requestToRow(req: import('../types').SupplyRequest) {
   return {
     id: req.id,

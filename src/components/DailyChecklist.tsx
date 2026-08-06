@@ -112,7 +112,10 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
   useLayoutEffect(() => {
     const el = summaryBarRef.current;
     if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setSummaryBarH(entry.contentRect.height));
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setSummaryBarH(entry.contentRect.height);
+    });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
@@ -149,7 +152,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
   const itemsNeedingReplenishment = useMemo(() => {
     return products.filter((p) => {
-      const currentVal = readings[p.id] !== undefined ? readings[p.id] : p.minThreshold + 1;
+      const currentVal = readings[p.id] ?? p.minThreshold + 1;
       return currentVal < p.minThreshold;
     });
   }, [products, readings]);
@@ -274,7 +277,7 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <AnimatePresence initial={false}>
         {filteredProducts.map((p) => {
-          const currentVal = readings[p.id] !== undefined ? readings[p.id] : p.minThreshold + 1;
+          const currentVal = readings[p.id] ?? p.minThreshold + 1;
           const isBelowThreshold = currentVal < p.minThreshold;
           const isCriticalZero = currentVal === 0;
           const isReviewed = reviewedIds.has(p.id);

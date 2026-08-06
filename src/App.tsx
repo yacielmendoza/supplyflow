@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef, Suspense, lazy } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import {
   Restaurant,
   UserProfile,
@@ -23,7 +24,8 @@ import {
   upsertSupplyRequest,
   getNextRequestNumber,
 } from './lib/api';
-import { supabase, rowToRequest } from './lib/supabase';
+import { getSupabaseClient, rowToRequest, supabaseConfiguration } from './lib/supabase';
+import { normalizeProfile, signInWithPassword, type AuthenticatedProfile } from './lib/auth';
 import { INITIAL_SUPPLIERS } from './data/caddyShackData';
 import { Header } from './components/Header';
 import { BottomNav, BottomNavTab } from './components/BottomNav';
@@ -83,7 +85,7 @@ function persistJSON(key: string, value: unknown) {
   }
 }
 
-export default function App() {
+function LegacyDemoApp() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('rest-1');
@@ -187,7 +189,8 @@ export default function App() {
     loadInitialData();
 
     // Supabase Realtime — syncs all devices over the internet in real time
-    const channel = supabase
+    const client = getSupabaseClient();
+    const channel = client
       .channel('sf_supply_requests_all')
       .on(
         'postgres_changes',
@@ -229,14 +232,14 @@ export default function App() {
     // iOS PWA: reconnect Realtime when app returns from background
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        supabase.realtime.connect();
+        client.realtime.connect();
         loadInitialData();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      supabase.removeChannel(channel);
+      client.removeChannel(channel);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [loadInitialData]);
@@ -780,5 +783,176 @@ export default function App() {
         onChange={(id) => setActiveTab(id as TabId)}
       />
     </div>
+  );
+}
+
+type AuthGateState =
+  | { status: 'loading' }
+  | { status: 'signed-out' }
+  | { status: 'ready'; profile: AuthenticatedProfile }
+  | { status: 'error'; message: string };
+
+function roleLabel(role: AuthenticatedProfile['role']): string {
+  if (role === 'admin') return 'Administrador';
+  if (role === 'buyer') return 'Comprador';
+  return 'Cocina';
+}
+
+export default function App() {
+  const [authState, setAuthState] = useState<AuthGateState>({ status: 'loading' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (supabaseConfiguration.available === false) {
+      setAuthState({
+        status: 'error',
+        message: `Falta configurar: ${supabaseConfiguration.missingKeys.join(', ')}.`,
+      });
+      return;
+    }
+
+    const client = getSupabaseClient();
+    let mounted = true;
+
+    const loadSession = async (session: Session | null): Promise<void> => {
+      if (!session) {
+        if (mounted) setAuthState({ status: 'signed-out' });
+        return;
+      }
+
+      if (mounted) setAuthState({ status: 'loading' });
+
+      const { data, error } = await client
+        .from('profiles')
+        .select('id, organization_id, role, full_name, email')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (error) {
+        if (mounted) {
+          setAuthState({
+            status: 'error',
+            message: 'No fue posible cargar tu perfil. Intenta de nuevo.',
+          });
+        }
+        return;
+      }
+
+      try {
+        const profile = normalizeProfile(data);
+        if (mounted) setAuthState({ status: 'ready', profile });
+      } catch (profileError) {
+        if (mounted) {
+          setAuthState({
+            status: 'error',
+            message: profileError instanceof Error
+              ? profileError.message
+              : 'No fue posible validar tu perfil.',
+          });
+        }
+      }
+    };
+
+    void client.auth.getSession().then(({ data, error }) => {
+      if (error) {
+        if (mounted) setAuthState({ status: 'error', message: 'No fue posible restaurar tu sesión.' });
+        return;
+      }
+      void loadSession(data.session);
+    });
+
+    const { data: subscription } = client.auth.onAuthStateChange((_event, session) => {
+      void loadSession(session);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    if (!supabaseConfiguration.available || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await signInWithPassword(getSupabaseClient(), email, password);
+    } catch (signInError) {
+      setAuthState({
+        status: 'error',
+        message: signInError instanceof Error ? signInError.message : 'No fue posible iniciar sesión.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSignOut = async (): Promise<void> => {
+    if (!supabaseConfiguration.available) return;
+    const { error } = await getSupabaseClient().auth.signOut();
+    if (error) {
+      setAuthState({ status: 'error', message: 'No fue posible cerrar sesión. Intenta de nuevo.' });
+    }
+  };
+
+  if (authState.status === 'loading') {
+    return <AuthLayout><p role="status">Cargando sesión segura…</p></AuthLayout>;
+  }
+
+  if (authState.status === 'ready') {
+    return (
+      <AuthLayout>
+        <h1 className="text-2xl font-black" style={{ color: 'var(--sf-text)' }}>SupplyFlow</h1>
+        <p className="sf-muted mt-2">Sesión verificada para {authState.profile.fullName || authState.profile.email}.</p>
+        <dl className="mt-6 space-y-3 text-sm">
+          <div><dt className="sf-subtle">Rol</dt><dd className="font-bold">{roleLabel(authState.profile.role)}</dd></div>
+          <div><dt className="sf-subtle">Organización</dt><dd className="font-mono text-xs">{authState.profile.organizationId}</dd></div>
+        </dl>
+        <p className="sf-muted mt-8 text-sm">La base de identidad y permisos está activa. El flujo operativo persistente llegará en las siguientes fases.</p>
+        <button type="button" onClick={() => void handleSignOut()} className="mt-8 w-full rounded-xl px-4 py-3 font-bold sf-btn-ghost">
+          Cerrar sesión
+        </button>
+      </AuthLayout>
+    );
+  }
+
+  return (
+    <AuthLayout>
+      <h1 className="text-3xl font-black" style={{ color: 'var(--sf-text)' }}>SupplyFlow</h1>
+      <p className="sf-muted mt-2 text-sm">Acceso seguro para el equipo de abastecimiento.</p>
+      {authState.status === 'error' && (
+        <p className="mt-5 rounded-xl px-3 py-2 text-sm" role="alert" style={{ color: 'var(--sf-danger)', background: 'rgba(239, 68, 68, 0.12)' }}>
+          {authState.message}
+        </p>
+      )}
+      {authState.status === 'signed-out' && (
+        <form onSubmit={(event) => void handleSignIn(event)} className="mt-6 space-y-4">
+          <label className="block text-sm font-bold">
+            Email
+            <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" required className="mt-1 w-full rounded-xl px-3 py-3 sf-inset" />
+          </label>
+          <label className="block text-sm font-bold">
+            Contraseña
+            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" required className="mt-1 w-full rounded-xl px-3 py-3 sf-inset" />
+          </label>
+          <button type="submit" disabled={isSubmitting} className="w-full rounded-xl px-4 py-3 font-bold text-white disabled:opacity-60" style={{ background: 'var(--sf-accent)' }}>
+            {isSubmitting ? 'Ingresando…' : 'Iniciar sesión'}
+          </button>
+        </form>
+      )}
+    </AuthLayout>
+  );
+}
+
+function AuthLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <main className="min-h-screen sf-page flex items-center justify-center px-4">
+      <section className="w-full max-w-md rounded-3xl p-6 sf-card">
+        {children}
+      </section>
+    </main>
   );
 }

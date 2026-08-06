@@ -346,15 +346,20 @@ app.put('/api/requests/:id/claim', (req, res) => {
     return res.status(404).json({ error: 'Solicitud no encontrada' });
   }
 
+  const claimedRequest = supplyRequests[reqIndex];
+  if (!claimedRequest) {
+    return res.status(404).json({ error: 'Solicitud no encontrada' });
+  }
+
   const buyer = users.find((u) => u.id === buyerId);
-  supplyRequests[reqIndex].assignedBuyerId = buyerId;
-  supplyRequests[reqIndex].assignedBuyerName = buyer ? buyer.name : 'Comprador';
-  supplyRequests[reqIndex].status = 'Asignada';
-  supplyRequests[reqIndex].assignedAt = new Date().toISOString();
+  claimedRequest.assignedBuyerId = buyerId;
+  claimedRequest.assignedBuyerName = buyer ? buyer.name : 'Comprador';
+  claimedRequest.status = 'Asignada';
+  claimedRequest.assignedAt = new Date().toISOString();
 
   saveData();
-  broadcastUpdate('REQUEST_UPDATED', supplyRequests[reqIndex]);
-  res.json(supplyRequests[reqIndex]);
+  broadcastUpdate('REQUEST_UPDATED', claimedRequest);
+  res.json(claimedRequest);
 });
 
 // Update Request Status
@@ -367,6 +372,10 @@ app.put('/api/requests/:id/status', (req, res) => {
   }
 
   const targetReq = supplyRequests[reqIndex];
+  if (!targetReq) {
+    return res.status(404).json({ error: 'Solicitud no encontrada' });
+  }
+
   targetReq.status = status;
 
   if (status === 'En Compra' && !targetReq.shoppingStartedAt) {
@@ -470,6 +479,9 @@ app.post('/api/checklist', (req, res) => {
 
   const rest = restaurants.find((r) => r.id === restaurantId) || restaurants[0];
   const user = users.find((u) => u.id === userId) || users[0];
+  if (!rest || !user) {
+    return res.status(500).json({ error: 'No hay local o usuario disponible para registrar el checklist' });
+  }
 
   const itemsToReplenish: RequestItem[] = [];
 
