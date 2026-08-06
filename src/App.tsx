@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef, Suspense, lazy } from 'react';
 import {
   Restaurant,
   UserProfile,
@@ -20,44 +20,95 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  triggerNotification,
   upsertSupplyRequest,
   getNextRequestNumber,
 } from './lib/api';
 import { supabase, rowToRequest } from './lib/supabase';
 import { INITIAL_SUPPLIERS } from './data/caddyShackData';
 import { Header } from './components/Header';
-import { DailyChecklist } from './components/DailyChecklist';
-import { RequestsList } from './components/RequestsList';
-import { ShoppingModeModal } from './components/ShoppingModeModal';
-import { AdminCatalog, OverdueSettings } from './components/AdminCatalog';
-import { AnalyticsDashboard } from './components/AnalyticsDashboard';
-import { NotificationCenter } from './components/NotificationCenter';
-import { ProfileSettingsModal } from './components/ProfileSettingsModal';
-import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { BottomNav, BottomNavTab } from './components/BottomNav';
+import { Dashboard } from './components/Dashboard';
 import { LoginScreen } from './components/LoginScreen';
+import type { OverdueSettings } from './components/AdminCatalog';
+
+// Tab/screen destinations are only ever needed after the initial Dashboard
+// render, so they're code-split out of the main bundle and fetched on demand.
+const AccountView = lazy(() => import('./components/AccountView').then((m) => ({ default: m.AccountView })));
+const NotificationsView = lazy(() => import('./components/NotificationsView').then((m) => ({ default: m.NotificationsView })));
+const DailyChecklist = lazy(() => import('./components/DailyChecklist').then((m) => ({ default: m.DailyChecklist })));
+const RequestsList = lazy(() => import('./components/RequestsList').then((m) => ({ default: m.RequestsList })));
+const ShoppingView = lazy(() => import('./components/ShoppingView').then((m) => ({ default: m.ShoppingView })));
+const AdminCatalog = lazy(() => import('./components/AdminCatalog').then((m) => ({ default: m.AdminCatalog })));
 import { showLocalNotification, playAlertSound, setAppBadge } from './lib/notifications';
 import { getTranslation } from './lib/translations';
 import {
+  LayoutDashboard,
   ClipboardList,
   ShoppingBag,
   SlidersHorizontal,
-  BarChart3,
 } from 'lucide-react';
+
+type TabId = 'DASHBOARD' | 'REQUESTS' | 'CHECKLIST' | 'ADMIN';
+type Screen = 'NONE' | 'NOTIFICATIONS' | 'ACCOUNT';
+
+// Lightweight, theme-aware placeholder shown while a lazy-loaded view's chunk fetches.
+const ViewFallback: React.FC<{ label: string }> = ({ label }) => (
+  <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
+    <div
+      className="w-8 h-8 rounded-full border-2 animate-spin"
+      style={{ borderColor: 'var(--sf-border)', borderTopColor: 'var(--sf-accent)' }}
+    />
+    <span className="sr-only">{label}</span>
+  </div>
+);
+
+const SESSION_KEY = 'restosupply_session_user';
+const LANGUAGE_KEY = 'restosupply_language';
+const PRODUCTS_OVERRIDE_KEY = 'restosupply_products_override';
+const RESTAURANTS_OVERRIDE_KEY = 'restosupply_restaurants_override';
+
+function readStoredJSON<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistJSON(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* storage unavailable — in-memory state still works for this session */
+  }
+}
+
+function safeSetItem(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* storage unavailable — in-memory state still works for this session */
+  }
+}
 
 export default function App() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('rest-1');
 
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [appLanguage, setAppLanguage] = useState<'es' | 'en'>('es');
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => readStoredJSON<UserProfile>(SESSION_KEY));
+  const [appLanguage, setAppLanguage] = useState<'es' | 'en'>(() => {
+    const stored = readStoredJSON<UserProfile>(SESSION_KEY);
+    return stored?.language || (localStorage.getItem(LANGUAGE_KEY) as 'es' | 'en' | null) || 'es';
+  });
 
   const [products, setProducts] = useState<Product[]>([]);
   const [supplyRequests, setSupplyRequests] = useState<SupplyRequest[]>([]);
   const [sseConnected, setSseConnected] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'CHECKLIST' | 'REQUESTS' | 'ADMIN' | 'ANALYTICS'>('REQUESTS');
+  const [activeTab, setActiveTab] = useState<TabId>('DASHBOARD');
+  const [screen, setScreen] = useState<Screen>('NONE');
 
   const [shoppingModalRequest, setShoppingModalRequest] = useState<SupplyRequest | null>(null);
   // Ref to avoid stale closure in SSE handler
@@ -66,9 +117,13 @@ export default function App() {
     shoppingModalRequestRef.current = shoppingModalRequest;
   }, [shoppingModalRequest]);
 
-  const [showNotificationCenter, setShowNotificationCenter] = useState(false);
-  const [showProfileSettingsModal, setShowProfileSettingsModal] = useState(false);
-  const [showPWAInstallModal, setShowPWAInstallModal] = useState(false);
+  const t = getTranslation(currentUser?.language || appLanguage);
+  // Ref to avoid stale-language closures in long-lived effect handlers (SSE, interval)
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
+
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [highlightedRequestId, setHighlightedRequestId] = useState<string | null>(null);
 
@@ -86,38 +141,61 @@ export default function App() {
     setUsers((prev) =>
       prev.map((u) => (u.id === updatedProfile.id ? updatedProfile : u))
     );
+    persistJSON(SESSION_KEY, updatedProfile);
+    if (updatedProfile.language) safeSetItem(LANGUAGE_KEY, updatedProfile.language);
   };
 
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleSelectRequestFromNotification = (requestId: string) => {
     const req = supplyRequests.find((r) => r.id === requestId);
     if (req) {
       setSelectedRestaurantId(req.restaurantId);
     }
     setActiveTab('REQUESTS');
+    setScreen('NONE');
     setHighlightedRequestId(requestId);
-    setShowNotificationCenter(false);
-    setTimeout(() => {
+    // Cancel any still-pending un-highlight from a previous notification —
+    // without this, opening a second notification within 5s of the first
+    // lets the first timeout clear the second request's highlight early.
+    if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
+    highlightTimeoutRef.current = setTimeout(() => {
       setHighlightedRequestId(null);
+      highlightTimeoutRef.current = null;
     }, 5000);
   };
 
   const [isSubmittingChecklist, setIsSubmittingChecklist] = useState(false);
 
   const loadInitialData = useCallback(async () => {
-    const [rests, usrs, prods, reqs] = await Promise.all([
+    // Restaurants/users/products are static + localStorage-only (no backend
+    // table yet for the catalog) and resolve instantly. Supply requests are
+    // the only part that depends on the Supabase network round-trip, which
+    // can be slow or briefly unavailable — fetch it independently so a slow
+    // or failed connection never delays restoring the session/catalog.
+    const [rests, usrs, prods] = await Promise.all([
       fetchRestaurants(),
       fetchUsers(),
       fetchProducts(),
-      fetchSupplyRequests(),
     ]);
 
-    if (rests.length > 0) setRestaurants(rests);
+    // A locally-saved override lets admin catalog edits survive a refresh on this device.
+    const storedRestaurants = readStoredJSON<Restaurant[]>(RESTAURANTS_OVERRIDE_KEY);
+    const storedProducts = readStoredJSON<Product[]>(PRODUCTS_OVERRIDE_KEY);
+
+    if (storedRestaurants && storedRestaurants.length > 0) setRestaurants(storedRestaurants);
+    else if (rests.length > 0) setRestaurants(rests);
+
     if (usrs.length > 0) setUsers(usrs);
-    if (prods.length > 0) setProducts(prods);
-    if (reqs.length > 0) {
-      const uniqueReqs = Array.from(new Map(reqs.map((r: SupplyRequest) => [r.id, r])).values());
-      setSupplyRequests(uniqueReqs);
-    }
+
+    if (storedProducts && storedProducts.length > 0) setProducts(storedProducts);
+    else if (prods.length > 0) setProducts(prods);
+
+    fetchSupplyRequests().then((reqs) => {
+      if (reqs.length > 0) {
+        const uniqueReqs = Array.from(new Map(reqs.map((r: SupplyRequest) => [r.id, r])).values());
+        setSupplyRequests(uniqueReqs);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -137,8 +215,8 @@ export default function App() {
               if (prev.some((r) => r.id === newReq.id)) return prev;
               playAlertSound('urgent');
               showLocalNotification(
-                `🚨 NUEVA SOLICITUD #${newReq.requestNumber}`,
-                `${newReq.restaurantName} — ${newReq.items.length} productos requeridos.`
+                `${tRef.current.notifNewRequestTitlePrefix} #${newReq.requestNumber}`,
+                `${newReq.restaurantName} — ${newReq.items.length} ${tRef.current.notifNewRequestBodySuffix}`
               );
               return [newReq, ...prev];
             });
@@ -192,8 +270,8 @@ export default function App() {
         if (!notifiedOverdueIds.current.has(req.id) && currentUser && (currentUser.role === 'comprador' || currentUser.role === 'admin')) {
           notifiedOverdueIds.current.add(req.id);
           showLocalNotification(
-            `⏰ PEDIDO ATRASADO #${req.requestNumber}`,
-            `${req.restaurantName} lleva más de ${limit} min sin asignar.`
+            `${tRef.current.notifOverdueTitlePrefix} #${req.requestNumber}`,
+            `${req.restaurantName} ${tRef.current.notifOverdueBodyMid} ${limit} ${tRef.current.notifOverdueBodySuffix}`
           );
         }
       });
@@ -219,11 +297,12 @@ export default function App() {
       address: 'Big Spring, TX',
       phone: '',
       active: true,
-      colorBadge: 'bg-emerald-600',
+      colorBadge: 'emerald',
     };
 
-  const currentRestaurantProducts = products.filter(
-    (p) => p.restaurantId === selectedRestaurantId
+  const currentRestaurantProducts = useMemo(
+    () => products.filter((p) => p.restaurantId === selectedRestaurantId),
+    [products, selectedRestaurantId]
   );
 
   const handleSubmitChecklist = async (
@@ -308,8 +387,8 @@ export default function App() {
     ) {
       playAlertSound('urgent');
       showLocalNotification(
-        '⛔ Acceso Restringido',
-        `Esta solicitud está asignada a ${req.assignedBuyerName || 'otro comprador'}.`
+        tRef.current.notifRestrictedTitle,
+        `${tRef.current.notifRestrictedBodyPrefix} ${req.assignedBuyerName || tRef.current.notifRestrictedOtherBuyer}.`
       );
       return;
     }
@@ -355,8 +434,8 @@ export default function App() {
     if (newPendingRequest) {
       playAlertSound('urgent');
       showLocalNotification(
-        `🚨 NUEVA SOLICITUD DE COMPRA #${newPendingRequest.requestNumber}`,
-        `Se creó automáticamente con ${newPendingRequest.items.length} insumos faltantes.`
+        `${tRef.current.notifAutoPendingTitle} #${newPendingRequest.requestNumber}`,
+        `${tRef.current.notifAutoPendingBodyPrefix} ${newPendingRequest.items.length} ${tRef.current.notifAutoPendingBodySuffix}`
       );
     }
   };
@@ -428,15 +507,15 @@ export default function App() {
           purchasedBy: undefined,
         })),
         urgent: shoppingModalRequest.urgent,
-        notes: `Generada automáticamente — ${unpurchased.length} insumos faltantes de Solicitud #${shoppingModalRequest.requestNumber}.`,
+        notes: `${tRef.current.notifAutoGeneratedNotePrefix} ${unpurchased.length} ${tRef.current.notifAutoGeneratedNoteMid} #${shoppingModalRequest.requestNumber}.`,
         createdAt: now,
       };
       // Add optimistically so this device sees it immediately
       setSupplyRequests((prev) => [newPendingRequest!, ...prev.filter((r) => r.id !== newPendingRequest!.id)]);
       playAlertSound('urgent');
       showLocalNotification(
-        `📦 NUEVA SOLICITUD #${newPendingRequest.requestNumber} GENERADA`,
-        `Se creó con ${newPendingRequest.items.length} productos pendientes de comprar.`
+        `${tRef.current.notifPendingGeneratedTitlePrefix} #${newPendingRequest.requestNumber} ${tRef.current.notifPendingGeneratedTitleSuffix}`,
+        `${tRef.current.notifPendingGeneratedBodyPrefix} ${newPendingRequest.items.length} ${tRef.current.notifPendingGeneratedBodySuffix}`
       );
     }
 
@@ -455,223 +534,175 @@ export default function App() {
 
   const handleAddProduct = async (productData: Omit<Product, 'id' | 'updatedAt'>) => {
     const newProd = await createProduct(productData);
-    setProducts((prev) => [...prev, newProd]);
+    setProducts((prev) => {
+      const next = [...prev, newProd];
+      persistJSON(PRODUCTS_OVERRIDE_KEY, next);
+      return next;
+    });
   };
 
   const handleUpdateProduct = async (id: string, updates: Partial<Product>) => {
     const updated = await updateProduct(id, updates);
-    setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    setProducts((prev) => {
+      const next = prev.map((p) => (p.id === id ? updated : p));
+      persistJSON(PRODUCTS_OVERRIDE_KEY, next);
+      return next;
+    });
   };
 
   const handleDeleteProduct = async (id: string) => {
     await deleteProduct(id);
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    setProducts((prev) => {
+      const next = prev.filter((p) => p.id !== id);
+      persistJSON(PRODUCTS_OVERRIDE_KEY, next);
+      return next;
+    });
   };
 
   const handleAddRestaurant = async (restData: { name: string; type: any; address: string; phone: string }) => {
-    const newRest = { ...restData, id: `rest-${Date.now()}`, active: true, colorBadge: 'bg-emerald-600' };
-    setRestaurants((prev) => [...prev, newRest]);
+    const newRest = { ...restData, id: `rest-${Date.now()}`, active: true, colorBadge: 'emerald' as const };
+    setRestaurants((prev) => {
+      const next = [...prev, newRest];
+      persistJSON(RESTAURANTS_OVERRIDE_KEY, next);
+      return next;
+    });
     setSelectedRestaurantId(newRest.id);
   };
 
   const handleSaveOverdueSettings = (settings: OverdueSettings) => {
     setOverdueSettings(settings);
-    localStorage.setItem('restosupply_overdue_settings', JSON.stringify(settings));
+    persistJSON('restosupply_overdue_settings', settings);
     notifiedOverdueIds.current.clear();
   };
 
   const handleSelectUser = (u: UserProfile) => {
     setCurrentUser(u);
-    if (u.role === 'cocinero') {
-      setActiveTab('REQUESTS');
-    } else if (u.role === 'comprador') {
-      setActiveTab('REQUESTS');
-    } else if (u.role === 'admin') {
-      setActiveTab('ANALYTICS');
+    setAppLanguage(u.language || 'es');
+    setActiveTab('DASHBOARD');
+    setScreen('NONE');
+    persistJSON(SESSION_KEY, u);
+    if (u.language) safeSetItem(LANGUAGE_KEY, u.language);
+  };
+
+  const handleChangeLanguage = (lang: 'es' | 'en') => {
+    setAppLanguage(lang);
+    safeSetItem(LANGUAGE_KEY, lang);
+  };
+
+  // Stable identities so React.memo on Header/BottomNav actually skips re-renders.
+  const handleSelectRestaurant = useCallback((id: string) => setSelectedRestaurantId(id), []);
+  const handleOpenNotifications = useCallback(() => setScreen('NOTIFICATIONS'), []);
+  const handleOpenProfile = useCallback(() => setScreen('ACCOUNT'), []);
+  const handleChangeTab = useCallback((id: string) => setActiveTab(id as TabId), []);
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem(SESSION_KEY);
+    } catch {
+      /* ignore */
     }
   };
+
+  const activePendingRequestsCount = supplyRequests.filter(
+    (r) => r.status === 'Pendiente'
+  ).length;
+
+  // Hooks must run unconditionally on every render, so this is computed
+  // before the early "no session" return below (Rules of Hooks).
+  const currentNavTabs = useMemo((): BottomNavTab[] => {
+    const dashboard: BottomNavTab = { id: 'DASHBOARD', label: t.tabDashboard, icon: LayoutDashboard };
+    switch (currentUser?.role) {
+      case 'cocinero':
+        return [
+          dashboard,
+          { id: 'REQUESTS', label: t.tabRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
+          { id: 'CHECKLIST', label: t.tabChecklist, icon: ClipboardList },
+        ];
+      case 'comprador':
+        return [
+          dashboard,
+          { id: 'REQUESTS', label: t.tabRequestsBuyer, icon: ShoppingBag, badge: activePendingRequestsCount },
+        ];
+      case 'admin':
+        return [
+          dashboard,
+          { id: 'REQUESTS', label: t.tabRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
+          { id: 'ADMIN', label: t.tabCatalog, icon: SlidersHorizontal },
+          { id: 'CHECKLIST', label: t.tabChecklist, icon: ClipboardList },
+        ];
+      default:
+        return [dashboard];
+    }
+  }, [currentUser?.role, t, activePendingRequestsCount]);
+
+  // Sync html root class + PWA chrome color for theme. A DOM side effect must
+  // live in useEffect, not the render body — the render body runs on every
+  // Realtime-triggered re-render, which would otherwise re-run a
+  // querySelector + DOM write far more often than the theme actually changes,
+  // and would violate render purity under Strict Mode / concurrent features.
+  // Declared before the early "no session" return below (Rules of Hooks).
+  const isLight = currentUser?.theme === 'light';
+  useEffect(() => {
+    if (isLight) {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    }
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
+    }
+  }, [isLight]);
+
+  // Sync the document's lang attribute with the active language (WCAG 3.1.1)
+  // — index.html hardcodes lang="es" as a static fallback for pre-hydration
+  // paint; screen readers need this kept current or they read translated
+  // content with the wrong pronunciation.
+  const activeLanguage = currentUser?.language || appLanguage;
+  useEffect(() => {
+    document.documentElement.lang = activeLanguage;
+    document.title = t.docTitle;
+  }, [activeLanguage, t.docTitle]);
 
   // Show login screen when no user is selected
   if (!currentUser) {
     return (
       <LoginScreen
         users={users}
-        onSelectUser={(u) => {
-          setCurrentUser(u);
-          setAppLanguage(u.language || 'es');
-          if (u.role === 'admin') setActiveTab('ANALYTICS');
-          else setActiveTab('REQUESTS');
-        }}
+        onSelectUser={handleSelectUser}
         language={appLanguage}
-        onChangeLanguage={setAppLanguage}
+        onChangeLanguage={handleChangeLanguage}
       />
     );
   }
 
-  const activePendingRequestsCount = supplyRequests.filter(
-    (r) => r.status === 'Pendiente'
-  ).length;
-
   const isIOS =
     /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
-  const t = getTranslation(currentUser.language || appLanguage);
-  const isLight = currentUser.theme === 'light';
-
-  // Sync html root class for theme
-  if (isLight) {
-    document.documentElement.classList.add('light');
-    document.documentElement.classList.remove('dark');
-  } else {
-    document.documentElement.classList.add('dark');
-    document.documentElement.classList.remove('light');
-  }
-
-  const getNavTabs = () => {
-    switch (currentUser.role) {
-      case 'cocinero':
-        return [
-          { id: 'REQUESTS' as const, label: t.navRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
-          { id: 'CHECKLIST' as const, label: t.navChecklist, icon: ClipboardList },
-        ];
-      case 'comprador':
-        return [
-          { id: 'REQUESTS' as const, label: t.navPurchaseRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
-        ];
-      case 'admin':
-        return [
-          { id: 'ANALYTICS' as const, label: t.navAnalytics, icon: BarChart3 },
-          { id: 'REQUESTS' as const, label: t.navRequests, icon: ShoppingBag, badge: activePendingRequestsCount },
-          { id: 'ADMIN' as const, label: t.navAdmin, icon: SlidersHorizontal },
-          { id: 'CHECKLIST' as const, label: t.navChecklist, icon: ClipboardList },
-        ];
-    }
-  };
-
-  const currentNavTabs = getNavTabs();
-
-  return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
-      isLight
-        ? 'bg-slate-100 text-slate-900 selection:bg-emerald-500 selection:text-white'
-        : 'bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-slate-950'
-    }`}>
-      <Header
-        restaurants={restaurants}
-        selectedRestaurantId={selectedRestaurantId}
-        onSelectRestaurant={(id) => setSelectedRestaurantId(id)}
-        currentUser={currentUser}
-        users={users}
-        onSelectUser={handleSelectUser}
-        sseConnected={sseConnected}
-        activeRequestsCount={activePendingRequestsCount}
-        onOpenNotifications={() => setShowNotificationCenter(true)}
-        onOpenProfileSettings={() => setShowProfileSettingsModal(true)}
-        isPWAInstallable={!!deferredPrompt || isIOS}
-        onInstallPWA={() => setShowPWAInstallModal(true)}
-        onLogout={() => setCurrentUser(null)}
-      />
-
-      <nav
-        className={`border-b sticky z-30 backdrop-blur-md ${
-          isLight ? 'bg-white/90 border-slate-200' : 'bg-slate-900/90 border-slate-800'
-        }`}
-        style={{ top: 'calc(52px + env(safe-area-inset-top))' }}
-      >
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-1 sm:space-x-3 py-1.5 overflow-x-auto no-scrollbar">
-            {currentNavTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    playAlertSound('click');
-                  }}
-                  className={`relative flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-                    isActive
-                      ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
-                      : isLight
-                      ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span>{tab.label}</span>
-                  {tab.badge !== undefined && tab.badge > 0 && (
-                    <span
-                      className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                        isActive ? 'bg-slate-950 text-emerald-400' : 'bg-rose-500 text-white animate-pulse'
-                      }`}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </nav>
-
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 w-full">
-        {activeTab === 'CHECKLIST' && (
-          <DailyChecklist
-            products={currentRestaurantProducts}
-            selectedRestaurant={selectedRestaurant}
-            currentUser={currentUser}
-            onSubmitChecklist={handleSubmitChecklist}
-            isSubmitting={isSubmittingChecklist}
-          />
-        )}
-
-        {activeTab === 'REQUESTS' && (
-          <RequestsList
-            requests={supplyRequests}
-            currentUser={currentUser}
-            onClaimRequest={handleClaimRequest}
-            onOpenShoppingMode={handleOpenShoppingMode}
-            onUpdateStatus={handleUpdateStatus}
-            selectedRestaurantId={selectedRestaurantId}
-            highlightedRequestId={highlightedRequestId}
-            overdueRequestIds={overdueRequestIds}
-          />
-        )}
-
-        {activeTab === 'ADMIN' && (
-          <AdminCatalog
-            products={products}
-            restaurants={restaurants}
-            suppliers={INITIAL_SUPPLIERS}
-            currentUser={currentUser}
-            onAddProduct={handleAddProduct}
-            onUpdateProduct={handleUpdateProduct}
-            onDeleteProduct={handleDeleteProduct}
-            onAddRestaurant={handleAddRestaurant}
-            overdueSettings={overdueSettings}
-            onSaveOverdueSettings={handleSaveOverdueSettings}
-          />
-        )}
-
-        {activeTab === 'ANALYTICS' && <AnalyticsDashboard currentUser={currentUser} />}
-      </main>
-
-      {shoppingModalRequest && (
-        <ShoppingModeModal
+  // Shopping mode is a full-screen view (no modal), takes priority when active
+  if (shoppingModalRequest) {
+    return (
+      <Suspense fallback={<ViewFallback label={t.loading} />}>
+        <ShoppingView
           request={shoppingModalRequest}
           currentUser={currentUser}
           onClose={() => setShoppingModalRequest(null)}
           onToggleItem={handleToggleItem}
           onCompleteShopping={handleFinishShopping}
         />
-      )}
+      </Suspense>
+    );
+  }
 
-      {showNotificationCenter && (
-        <NotificationCenter
-          onClose={() => setShowNotificationCenter(false)}
+  // Drill-in full-screen views (no modals): notifications & account
+  if (screen === 'NOTIFICATIONS') {
+    return (
+      <Suspense fallback={<ViewFallback label={t.loading} />}>
+        <NotificationsView
+          onBack={() => setScreen('NONE')}
           sseConnected={sseConnected}
           currentUserPhone={currentUser.phone}
           currentUserRole={currentUser.role}
@@ -679,28 +710,114 @@ export default function App() {
           requests={supplyRequests}
           onSelectRequest={handleSelectRequestFromNotification}
         />
-      )}
+      </Suspense>
+    );
+  }
 
-      {showProfileSettingsModal && (
-        <ProfileSettingsModal
+  if (screen === 'ACCOUNT') {
+    return (
+      <Suspense fallback={<ViewFallback label={t.loading} />}>
+        <AccountView
           currentUser={currentUser}
-          onClose={() => setShowProfileSettingsModal(false)}
+          users={users}
+          onBack={() => setScreen('NONE')}
           onSaveProfile={handleSaveProfile}
-        />
-      )}
-
-      {showPWAInstallModal && (
-        <PWAInstallPrompt
-          onClose={() => setShowPWAInstallModal(false)}
+          onSelectUser={handleSelectUser}
+          isPWAInstallable={!!deferredPrompt || isIOS}
           isIOS={isIOS}
-          onInstall={() => {
+          onInstallDirect={() => {
             if (deferredPrompt) {
               deferredPrompt.prompt();
               deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
             }
           }}
+          onLogout={handleLogout}
         />
-      )}
+      </Suspense>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col font-sans sf-page selection:bg-[var(--sf-accent)] selection:text-[var(--sf-accent-contrast)]">
+      <Header
+        restaurants={restaurants}
+        selectedRestaurantId={selectedRestaurantId}
+        onSelectRestaurant={handleSelectRestaurant}
+        currentUser={currentUser}
+        sseConnected={sseConnected}
+        activeRequestsCount={activePendingRequestsCount}
+        onOpenNotifications={handleOpenNotifications}
+        onOpenProfile={handleOpenProfile}
+      />
+
+      <main
+        className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full"
+        style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}
+      >
+        {activeTab === 'DASHBOARD' && (
+          <Dashboard
+            currentUser={currentUser}
+            requests={supplyRequests}
+            products={products}
+            selectedRestaurantId={selectedRestaurantId}
+            onGoToRequests={() => setActiveTab('REQUESTS')}
+            onOpenRequest={handleSelectRequestFromNotification}
+          />
+        )}
+
+        {activeTab === 'CHECKLIST' && (
+          <Suspense fallback={<ViewFallback label={t.loading} />}>
+            <DailyChecklist
+              key={selectedRestaurant.id}
+              products={currentRestaurantProducts}
+              selectedRestaurant={selectedRestaurant}
+              currentUser={currentUser}
+              onSubmitChecklist={handleSubmitChecklist}
+              isSubmitting={isSubmittingChecklist}
+            />
+          </Suspense>
+        )}
+
+        {activeTab === 'REQUESTS' && (
+          <Suspense fallback={<ViewFallback label={t.loading} />}>
+            <RequestsList
+              requests={supplyRequests}
+              currentUser={currentUser}
+              onClaimRequest={handleClaimRequest}
+              onOpenShoppingMode={handleOpenShoppingMode}
+              onUpdateStatus={handleUpdateStatus}
+              selectedRestaurantId={selectedRestaurantId}
+              highlightedRequestId={highlightedRequestId}
+              overdueRequestIds={overdueRequestIds}
+            />
+          </Suspense>
+        )}
+
+        {activeTab === 'ADMIN' && (
+          <Suspense fallback={<ViewFallback label={t.loading} />}>
+            <AdminCatalog
+              products={products}
+              restaurants={restaurants}
+              suppliers={INITIAL_SUPPLIERS}
+              currentUser={currentUser}
+              onAddProduct={handleAddProduct}
+              onUpdateProduct={handleUpdateProduct}
+              onDeleteProduct={handleDeleteProduct}
+              onAddRestaurant={handleAddRestaurant}
+              overdueSettings={overdueSettings}
+              onSaveOverdueSettings={handleSaveOverdueSettings}
+            />
+          </Suspense>
+        )}
+
+      </main>
+
+      <BottomNav
+        tabs={currentNavTabs}
+        activeTab={activeTab}
+        onChange={handleChangeTab}
+        ariaLabel={t.navLandmarkLabel}
+      />
     </div>
   );
 }

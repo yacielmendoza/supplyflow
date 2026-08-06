@@ -1,19 +1,8 @@
-import React, { useState } from 'react';
-import { Restaurant, UserProfile, Role } from '../types';
+import React, { useState, useRef, useEffect } from 'react';
+import { Restaurant, UserProfile } from '../types';
 import { formatCleanName } from '../lib/formatters';
 import { getTranslation } from '../lib/translations';
-import {
-  Store,
-  User,
-  Bell,
-  Smartphone,
-  CheckCircle2,
-  AlertTriangle,
-  Flame,
-  Volume2,
-  Settings,
-  LogOut,
-} from 'lucide-react';
+import { Store, Bell, Flame, ChevronDown, Check } from 'lucide-react';
 import { playAlertSound } from '../lib/notifications';
 
 interface HeaderProps {
@@ -21,274 +10,258 @@ interface HeaderProps {
   selectedRestaurantId: string;
   onSelectRestaurant: (id: string) => void;
   currentUser: UserProfile;
-  users: UserProfile[];
-  onSelectUser: (user: UserProfile) => void;
   sseConnected: boolean;
   activeRequestsCount: number;
   onOpenNotifications: () => void;
-  onOpenProfileSettings: () => void;
-  onInstallPWA?: () => void;
-  isPWAInstallable?: boolean;
-  onLogout?: () => void;
+  onOpenProfile: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({
+/**
+ * Simplified top bar (2026 refresh): brand logo · restaurant selector ·
+ * notifications (with pending badge) · profile avatar. The restaurant selector
+ * is a custom popover (not a native <select>) so the picker matches the app's
+ * design language instead of the OS control.
+ */
+const HeaderComponent: React.FC<HeaderProps> = ({
   restaurants,
   selectedRestaurantId,
   onSelectRestaurant,
   currentUser,
-  users,
-  onSelectUser,
   sseConnected,
   activeRequestsCount,
   onOpenNotifications,
-  onOpenProfileSettings,
-  onInstallPWA,
-  isPWAInstallable,
-  onLogout,
+  onOpenProfile,
 }) => {
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-  const selectedRest = restaurants.find((r) => r.id === selectedRestaurantId) || restaurants[0];
   const t = getTranslation(currentUser.language || 'es');
+  const [open, setOpen] = useState(false);
+  const selectorRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
-  const getRoleLabel = (role: Role) => {
-    switch (role) {
-      case 'cocinero':
-        return t.roleCook;
-      case 'comprador':
-        return t.roleBuyer;
-      case 'admin':
-        return t.roleAdmin;
-    }
+  const selected = restaurants.find((r) => r.id === selectedRestaurantId) || restaurants[0];
+
+  // Same broken-avatar fallback AccountView already has — without it a
+  // failed image load shows the browser's broken-image icon in the most
+  // visible spot in the chrome instead of the user's initials.
+  const [avatarError, setAvatarError] = useState(false);
+  useEffect(() => { setAvatarError(false); }, [currentUser.avatarUrl]);
+
+  const closePopover = (returnFocus: boolean) => {
+    setOpen(false);
+    if (returnFocus) triggerRef.current?.focus();
   };
 
-  const getRoleBadgeColor = (role: Role) => {
-    switch (role) {
-      case 'cocinero':
-        return 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/20';
-      case 'comprador':
-        return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20';
-      case 'admin':
-        return 'bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/20';
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closePopover(true);
+    // Tabbing out of the listbox previously left it open and interactive
+    // while keyboard focus had already moved to the next control (the
+    // notification bell) — a screen reader user tabbing linearly would find
+    // an "open" listbox with focus somewhere else entirely. No focus trap is
+    // added (Tab should be allowed to leave), just a close on the way out.
+    const onFocusOut = (e: FocusEvent) => {
+      const next = e.relatedTarget as Node | null;
+      // relatedTarget is null both when focus leaves the document entirely
+      // (e.g. Tab to the browser chrome/address bar) and in a few other
+      // browser-specific cases — treat it the same as "focus moved outside
+      // the selector" so the popover doesn't linger open with focus gone.
+      if (!next || (selectorRef.current && !selectorRef.current.contains(next))) setOpen(false);
+    };
+    const container = selectorRef.current;
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    container?.addEventListener('focusout', onFocusOut);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+      container?.removeEventListener('focusout', onFocusOut);
+    };
+  }, [open]);
+
+  // Move focus into the listbox on open (APG listbox pattern) — previously
+  // the popover only worked by mouse/tab proximity, degrading with more
+  // restaurants. Lands on the currently-selected option, or the first one.
+  useEffect(() => {
+    if (!open) return;
+    const idx = Math.max(0, restaurants.findIndex((r) => r.id === selectedRestaurantId));
+    setFocusedIndex(idx);
+    const raf = requestAnimationFrame(() => optionRefs.current[idx]?.focus());
+    return () => cancelAnimationFrame(raf);
+  }, [open, restaurants, selectedRestaurantId]);
+
+  const moveFocusTo = (index: number) => {
+    setFocusedIndex(index);
+    optionRefs.current[index]?.focus();
+  };
+
+  const handleListboxKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      moveFocusTo(Math.min(restaurants.length - 1, focusedIndex + 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      moveFocusTo(Math.max(0, focusedIndex - 1));
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      moveFocusTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      moveFocusTo(restaurants.length - 1);
     }
   };
 
   return (
     <header
-      className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white shadow-md"
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      className="sticky top-0 z-40 safe-top"
+      style={{
+        background: 'color-mix(in srgb, var(--sf-surface) 88%, transparent)',
+        borderBottom: '1px solid var(--sf-border)',
+        backdropFilter: 'blur(14px)',
+      }}
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5">
-        <div className="flex items-center justify-between gap-2">
-          {/* Left: Brand Logo & Compact Location Selector */}
-          <div className="flex items-center space-x-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-amber-500 flex items-center justify-center shadow-md shadow-emerald-950/50 flex-shrink-0">
-              <Flame className="w-5 h-5 text-slate-950 stroke-[2.5]" />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between gap-3 h-16">
+          {/* Left: brand mark + restaurant selector */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div
+              className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'var(--sf-brand-gradient)', boxShadow: 'var(--sf-brand-shadow)' }}
+            >
+              <Flame className="w-5 h-5 stroke-[2.5]" style={{ color: 'var(--sf-brand-fg)' }} />
             </div>
 
-            <div className="flex items-center space-x-2 min-w-0">
-              {/* App Name */}
-              <span className="hidden sm:inline-block font-extrabold text-base sm:text-lg tracking-tight text-white font-sans flex-shrink-0">
-                Resto<span className="text-emerald-400">Supply</span>
-              </span>
+            <div className="relative min-w-0" ref={selectorRef}>
+              <button
+                ref={triggerRef}
+                onClick={() => {
+                  setOpen((o) => !o);
+                  playAlertSound('click');
+                }}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                aria-controls="header-restaurant-listbox"
+                aria-label={t.headerRestaurantSelector}
+                className="flex items-center sf-pill rounded-2xl pl-3 pr-2.5 h-11 min-w-0 transition"
+                style={open ? { borderColor: 'var(--sf-accent)' } : undefined}
+              >
+                <Store className="w-4 h-4 sf-accent mr-2 flex-shrink-0" />
+                <span className="font-bold text-sm truncate max-w-[42vw] sm:max-w-[240px]" style={{ color: 'var(--sf-text)' }}>
+                  {selected?.name}
+                </span>
+                <ChevronDown
+                  className="w-4 h-4 sf-subtle ml-1.5 flex-shrink-0 transition-transform"
+                  style={{ transform: open ? 'rotate(180deg)' : 'none' }}
+                />
+              </button>
 
-              {/* Restaurant Selector Pill */}
-              <div className="relative flex items-center bg-slate-950 border border-slate-800 rounded-xl px-2 sm:px-2.5 py-1 text-xs min-w-0">
-                <Store className="w-3.5 h-3.5 text-emerald-400 mr-1 sm:mr-1.5 flex-shrink-0" />
-                <select
-                  value={selectedRestaurantId}
-                  onChange={(e) => {
-                    onSelectRestaurant(e.target.value);
-                    playAlertSound('click');
-                  }}
-                  className="bg-transparent text-slate-100 font-extrabold focus:outline-none cursor-pointer pr-1 text-xs max-w-[150px] sm:max-w-[220px] truncate"
+              {open && (
+                <div
+                  id="header-restaurant-listbox"
+                  role="listbox"
+                  aria-label={t.headerRestaurantSelector}
+                  onKeyDown={handleListboxKeyDown}
+                  className="sf-card absolute left-0 top-full mt-2 min-w-[220px] max-h-72 overflow-y-auto p-1.5 z-50 animate-fadeIn"
                 >
-                  {restaurants.map((r) => (
-                    <option key={r.id} value={r.id} className="bg-slate-900 text-slate-100 font-normal">
-                      {r.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  {restaurants.map((r, index) => {
+                    const active = r.id === selectedRestaurantId;
+                    return (
+                      <button
+                        key={r.id}
+                        ref={(el) => { optionRefs.current[index] = el; }}
+                        role="option"
+                        aria-selected={active}
+                        tabIndex={index === focusedIndex ? 0 : -1}
+                        onClick={() => {
+                          onSelectRestaurant(r.id);
+                          closePopover(true);
+                          playAlertSound('click');
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-2xl text-left transition"
+                        style={active ? { background: 'var(--sf-accent-soft)' } : undefined}
+                      >
+                        <Store className="w-4 h-4 flex-shrink-0" style={{ color: active ? 'var(--sf-accent)' : 'var(--sf-text-subtle)' }} />
+                        <span className="flex-1 min-w-0 truncate font-bold text-sm" style={{ color: active ? 'var(--sf-accent)' : 'var(--sf-text)' }}>
+                          {r.name}
+                        </span>
+                        {active && <Check className="w-4 h-4 sf-accent flex-shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Controls */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2">
-            {/* Live SSE Indicator */}
-            <div
-              className={`hidden md:flex items-center space-x-1.5 text-[11px] px-2.5 py-1 rounded-full border ${
-                sseConnected
-                  ? 'bg-emerald-950/80 border-emerald-700/50 text-emerald-300'
-                  : 'bg-amber-950/80 border-amber-700/50 text-amber-300'
-              }`}
-            >
-              <span className={`w-2 h-2 rounded-full ${sseConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              <span className="font-semibold">{sseConnected ? t.online : t.reconnecting}</span>
-            </div>
-
-            {/* Profile Settings Quick Gear Button */}
-            <button
-              onClick={() => {
-                onOpenProfileSettings();
-                playAlertSound('click');
-              }}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 transition-colors border border-slate-700/60"
-              title={t.profileSettings}
-            >
-              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {/* Test Audio Chime */}
-            <button
-              onClick={() => playAlertSound('urgent')}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-              title={t.headerTestChime}
-            >
-              <Volume2 className="w-4 h-4" />
-            </button>
-
-            {/* Notifications Button */}
+          {/* Right: notifications + avatar */}
+          <div className="flex items-center gap-2.5 flex-shrink-0">
             <button
               onClick={onOpenNotifications}
-              className="relative p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+              className="relative w-11 h-11 rounded-2xl sf-btn-ghost flex items-center justify-center transition"
               title={t.headerNotifications}
+              aria-label={
+                activeRequestsCount > 0
+                  ? `${t.headerNotifications} (${activeRequestsCount})`
+                  : t.headerNotifications
+              }
             >
-              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Bell className="w-5 h-5" />
               {activeRequestsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center animate-bounce shadow-md">
-                  {activeRequestsCount}
+                <span
+                  className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full text-[11px] font-black flex items-center justify-center shadow-md sf-pop"
+                  style={{ background: 'var(--sf-rose)', color: 'var(--sf-accent-contrast)' }}
+                >
+                  {activeRequestsCount > 99 ? '99+' : activeRequestsCount}
                 </span>
               )}
             </button>
 
-            {/* PWA Install Button */}
-            {isPWAInstallable && onInstallPWA && (
-              <button
-                onClick={onInstallPWA}
-                className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-sm transition"
-              >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>{t.installApp}</span>
-              </button>
-            )}
-
-            {/* User Profile / Role Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition ${getRoleBadgeColor(
-                  currentUser.role
-                )}`}
-              >
-                {currentUser.avatarUrl ? (
+            <button
+              onClick={() => {
+                onOpenProfile();
+                playAlertSound('click');
+              }}
+              className="relative w-11 h-11 rounded-full flex-shrink-0 transition ring-2"
+              style={{ ['--tw-ring-color' as string]: 'var(--sf-accent)' }}
+              title={`${formatCleanName(currentUser.name)} — ${sseConnected ? t.online : t.reconnecting}`}
+              aria-label={`${t.accountTitle}: ${formatCleanName(currentUser.name)} — ${sseConnected ? t.online : t.reconnecting}`}
+            >
+              <span className="block w-full h-full rounded-full overflow-hidden">
+                {currentUser.avatarUrl && !avatarError ? (
                   <img
                     src={currentUser.avatarUrl}
                     alt={currentUser.name}
-                    className="w-5 h-5 rounded-full object-cover border border-emerald-400/50"
+                    className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
+                    onError={() => setAvatarError(true)}
                   />
                 ) : (
-                  <User className="w-4 h-4" />
+                  <span
+                    className="w-full h-full flex items-center justify-center text-base font-black"
+                    style={{ background: 'var(--sf-accent-soft)', color: 'var(--sf-accent)' }}
+                  >
+                    {currentUser.name.charAt(0).toUpperCase()}
+                  </span>
                 )}
-                <div className="text-left hidden sm:block">
-                  <div className="font-bold text-white text-xs leading-tight truncate max-w-[120px]">
-                    {formatCleanName(currentUser.name)}
-                  </div>
-                  <div className="text-[10px] opacity-80 font-bold uppercase tracking-wider">
-                    {getRoleLabel(currentUser.role)}
-                  </div>
-                </div>
-              </button>
-
-              {/* Role Dropdown */}
-              {showRoleDropdown && (
-                <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl py-2 z-50 text-slate-200">
-                  {/* Configure Profile Button inside dropdown */}
-                  <div className="p-1 border-b border-slate-800">
-                    <button
-                      onClick={() => {
-                        setShowRoleDropdown(false);
-                        onOpenProfileSettings();
-                        playAlertSound('click');
-                      }}
-                      className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-700/60 text-emerald-300 font-extrabold text-xs transition"
-                    >
-                      <Settings className="w-4 h-4 text-emerald-400" />
-                      <span>{t.profileSettings}</span>
-                    </button>
-                  </div>
-
-                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    {t.changeUser}
-                  </div>
-                  <div className="space-y-1 p-1">
-                    {users.map((u) => (
-                      <button
-                        key={u.id}
-                        onClick={() => {
-                          onSelectUser(u);
-                          setShowRoleDropdown(false);
-                          playAlertSound('click');
-                        }}
-                        className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-xl text-xs text-left transition ${
-                          u.id === currentUser.id
-                            ? 'bg-slate-800 text-white font-bold border border-slate-700'
-                            : 'hover:bg-slate-800/60 text-slate-300'
-                        }`}
-                      >
-                        {u.avatarUrl ? (
-                          <img
-                            src={u.avatarUrl}
-                            alt={u.name}
-                            className="w-5 h-5 rounded-full object-cover border border-slate-700"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <div
-                            className={`w-2.5 h-2.5 rounded-full ${
-                              u.role === 'cocinero'
-                                ? 'bg-amber-400'
-                                : u.role === 'comprador'
-                                ? 'bg-emerald-400'
-                                : 'bg-purple-400'
-                            }`}
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-slate-100 truncate">{formatCleanName(u.name)}</div>
-                          <div className="text-xs text-slate-400">
-                            {t.headerRolePrefix}: {getRoleLabel(u.role)}
-                          </div>
-                        </div>
-                        {u.id === currentUser.id && (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Logout */}
-                  {onLogout && (
-                    <div className="p-1 border-t border-slate-800 mt-1">
-                      <button
-                        onClick={() => {
-                          setShowRoleDropdown(false);
-                          onLogout();
-                        }}
-                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl hover:bg-slate-800/80 text-slate-400 hover:text-rose-400 text-xs transition"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span className="font-semibold">{t.logout || 'Cerrar sesión'}</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+              </span>
+              {/* Presence dot — sits on the ring, outside the clipped image wrapper */}
+              <span
+                className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full"
+                style={{
+                  background: sseConnected ? 'var(--sf-accent)' : 'var(--sf-amber)',
+                  border: '2.5px solid var(--sf-surface)',
+                }}
+                title={sseConnected ? t.online : t.reconnecting}
+              />
+            </button>
           </div>
         </div>
       </div>
     </header>
   );
 };
+
+export const Header = React.memo(HeaderComponent);

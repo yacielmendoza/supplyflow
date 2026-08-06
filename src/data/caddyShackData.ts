@@ -8,7 +8,7 @@ export const INITIAL_RESTAURANTS: Restaurant[] = [
     address: 'Comanche Trail Golf Course, Big Spring, TX',
     phone: '(432) 555-0192',
     active: true,
-    colorBadge: 'bg-emerald-600',
+    colorBadge: 'emerald',
   },
   {
     id: 'rest-2',
@@ -17,7 +17,7 @@ export const INITIAL_RESTAURANTS: Restaurant[] = [
     address: 'Main St, Big Spring, TX',
     phone: '(432) 555-0241',
     active: true,
-    colorBadge: 'bg-amber-600',
+    colorBadge: 'amber',
   },
   {
     id: 'rest-3',
@@ -26,7 +26,7 @@ export const INITIAL_RESTAURANTS: Restaurant[] = [
     address: 'E 4th St, Big Spring, TX',
     phone: '(432) 555-0388',
     active: true,
-    colorBadge: 'bg-indigo-600',
+    colorBadge: 'indigo',
   },
   {
     id: 'rest-4',
@@ -35,7 +35,7 @@ export const INITIAL_RESTAURANTS: Restaurant[] = [
     address: 'Gregg St, Big Spring, TX',
     phone: '(432) 555-0419',
     active: true,
-    colorBadge: 'bg-rose-600',
+    colorBadge: 'rose',
   },
 ];
 

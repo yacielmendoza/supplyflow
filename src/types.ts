@@ -42,6 +42,8 @@ export interface Supplier {
   categorySpecialty?: string;
 }
 
+export type RestaurantColorKey = 'emerald' | 'amber' | 'indigo' | 'rose';
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -49,7 +51,7 @@ export interface Restaurant {
   address: string;
   phone: string;
   active: boolean;
-  colorBadge: string;
+  colorBadge: RestaurantColorKey;
 }
 
 export interface UserProfile {
