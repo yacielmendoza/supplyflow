@@ -582,45 +582,14 @@ export default function App() {
     }
   };
 
-  // Show login screen when no user is selected
-  if (!currentUser) {
-    return (
-      <LoginScreen
-        users={users}
-        onSelectUser={handleSelectUser}
-        language={appLanguage}
-        onChangeLanguage={handleChangeLanguage}
-      />
-    );
-  }
-
+  // useMemo must be before any early return to satisfy Rules of Hooks
   const activePendingRequestsCount = supplyRequests.filter(
     (r) => r.status === 'Pendiente'
   ).length;
 
-  const isIOS =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-
-  const isLight = currentUser.theme === 'light';
-
-  // Sync html root class for theme
-  if (isLight) {
-    document.documentElement.classList.add('light');
-    document.documentElement.classList.remove('dark');
-  } else {
-    document.documentElement.classList.add('dark');
-    document.documentElement.classList.remove('light');
-  }
-
-  // Keep the PWA/browser chrome (status bar, task switcher) color matching the active theme
-  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeColorMeta) {
-    themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
-  }
-
   const currentNavTabs = useMemo((): BottomNavTab[] => {
     const dashboard: BottomNavTab = { id: 'DASHBOARD', label: t.tabDashboard, icon: LayoutDashboard };
-    switch (currentUser.role) {
+    switch (currentUser?.role) {
       case 'cocinero':
         return [
           dashboard,
@@ -642,7 +611,39 @@ export default function App() {
       default:
         return [dashboard];
     }
-  }, [currentUser.role, t, activePendingRequestsCount]);
+  }, [currentUser?.role, t, activePendingRequestsCount]);
+
+  // Show login screen when no user is selected
+  if (!currentUser) {
+    return (
+      <LoginScreen
+        users={users}
+        onSelectUser={handleSelectUser}
+        language={appLanguage}
+        onChangeLanguage={handleChangeLanguage}
+      />
+    );
+  }
+
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+
+  const isLight = currentUser.theme === 'light';
+
+  // Sync html root class for theme
+  if (isLight) {
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+  } else {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+  }
+
+  // Keep the PWA/browser chrome (status bar, task switcher) color matching the active theme
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute('content', isLight ? '#f3f5f9' : '#070b14');
+  }
 
   // Shopping mode is a full-screen view (no modal), takes priority when active
   if (shoppingModalRequest) {

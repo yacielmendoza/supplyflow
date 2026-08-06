@@ -227,10 +227,20 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                       </span>
                     )}
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide flex-shrink-0"
-                    style={{ background: tint(statusColor, 14), color: statusColor, border: `1px solid ${tint(statusColor, 35)}` }}>
-                    {getStatusLabel(req.status)}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide"
+                      style={{ background: tint(statusColor, 14), color: statusColor, border: `1px solid ${tint(statusColor, 35)}` }}>
+                      {getStatusLabel(req.status)}
+                    </span>
+                    <button
+                      onClick={() => toggleExpand(req.id)}
+                      aria-expanded={isExpanded}
+                      aria-label={isExpanded ? t.btnHideDetails : t.btnViewDetails}
+                      className="w-8 h-8 rounded-xl sf-btn-ghost flex items-center justify-center transition active:scale-90"
+                    >
+                      {isExpanded ? <ChevronUp className="w-4 h-4 sf-muted" /> : <ChevronDown className="w-4 h-4 sf-muted" />}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Subtitle */}
@@ -340,15 +350,9 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                   )}
                 </AnimatePresence>
 
-                {/* Footer actions */}
-                <div className="mt-3 pt-2.5 flex items-center justify-between gap-2 flex-wrap" style={{ borderTop: '1px solid var(--sf-border)' }}>
-                  <button onClick={() => toggleExpand(req.id)} className="sf-btn-ghost px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition flex-shrink-0">
-                    <span>{isExpanded ? t.btnHideDetails : t.btnViewDetails}</span>
-                    {isExpanded ? <ChevronUp className="w-4 h-4 sf-muted" /> : <ChevronDown className="w-4 h-4 sf-muted" />}
-                  </button>
-
-                  <div className="flex items-center gap-2 min-w-0 justify-end">
-                    <a
+                {/* Footer actions — all action buttons grouped on last line */}
+                <div className="mt-3 pt-2.5 flex items-center justify-end gap-2 flex-wrap" style={{ borderTop: '1px solid var(--sf-border)' }}>
+                  <a
                       href={generateWhatsAppLink(currentUser.phone, generateRequestWhatsAppSummary(req, currentUser.language ?? 'es'))}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -431,7 +435,6 @@ export const RequestsList: React.FC<RequestsListProps> = ({
                         )}
                       </>
                     )}
-                  </div>
                 </div>
               </div>
             );
