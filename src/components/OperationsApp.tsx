@@ -31,6 +31,7 @@ export function OperationsApp({ profile, onSignOut }: { profile: AuthenticatedPr
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [liveMessage, setLiveMessage] = useState<string | null>(null);
   const [online, setOnline] = useState(() => navigator.onLine);
 
   const refresh = useCallback(async () => {
@@ -52,7 +53,10 @@ export function OperationsApp({ profile, onSignOut }: { profile: AuthenticatedPr
     const markOffline = () => setOnline(false);
     window.addEventListener('online', markOnline);
     window.addEventListener('offline', markOffline);
-    const unsubscribe = subscribeToOperations(() => { void refresh(); });
+    const unsubscribe = subscribeToOperations(() => {
+      setLiveMessage('La operación se actualizó en tiempo real.');
+      void refresh();
+    });
     return () => { window.removeEventListener('online', markOnline); window.removeEventListener('offline', markOffline); unsubscribe(); };
   }, [refresh]);
 
@@ -72,6 +76,7 @@ export function OperationsApp({ profile, onSignOut }: { profile: AuthenticatedPr
       </header>
       {!online && <div role="status" className="mx-auto max-w-5xl px-4 pt-3 text-sm" style={{ color: 'var(--sf-danger)' }}>Sin conexión: las operaciones están temporalmente deshabilitadas. Tus datos no se sustituyen por contenido demo.</div>}
       {error && <div role="alert" className="mx-auto max-w-5xl px-4 pt-3 text-sm" style={{ color: 'var(--sf-danger)' }}>{error}</div>}
+      {liveMessage && <div role="status" aria-live="polite" className="mx-auto max-w-5xl px-4 pt-3 text-sm" style={{ color: 'var(--sf-accent)' }}>{liveMessage}</div>}
       <section className="mx-auto max-w-5xl px-4 py-5">
         {loading ? <p role="status" className="sf-muted">Cargando datos de tu organización…</p> : <>
           {view === 'dashboard' && <Dashboard snapshot={snapshot} pendingCount={pendingCount} onNewRequest={() => setView('request')} />}
