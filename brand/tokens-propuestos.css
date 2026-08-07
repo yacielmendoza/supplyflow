@@ -1,0 +1,142 @@
+/* ────────────────────────────────────────────────────────────────────────────
+   SupplyFlow — Tokens propuestos (identidad v1 · "El umbral")
+   PROPUESTA. No está aplicado: src/index.css sigue con la paleta esmeralda.
+
+   Sustituye únicamente los bloques de tokens de src/index.css (html.dark,
+   html.light, :root de marca y el bloque de hues secundarios). Las clases
+   helper .sf-* y las utilidades NO cambian: leen de estas variables.
+
+   Todos los pares de uso están verificados contra WCAG 2.2 AA (≥ 4.5:1).
+   Ver brand/01-brand-lock.md §3.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+html.dark {
+  color-scheme: dark;
+  --sf-bg: #0b0c0e;              /* ink-950 */
+  --sf-surface: #121317;         /* ink-900 */
+  --sf-surface-2: #16181d;       /* ink-850 */
+  --sf-surface-hover: #1d2026;   /* ink-800 */
+  --sf-border: #262a32;          /* ink-700 */
+  --sf-border-strong: #383d47;   /* ink-600 */
+  --sf-text: #ffffff;            /* 19.57:1 sobre --sf-bg */
+  --sf-text-muted: #9aa0ab;      /*  7.06:1 sobre --sf-surface */
+  --sf-text-subtle: #79808c;
+  --sf-accent: #c9fa43;          /* lime-500 · 15.24:1 sobre --sf-surface */
+  --sf-accent-strong: #d8ff6b;   /* lime-400 · hover */
+  --sf-accent-soft: rgba(201, 250, 67, 0.14);
+  --sf-accent-contrast: #0b0c0e; /* texto sobre relleno lima · 16.06:1 */
+  --sf-accent-2: #a8db1e;        /* lime-600 */
+  --sf-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.8);
+  --sf-shadow-sm: 0 8px 20px -14px rgba(0, 0, 0, 0.75);
+}
+
+html.light {
+  color-scheme: light;
+  --sf-bg: #f4f5f7;              /* paper-100 */
+  --sf-surface: #ffffff;
+  --sf-surface-2: #eef0f3;       /* paper-200 */
+  --sf-surface-hover: #e4e7ec;   /* paper-300 */
+  --sf-border: #e4e7ec;          /* paper-300 */
+  --sf-border-strong: #cdd2da;   /* paper-400 */
+  --sf-text: #0b0c0e;            /* 17.94:1 sobre --sf-bg */
+  --sf-text-muted: #5a616c;      /*  6.25:1 sobre blanco */
+  --sf-text-subtle: #6b7280;
+  --sf-accent: #4d6b08;          /* lime-800 · acento COMO TEXTO · 6.14:1 sobre blanco */
+  --sf-accent-strong: #3d5506;
+  --sf-accent-soft: rgba(201, 250, 67, 0.22);
+  --sf-accent-contrast: #ffffff; /* texto sobre relleno --sf-accent · 6.14:1 */
+  --sf-accent-2: #7fa80f;        /* lime-700 · SOLO relleno, 2.8:1 → nunca texto */
+  --sf-shadow: 0 20px 40px -22px rgba(11, 12, 14, 0.24);
+  --sf-shadow-sm: 0 10px 24px -16px rgba(11, 12, 14, 0.18);
+}
+
+/* Marca — identidad fija, independiente del tema.
+   Reemplaza el degradado esmeralda→teal→ámbar por el par plano de la marca. */
+:root {
+  --sf-brand-ink: #0b0c0e;
+  --sf-brand-lime: #c9fa43;
+  --sf-brand-gradient: none;                       /* la marca ya no usa degradado */
+  --sf-brand-surface: var(--sf-brand-ink);         /* fondo de la cápsula del logo */
+  --sf-brand-shadow: 0 10px 15px -3px rgba(11, 12, 14, 0.35);
+}
+
+/* Paleta secundaria — reafinada para convivir con el lima sin competir con él.
+   Un valor por tema porque el mismo hex no puede pasar AA en ambos fondos. */
+html.dark {
+  --sf-rose: #ff4d5e;    /* 5.72:1 sobre --sf-surface */
+  --sf-amber: #ffb020;   /* 10.15:1 */
+  --sf-amber-contrast: #1a1200;
+  --sf-sky: #4cc2ff;     /* 9.25:1 */
+  --sf-violet: #a98bff;  /* 6.92:1 */
+}
+html.light {
+  --sf-rose: #c2183a;    /* 6.02:1 sobre blanco */
+  --sf-amber: #9a5b00;   /* 5.43:1 */
+  --sf-amber-contrast: #ffffff;
+  --sf-sky: #0b6e9e;     /* 5.62:1 */
+  --sf-violet: #5b32c7;  /* 7.70:1 */
+}
+
+/* ── Adiciones nuevas ─────────────────────────────────────────────────────── */
+
+/* Escala de radios explícita — hoy los valores están hardcodeados dentro de las
+   clases helper. Extraerlos permite que ilustración y UI compartan el lenguaje. */
+:root {
+  --sf-radius-chip: 12px;
+  --sf-radius-inset: 20px;
+  --sf-radius-card: 26px;
+  --sf-radius-container: 34px;
+  --sf-radius-pill: 999px;
+}
+
+/* La línea de mínimo (dispositivo gráfico G1) como utilidad reutilizable. */
+@layer components {
+  .sf-threshold {
+    display: block;
+    height: 3px;
+    border-radius: var(--sf-radius-pill);
+    background: var(--sf-accent);
+  }
+  /* La retícula de marca (G4) como fondo decorativo. */
+  .sf-grid-bg {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--sf-text) 10%, transparent) 1px,
+      transparent 0
+    );
+    background-size: 16px 16px;
+  }
+}
+
+/* Cifras tabulares — obligatorias en cantidades y contadores. Sin esto, las
+   listas que se actualizan por Realtime "bailan" al cambiar un dígito. */
+@layer utilities {
+  .sf-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+}
+
+/* ── Tipografía ───────────────────────────────────────────────────────────────
+   Requiere añadir en index.html, antes del CSS:
+
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+   Alternativa recomendada para una PWA: self-host con woff2 y font-display:swap,
+   para no depender de un tercero en la ruta crítica ni en modo offline.
+   ──────────────────────────────────────────────────────────────────────────── */
+:root {
+  --sf-font-display: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
+  --sf-font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --sf-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer components {
+  .sf-display {
+    font-family: var(--sf-font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
